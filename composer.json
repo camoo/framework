@@ -1,0 +1,38 @@
+{
+    "name": "camoo/framework",
+    "description": "CAMOO Framework",
+    "type": "library",
+    "require": {
+        "php": ">=7.1.0",
+        "vlucas/valitron": "^1.4",
+        "guzzlehttp/guzzle": "^6.2",
+    "ext-mbstring": "*"
+    },
+   "minimum-stability": "dev",
+   "homepage": "https://camoo.cm",
+    "license": "MIT",
+   "prefer-stable" : true,
+    "require-dev": {
+    },
+    "authors": [
+        {
+            "name": "CAMOO SARL",
+            "email": "framework@camoo.sarl"
+        }
+    ],
+
+     "keywords" : [
+    "CAMOO",
+    "Framework",
+    "PHP opensource"
+    ],
+    "autoload": {
+        "psr-4": {
+            "CAMOO\\": "src/"
+        }
+    },
+   "support": {
+        "issues": "https://github.com/camoo/framework/issues",
+        "source": "https://github.com/camoo/framework"
+    }
+}
