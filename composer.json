@@ -6,7 +6,7 @@
         "php": ">=7.1.0",
         "vlucas/valitron": "^1.4",
         "guzzlehttp/guzzle": "^6.2",
-        "ext-mbstring": "*"
+        "ext-mbstring": "*",
         "middlewares/request-handler": "^v1.1.0",
         "middlewares/fast-route": "^v1.0",
         "nikic/fast-route": "^v1.3.0",
