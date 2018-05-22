@@ -95,17 +95,16 @@ class AppController
      */
     public function redirect($destination, $permanent = false)
     {
-        $hServerParams = $this->request->getServerParams();
         if (mb_strpos($destination, '://') === false) {
-            if (!isset($hServerParams['HTTPS'])
-                || $hServerParams['HTTPS'] == 'off'
-                || $hServerParams['HTTPS'] == ''
+            if (null !== getEnv('HTTPS')
+                || getEnv('HTTPS') == 'off'
+                || getEnv('HTTPS') == ''
             ) {
                 $protocol = 'http';
             } else {
                 $protocol = 'https';
             }
-            $destination = $protocol . '://' . $hServerParams['HTTP_HOST'] . $destination;
+            $destination = $protocol . '://' . getEnv('HTTP_HOST') . $destination;
         }
         if ($permanent) {
             $code    = 301;
@@ -114,7 +113,7 @@ class AppController
             $code    = 302;
             $message = $code . ' Found';
         }
-        header('HTTP/'.$hServerParams['SERVER_PROTOCOL'].' ' . $message, true, $code);
+        header('HTTP/'.getEnv('SERVER_PROTOCOL').' ' . $message, true, $code);
         header('Status: '  . $message, true, $code);
         header('Location: ' . $destination);
         exit();
