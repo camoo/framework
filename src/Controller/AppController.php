@@ -2,6 +2,7 @@
 namespace CAMOO\Controller;
 
 use Cake\ORM\Locator\TableLocator;
+use CAMOO\Utils\Inflector;
 
 class AppController
 {
@@ -40,7 +41,7 @@ class AppController
         }
 
         if ($this->oTemplate === null) {
-            $this->oTemplate = $this->oLayout->load(sprintf($this->sTemplate, $this->controller, $this->action));
+            $this->oTemplate = $this->oLayout->load(sprintf($this->sTemplate, $this->controller, Inflector::tableize($this->action)));
         }
         // @See https://github.com/auraphp/Aura.Session
         if (in_array(getEnv('REQUEST_METHOD'), ['DELETE', 'POST', 'PUT'])) {
@@ -50,6 +51,7 @@ class AppController
                 throw \CAMOO\Exception\Exception("Request Blackholded.");
             }
         }
+        $this->loadModel($this->controller);
     }
 
     /**
@@ -121,6 +123,6 @@ class AppController
 
     protected function loadModel($sModel)
     {
-        $this->{$sModel} = (new TableLocator())->get($sModel);
+        $this->{$sModel} = (new TableLocator())->get(Inflector::classify($sModel));
     }
 }
