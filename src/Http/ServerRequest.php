@@ -31,7 +31,10 @@ class ServerRequest
 
     public function __call($name, $xargs)
     {
-        if (in_array($name, array_keys($this->_queryDataMaps))) {
+	if ( mb_substr($name, 0, 3) === 'get' && in_array(mb_strtolower(mb_substr($name, 3)),array_keys($this->_queryDataMaps)) ) {
+            return $this->__queryData($this->oRequest->{$this->_queryDataMaps[mb_strtolower(mb_substr($name, 3))]}());
+	}
+        elseif (in_array($name, array_keys($this->_queryDataMaps))) {
             if (empty($xargs) || count($xargs) > 1 || !preg_match('/\S/', $xargs[0])) {
                 throw new Exception(
                     sprintf('Method %s::%s does not exist', get_class($this), $name)

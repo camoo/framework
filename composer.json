@@ -49,7 +49,7 @@
         }
     },
    "support": {
-        "issues": "https://github.com/camoo/framework/issues",
-        "source": "https://github.com/camoo/framework"
+        "issues": "https://gitlab.com/camoo/framework/issues",
+        "source": "https://gitlab.com/camoo/framework"
     }
 }
