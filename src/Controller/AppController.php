@@ -48,7 +48,7 @@ class AppController
             $csrf_value = $_POST['__csrf_Token'];
             $oCsrfToken = $this->__getSessionRaw()->getCsrfToken();
             if (! $oCsrfToken->isValid($csrf_value)) {
-                throw \CAMOO\Exception\Exception("Request Blackholded.");
+                throw \CAMOO\Exception\Exception("Request Blackholed.");
             }
         }
         $this->loadModel($this->controller);

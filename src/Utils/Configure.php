@@ -7,49 +7,29 @@ use \Noodlehaus\Config;
 
 class Configure
 {
-    private static $oCache = null;
+    private static $_oahConfigs;
 
-    public function __construct()
+    public static function load($sPath, $bMerge = false)
     {
-        if (self::$oCache === null) {
-            self::$oCache = new Cache\Filesystem();
+        if ($bMerge !== true) {
+            static::$_oahConfigs = Config::load($sPath);
+        } else {
+            static::$_oahConfigs->merge(Config::load($sPath));
         }
-    }
-
-    public static function load($sPath, $bUseCache = false)
-    {
-        $xConfig = Config::load($sPath);
-        if ($bUseCache === true) {
-            $oCache = new Cache\Filesystem();
-            if ($oCache->has('configure')) {
-                $oCache->delete('configure', $xConfig);
-            }
-            $oCache->set('configure', $xConfig);
-        }
-        return $xConfig;
     }
 
     public static function read($sKey)
     {
-        self::$oCache = new Cache\Filesystem();
-        if ($xConfig = (self::$oCache->get('configure'))) {
-            return $xConfig->get($sKey);
-        }
+        return static::$_oahConfigs->get($sKey);
     }
 
     public static function check($sKey)
     {
-        self::$oCache = new Cache\Filesystem();
-        if ($xConfig = (self::$oCache->get('configure'))) {
-            return null !== $xConfig->offsetExists($sKey);
-        }
+        return static::$_oahConfigs->offsetExists($sKey);
     }
 
     public static function get()
     {
-        self::$oCache = new Cache\Filesystem();
-        if ($xConfig = (self::$oCache->get('configure'))) {
-            return $xConfig->all();
-        }
+        return static::$_oahConfigs->all();
     }
 }
