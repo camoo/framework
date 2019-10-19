@@ -13,7 +13,7 @@
         "twig/twig": "^2.0",
         "filp/whoops": "^2.1",
         "symfony/var-dumper": "^4.0",
-        "hassankhan/config": "^1.0",
+        "hassankhan/config": "^2.1",
         "symfony/yaml": "^4.0",
         "symfony/cache": "^4.0",
         "doctrine/orm": "^2.6",
