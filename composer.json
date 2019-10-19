@@ -13,7 +13,7 @@
         "twig/twig": "^2.0",
         "filp/whoops": "^2.1",
         "symfony/var-dumper": "^4.0",
-        "hassankhan/config": "^1.0",
+        "hassankhan/config": "^2.1",
         "symfony/yaml": "^4.0",
         "symfony/cache": "^4.0",
         "doctrine/orm": "^2.6",
@@ -30,6 +30,7 @@
     "license": "MIT",
    "prefer-stable" : true,
     "require-dev": {
+        "phpunit/phpunit": "^8.4"
     },
     "authors": [
         {
@@ -48,6 +49,17 @@
             "CAMOO\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "CAMOO\\Test\\": "tests"
+        }
+    },
+    "suggest": {
+        "phpunit/phpunit": "Allows automated tests to be run without system-wide install."
+    },
+	"scripts" : {
+		"test": "phpunit --colors=always"
+	},
    "support": {
         "issues": "https://gitlab.com/camoo/framework/issues",
         "source": "https://gitlab.com/camoo/framework"

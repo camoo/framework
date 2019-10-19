@@ -1,15 +1,11 @@
 <?php
 namespace CAMOO\Cache;
 
-use Symfony\Component\Cache\Simple\FilesystemCache;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Psr\SimpleCache\CacheInterface;
+use Symfony\Component\Cache\Psr16Cache;
 
-#use Symfony\Component\Cache\Adapter\ApcuAdapter;
-#use Symfony\Component\Cache\Adapter\ChainAdapter;
-#use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-#use Symfony\Component\Cache\Adapter\PdoAdapter;
-#use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
-
-class Filesystem
+class Filesystem implements CacheInterface
 {
     private $oCache = null;
     private $TTL = 300;
@@ -19,7 +15,7 @@ class Filesystem
     public function __construct()
     {
         if ($this->oCache === null) {
-            $this->oCache = new FilesystemCache($this->sNameSpace, $this->TTL, TMP.'cache'.DS.$this->sDirName);
+            $this->oCache = new FilesystemAdapter($this->sNameSpace, 0, TMP.'cache'.DS.$this->sDirName);
         }
     }
 
@@ -36,7 +32,14 @@ class Filesystem
      */
     public function get($key, $default = null)
     {
-        return $this->oCache->get($key, $default);
+        if (!is_string($key) || trim($key) === '') {
+            throw new InvalidArgumentException("key is not a legal value");
+        }
+        if (!$this->has($key)) {
+            return $default;
+        }
+        $cache = $this->oCache->getItem($key);
+        return $cache->get($key, $default);
     }
 
     /**
@@ -53,9 +56,20 @@ class Filesystem
      * @throws \Psr\SimpleCache\InvalidArgumentException
      *   MUST be thrown if the $key string is not a legal value.
      */
-    public function set($key, $value, $ttl = null)
+    public function set($key, $value, $ttl = 0)
     {
-        return $this->oCache->set($key, $value, $ttl);
+        if (!is_string($key) || trim($key) === '') {
+            throw new InvalidArgumentException("key is not a legal value");
+        }
+
+        $cache = $this->oCache->getItem($key);
+        if (!$cache->isHit()) {
+            $cache->set($value);
+            if (!empty($ttl)) {
+                $cache->expiresAfter($ttl);
+            }
+            return $this->oCache->save($cache);
+        }
     }
 
     /**
@@ -70,7 +84,11 @@ class Filesystem
      */
     public function delete($key)
     {
-        return $this->oCache->delete($key);
+        if (!is_string($key) || trim($key) === '') {
+            throw new InvalidArgumentException("key is not a legal value");
+        }
+
+        return $this->oCache->deleteItem($key);
     }
 
     /**
@@ -97,7 +115,11 @@ class Filesystem
      */
     public function getMultiple($keys, $default = null)
     {
-        return $this->oCache->getMultiple($keys, $default);
+        try {
+            return (new Psr16Cache($this->oCache))->getMultiple($keys, $default);
+        } catch (\Symfony\Component\Cache\Exception\InvalidArgumentException $err) {
+            throw new InvalidArgumentException($err->getMessage());
+        }
     }
 
     /**
@@ -116,7 +138,11 @@ class Filesystem
      */
     public function setMultiple($values, $ttl = null)
     {
-        return $this->oCache->setMultiple($values, $ttl);
+        try {
+            return (new Psr16Cache($this->oCache))->setMultiple($values, $ttl);
+        } catch (\Symfony\Component\Cache\Exception\InvalidArgumentException $err) {
+            throw new InvalidArgumentException($err->getMessage());
+        }
     }
 
     /**
@@ -132,7 +158,11 @@ class Filesystem
      */
     public function deleteMultiple($keys)
     {
-        return $this->oCache->deleteMultiple($keys);
+        try {
+            return (new Psr16Cache($this->oCache))->deleteMultiple($keys);
+        } catch (\Symfony\Component\Cache\Exception\InvalidArgumentException $err) {
+            throw new InvalidArgumentException($err->getMessage());
+        }
     }
 
     /**
@@ -152,6 +182,6 @@ class Filesystem
      */
     public function has($key)
     {
-        return $this->oCache->has($key);
+        return $this->oCache->hasItem($key);
     }
 }

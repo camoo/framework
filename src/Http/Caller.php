@@ -4,7 +4,6 @@ namespace CAMOO\Http;
 use \Middlewares\Utils\Dispatcher;
 use GuzzleHttp\Psr7;
 
-require CORE_PATH . 'config' . DS . 'bootstrap.php';
 class Caller
 {
     protected $hRequest = [];
@@ -14,15 +13,23 @@ class Caller
     public $xargs = [];
     public $uri = null;
     private $__controllerRaw = 'Pages';
+    protected $sConfigDir;
 
-    public function __construct()
+    public function __construct($configDir)
     {
+        $this->sConfigDir = $configDir;
         $this->initialize();
     }
 
     protected function initialize()
     {
+        $this->bootstrap();
         $this->route();
+    }
+
+    public function bootstrap()
+    {
+        require_once $this->sConfigDir . '/bootstrap.php';
     }
 
     public function getController($request = null)
@@ -48,7 +55,7 @@ class Caller
 
     public function route()
     {
-        require CONFIG . 'route.php';
+        require_once $this->sConfigDir . '/route.php';
 
         $this->uri = $uri = (new Psr7\Uri(getEnv('REQUEST_URI')))->getPath();
 

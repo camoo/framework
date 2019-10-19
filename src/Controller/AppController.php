@@ -45,10 +45,10 @@ class AppController
         }
         // @See https://github.com/auraphp/Aura.Session
         if (in_array(getEnv('REQUEST_METHOD'), ['DELETE', 'POST', 'PUT'])) {
-                $csrf_value = $_POST['__csrf_Token'];
-                $oCsrfToken = $this->__getSessionRaw()->getCsrfToken();
+            $csrf_value = $_POST['__csrf_Token'];
+            $oCsrfToken = $this->__getSessionRaw()->getCsrfToken();
             if (! $oCsrfToken->isValid($csrf_value)) {
-                throw \CAMOO\Exception\Exception("Request Blackholded.");
+                throw \CAMOO\Exception\Exception("Request Blackholed.");
             }
         }
         $this->loadModel($this->controller);
@@ -98,10 +98,7 @@ class AppController
     public function redirect($destination, $permanent = false)
     {
         if (mb_strpos($destination, '://') === false) {
-            if (null !== getEnv('HTTPS')
-                || getEnv('HTTPS') == 'off'
-                || getEnv('HTTPS') == ''
-            ) {
+            if (empty(getEnv('HTTPS')) || getEnv('HTTPS') == 'off') {
                 $protocol = 'http';
             } else {
                 $protocol = 'https';
@@ -118,7 +115,6 @@ class AppController
         header('HTTP/'.getEnv('SERVER_PROTOCOL').' ' . $message, true, $code);
         header('Status: '  . $message, true, $code);
         header('Location: ' . $destination);
-        exit();
     }
 
     protected function loadModel($sModel)

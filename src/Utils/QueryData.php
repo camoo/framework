@@ -10,6 +10,7 @@ class QueryData extends AbstractConfig
     {
         parent::__construct($data);
     }
+
     protected function getDefaults()
     {
         return [];

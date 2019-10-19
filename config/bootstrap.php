@@ -12,7 +12,7 @@ use Whoops\Handler\JsonResponseHandler;
 use CAMOO\Utils\Configure;
 use Cake\Datasource\ConnectionManager;
 
-$oahConfigBoot = Configure::load(CONFIG. 'app.php', true);
+Configure::load(CONFIG. 'app.php', false);
 require_once CORE_PATH. 'include/tools.php';
 
 $run     = new Run();
@@ -60,10 +60,4 @@ $run->pushHandler(function ($exception, $inspector, $run) {
 
 $run->register();
 
-$ahConfigBoot = $oahConfigBoot->all();
-
-ConnectionManager::setConfig('default', $ahConfigBoot['Database']['default']);
-
-foreach ($ahConfigBoot['Cache'] as $sCacheNamespace => $hCacheBoot) {
-    Cache::setConfig($sCacheNamespace, $hCacheBoot);
-}
+ConnectionManager::setConfig('default', Configure::read('Database.default'));
