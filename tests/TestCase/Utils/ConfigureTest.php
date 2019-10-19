@@ -62,7 +62,6 @@ class ConfigureTest extends TestCase
         $this->assertIsArray(Configure::get());
     }
 
-
     /**
      * @covers \CAMOO\Utils\Configure::load
 	 * @testWith        ["/tmp/test_configure2.php"]
