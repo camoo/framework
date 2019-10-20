@@ -1,6 +1,6 @@
 <?php
 
-namespace TestCase\Cache;
+namespace CAMOO\Test\TestCase\Cache;
 
 use PHPUnit\Framework\TestCase;
 use \CAMOO\Cache\Filesystem;
@@ -128,7 +128,6 @@ class FilesystemTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->oCache->delete($key);
     }
-
 
     /**
      * @covers \CAMOO\Cache\Filesystem::setMultiple

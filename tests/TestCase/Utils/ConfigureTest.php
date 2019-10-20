@@ -26,7 +26,7 @@ class ConfigureTest extends TestCase
 
     /**
      * @covers \CAMOO\Utils\Configure::load
-	 * @testWith        ["/tmp/test_configure1.php"]
+     * @testWith        ["/tmp/test_configure1.php"]
      */
     public function testInstance($path)
     {
@@ -64,12 +64,41 @@ class ConfigureTest extends TestCase
 
     /**
      * @covers \CAMOO\Utils\Configure::load
-	 * @testWith        ["/tmp/test_configure2.php"]
+     * @testWith        ["/tmp/test_configure2.php"]
      */
     public function testMerge($path2)
     {
-        Configure::load($path2,true);
-		$this->assertArrayHasKey('Plugin', Configure::get());
+        Configure::load($path2, true);
+        $this->assertArrayHasKey('Plugin', Configure::get());
     }
 
+    /**
+     * @covers \CAMOO\Utils\Configure::write
+     * @dataProvider writeProvider
+     */
+    public function testWriteMerge($key, $data)
+    {
+        Configure::write($key, $data);
+        $this->assertArrayHasKey('Config', Configure::get());
+    }
+
+    /**
+     * @covers \CAMOO\Utils\Configure::write
+     * @dataProvider writeProvider
+     * @runInSeparateProcess
+     */
+    public function testWriteNoMerge($key, $data)
+    {
+        Configure::load('/hjhj/tetet.php');
+        Configure::write($key, $data);
+        $this->assertArrayHasKey('Config', Configure::get());
+    }
+
+    public function writeProvider()
+    {
+        return [
+            ['Config.version', '1.2'],
+            ['Config.Cache', ['path' => '/cache', 'name' => 'test']],
+        ];
+    }
 }

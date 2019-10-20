@@ -15,17 +15,18 @@ class AppModel
     protected $driver = 'pdo_mysql';
     protected $queryBuilder = null;
 
-    public function __construct()
+    /**
+     * @return Doctrine\DBAL\Connection
+     * @source vendor/doctrine/dbal/lib/Doctrine/DBAL/Connection.php
+     */
+    public function getConnection()
     {
         if ($this->conn === null) {
             $connectionParams = Configure::read('Database.' .$this->db);
             $connectionParams['driver'] = $this->driver;
-            $this->conn = DriverManager::getConnection($connectionParams, Configuration());
+			#var_dump($connectionParams);
+            $this->conn = DriverManager::getConnection($connectionParams, new Configuration());
         }
-    }
-
-    public function getConnection()
-    {
         return $this->conn;
     }
 
