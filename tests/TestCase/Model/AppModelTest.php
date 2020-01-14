@@ -43,4 +43,16 @@ class AppModelTest extends TestCase
         $db->connect();
         $this->assertTrue($db->isConnected());
     }
+
+    /**
+     * @covers \CAMOO\Model\AppModel::getConnection
+     * @depends testInstance
+     */
+    public function testGeBuilder()
+    {
+        $this->oModel->setDB('test');
+        $db = $this->oModel->getConnection();
+        $this->assertInstanceOf(\Doctrine\DBAL\Query\QueryBuilder::class,$this->oModel->getQueryBuilder());
+    }
+
 }

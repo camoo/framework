@@ -1,8 +1,8 @@
 <?php
 namespace CAMOO\Exception;
 
-use Exception as BaseException;
+use RuntimeException as BaseException;
 
-class Exception extends BaseException
+class Exception extends BaseException implements ExceptionInterface
 {
 }

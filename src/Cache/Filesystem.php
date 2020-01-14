@@ -1,21 +1,21 @@
 <?php
 namespace CAMOO\Cache;
 
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Psr16Cache;
+use CAMOO\Interfaces\CacheInterface;
 
-class Filesystem implements CacheInterface
+class Filesystem extends Base implements CacheInterface
 {
+	
     private $oCache = null;
-    private $TTL = 300;
-    private $sNameSpace = 'core';
-    private $sDirName = 'persistent';
-
-    public function __construct()
+	
+	/**
+	 * @param Array $options
+	 */
+    public function __construct(array $options=[])
     {
         if ($this->oCache === null) {
-            $this->oCache = new FilesystemAdapter($this->sNameSpace, 0, TMP.'cache'.DS.$this->sDirName);
+            $this->oCache = $this->loadFactory()->getFileSystemAdapter($options);
         }
     }
 

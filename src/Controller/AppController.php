@@ -43,6 +43,7 @@ class AppController
         if ($this->oTemplate === null) {
             $this->oTemplate = $this->oLayout->load(sprintf($this->sTemplate, $this->controller, Inflector::tableize($this->action)));
         }
+
         // @See https://github.com/auraphp/Aura.Session
         if (in_array(getEnv('REQUEST_METHOD'), ['DELETE', 'POST', 'PUT'])) {
             $csrf_value = $_POST['__csrf_Token'];
