@@ -36,8 +36,8 @@ class AppController
     public function initialize()
     {
         if ($this->oLayout === null) {
-            $oTemplateLoader = new \Twig_Loader_Filesystem(APP.$this->sTemplateDir);
-            $this->oLayout = new \Twig_Environment($oTemplateLoader, ['cache' => TMP.'cache'. DS . 'tpl']);
+            $oTemplateLoader = new \Twig\Loader\Filesystem(APP.$this->sTemplateDir);
+            $this->oLayout = new \Twig\Environment($oTemplateLoader, ['cache' => TMP.'cache'. DS . 'tpl']);
         }
 
         if ($this->oTemplate === null) {

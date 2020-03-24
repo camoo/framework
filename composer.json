@@ -10,7 +10,7 @@
         "middlewares/request-handler": "^v1.1.0",
         "middlewares/fast-route": "^v1.0",
         "nikic/fast-route": "^v1.3.0",
-        "twig/twig": "^2.0",
+        "twig/twig": "^3.0",
         "filp/whoops": "^2.1",
         "symfony/var-dumper": "^4.0",
         "hassankhan/config": "^2.1",
