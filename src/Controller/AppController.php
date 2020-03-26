@@ -139,7 +139,7 @@ class AppController implements EventListenerInterface, EventDispatcherInterface
         return null;
     }
 
-    private function camooExit()
+    protected function camooExit()
     {
         exit();
     }
