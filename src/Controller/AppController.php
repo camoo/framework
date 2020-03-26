@@ -1,11 +1,18 @@
 <?php
+declare(strict_types=1);
 namespace CAMOO\Controller;
 
 use Cake\ORM\Locator\TableLocator;
 use CAMOO\Utils\Inflector;
+use CAMOO\Http\Response;
+use CAMOO\Event\Event;
+use CAMOO\Event\EventDispatcherInterface;
+use CAMOO\Event\EventDispatcherTrait;
+use CAMOO\Event\EventListenerInterface;
 
-class AppController
+class AppController implements EventListenerInterface, EventDispatcherInterface
 {
+    use EventDispatcherTrait;
     public $controller = null;
     public $action = null;
     public $Flash = null;
@@ -15,12 +22,14 @@ class AppController
     protected $sTemplateDir = 'Templates';
     protected $sLayout = 'Templates/Layouts/default.tpl';
     public $request = null;
+    protected $response = null;
     private $http_version = '1.1';
     protected $tplData = [];
     protected $__sessionRaw = [\CAMOO\Http\Session::class, 'create'];
 
     public function __construct()
     {
+        $this->getEventManager()->on($this);
     }
 
     private function __getSessionRaw()
@@ -36,7 +45,7 @@ class AppController
     public function initialize()
     {
         if ($this->oLayout === null) {
-            $oTemplateLoader = new \Twig\Loader\Filesystem(APP.$this->sTemplateDir);
+            $oTemplateLoader = new \Twig\Loader\FilesystemLoader(APP.$this->sTemplateDir);
             $this->oLayout = new \Twig\Environment($oTemplateLoader, ['cache' => TMP.'cache'. DS . 'tpl']);
         }
 
@@ -55,6 +64,26 @@ class AppController
         $this->loadModel($this->controller);
     }
 
+    public function implementedEvents()
+    {
+        return [
+            'Controller.initialize' => 'beforeRunning',
+            'Controller.beforeRender' => 'beforeRender',
+            'Controller.beforeRedirect' => 'beforeRedirect',
+        ];
+    }
+
+    /**
+     * @param Response $response
+     * @return AppController
+     */
+    public function setResponse(Response $response)
+    {
+        $this->response = $response;
+
+        return $this;
+    }
+
     /**
      * Sets variables to templates
      *
@@ -62,7 +91,7 @@ class AppController
      * @param mixed $value
      * @return \CAMOO\Controller\AppController
      */
-    public function set($varName, $value = null)
+    public function set(string $varName, $value = null)
     {
         if ($varName !== null) {
             $this->tplData[$varName] = $value;
@@ -74,21 +103,43 @@ class AppController
     }
 
     /**
-     * Renders the a template:w
+     * Renders the a template
      * @return void
      */
-    public function render()
+    public function render() : void
     {
-        $this->beforeRender();
-        print $this->oTemplate->render($this->tplData);
-        $this->afterRender();
+        $event = $this->dispatchEvent('Controller.beforeRender');
+        if ($event->getResult() instanceof Response) {
+            echo $event->getResult();
+            $this->camooExit();
+        }
+
+        $contents = $this->oTemplate->render($this->tplData);
+        $this->setResponse($this->response->withStringBody($contents));
+
+        echo $this->response;
+        $this->camooExit();
     }
 
-    public function beforeRender()
+    /**
+     * @param Event $event
+     * @return null
+     */
+    public function beforeRender(Event $event) :?Response
     {
+        return null;
     }
 
-    public function afterRender()
+    /**
+     * @param Event $event
+     * @return null
+     */
+    public function beforeRedirect(Event $event) :?Response
+    {
+        return null;
+    }
+
+    private function camooExit()
     {
         exit();
     }
@@ -99,6 +150,8 @@ class AppController
     public function redirect($destination, $permanent = false)
     {
         if (mb_strpos($destination, '://') === false) {
+            $this->dispatchEvent('Controller.beforeRedirect');
+
             if (empty(getEnv('HTTPS')) || getEnv('HTTPS') == 'off') {
                 $protocol = 'http';
             } else {

@@ -1,10 +1,12 @@
 <?php
+declare(strict_types=1);
 namespace CAMOO\Http;
 
 use \Middlewares\Utils\Dispatcher;
 use GuzzleHttp\Psr7;
+use CAMOO\Http\Response;
 
-class Caller
+final class Caller
 {
     protected $hRequest = [];
     public $controller = '\\App\\Controller\\PagesController';
@@ -21,13 +23,13 @@ class Caller
         $this->initialize();
     }
 
-    protected function initialize()
+    protected function initialize() : void
     {
         $this->bootstrap();
         $this->route();
     }
 
-    public function bootstrap()
+    public function bootstrap() : void
     {
         require_once $this->sConfigDir . '/bootstrap.php';
     }
@@ -38,6 +40,7 @@ class Caller
         $oController->request = new ServerRequest($request);
         $oController->action = $this->action;
         $oController->controller = $this->__controllerRaw;
+        $oController->setResponse(new Response());
         $oController->initialize();
         return $oController;
     }
@@ -53,7 +56,7 @@ class Caller
         return $dispatcher->dispatch(Psr7\ServerRequest::fromGlobals());
     }
 
-    public function route()
+    public function route() : void
     {
         require_once $this->sConfigDir . '/route.php';
 
