@@ -5,8 +5,7 @@ namespace CAMOO\Http;
 use \Middlewares\Utils\Dispatcher;
 use GuzzleHttp\Psr7;
 use CAMOO\Http\Response;
-use Sunrise\Http\ServerRequest\ServerRequestFactory;
-use Http\Factory\Discovery\HttpFactory;
+use Tebe\HttpFactory\HttpFactory;
 
 final class Caller
 {
@@ -53,10 +52,11 @@ final class Caller
             $r->addRoute($_SERVER['REQUEST_METHOD'], $this->uri, function ($request) {
                 return call_user_func_array([$this->getController($request), $this->action], $this->xargs);
             });
-		});
-		$responseFactory = $responseFactory = HttpFactory::responseFactory();
-        $dispatcher = new Dispatcher([new \Middlewares\FastRoute($dispatcher, $responseFactory), new \Middlewares\RequestHandler()]);
-        return $dispatcher->dispatch(ServerRequestFactory::fromGlobals());
+        });
+
+        $dispatcher = new Dispatcher([new \Middlewares\FastRoute($dispatcher), new \Middlewares\RequestHandler()]);
+
+        return $dispatcher->dispatch(Psr7\ServerRequest::fromGlobals());
     }
 
     public function route() : void

@@ -64,12 +64,12 @@ class AppController implements EventListenerInterface, EventDispatcherInterface
         $this->loadModel($this->controller);
     }
 
-    public function implementedEvents()
+    public function implementedEvents() : array
     {
         return [
-            'Controller.initialize' => 'beforeRunning',
-            'Controller.beforeRender' => 'beforeRender',
-            'Controller.beforeRedirect' => 'beforeRedirect',
+            'AppController.initialize' => 'beforeRunning',
+            'AppController.beforeRender' => 'beforeRender',
+            'AppController.beforeRedirect' => 'beforeRedirect',
         ];
     }
 
@@ -108,7 +108,7 @@ class AppController implements EventListenerInterface, EventDispatcherInterface
      */
     public function render() : void
     {
-        $event = $this->dispatchEvent('Controller.beforeRender');
+        $event = $this->dispatchEvent('AppController.beforeRender');
         if ($event->getResult() instanceof Response) {
             echo $event->getResult();
             $this->camooExit();
@@ -150,7 +150,7 @@ class AppController implements EventListenerInterface, EventDispatcherInterface
     public function redirect($destination, $permanent = false)
     {
         if (mb_strpos($destination, '://') === false) {
-            $this->dispatchEvent('Controller.beforeRedirect');
+            $this->dispatchEvent('AppController.beforeRedirect');
 
             if (empty(getEnv('HTTPS')) || getEnv('HTTPS') == 'off') {
                 $protocol = 'http';
