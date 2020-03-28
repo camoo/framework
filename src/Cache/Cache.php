@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace CAMOO\Cache;
 
@@ -11,6 +12,12 @@ use CAMOO\Exception\Exception as AppException;
  */
 final class Cache
 {
+    /**
+     * @param string $key
+     * @param string|int|array|mixed $value
+     * @param string $config
+     * @return bool
+     */
     public static function write(string $key, $value, string $config) : bool
     {
         $hConfig = self::getConfig($config);

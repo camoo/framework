@@ -20,7 +20,6 @@ class AppController implements EventListenerInterface, EventDispatcherInterface
     protected $oLayout = null;
     protected $sTemplate = '%s/%s.tpl';
     protected $sTemplateDir = 'Templates';
-    protected $sLayout = 'Templates/Layouts/default.tpl';
     public $request = null;
     protected $response = null;
     private $http_version = '1.1';
@@ -56,9 +55,9 @@ class AppController implements EventListenerInterface, EventDispatcherInterface
         // @See https://github.com/auraphp/Aura.Session
         if (in_array(getEnv('REQUEST_METHOD'), ['DELETE', 'POST', 'PUT'])) {
             $csrf_value = $_POST['__csrf_Token'];
-            $oCsrfToken = $this->__getSessionRaw()->getCsrfToken();
+            $oCsrfToken = $this->request->session->get('csrf_camoo');
             if (! $oCsrfToken->isValid($csrf_value)) {
-                throw \CAMOO\Exception\Exception("Request Blackholed.");
+                throw new \CAMOO\Exception\Exception("Request Blackholed.");
             }
         }
         $this->loadModel($this->controller);
@@ -67,8 +66,8 @@ class AppController implements EventListenerInterface, EventDispatcherInterface
     public function implementedEvents() : array
     {
         return [
-            'AppController.initialize' => 'beforeRunning',
-            'AppController.beforeRender' => 'beforeRender',
+            'AppController.initialize'     => 'beforeRunning',
+            'AppController.beforeRender'   => 'beforeRender',
             'AppController.beforeRedirect' => 'beforeRedirect',
         ];
     }
@@ -88,17 +87,21 @@ class AppController implements EventListenerInterface, EventDispatcherInterface
      * Sets variables to templates
      *
      * @param mixed|string $varName
-     * @param mixed $value
+     * @param null|mixed $value
      * @return \CAMOO\Controller\AppController
      */
-    public function set(string $varName, $value = null)
+    public function set(string $varName, $value = null) : AppController
     {
+        if (empty($varName)) {
+            throw new Exception('varName cannot be empty');
+        }
         if ($varName !== null) {
             $this->tplData[$varName] = $value;
         } else {
             $this->tplData = array_merge($this->tplData, $varName);
         }
-        $this->tplData['__csrf_Token'] = $this->request->csrf_Token;
+        $token = $this->request->csrf_Token;
+        $this->tplData['__csrf_Token'] = htmlspecialchars($token, ENT_QUOTES, 'UTF-8');
         return $this;
     }
 
@@ -139,7 +142,7 @@ class AppController implements EventListenerInterface, EventDispatcherInterface
         return null;
     }
 
-    protected function camooExit()
+    protected function camooExit() : void
     {
         exit();
     }
@@ -147,8 +150,12 @@ class AppController implements EventListenerInterface, EventDispatcherInterface
     /**
      * @param  string $destination URL to redirect to
      */
-    public function redirect($destination, $permanent = false)
+    public function redirect($destination, bool $permanent = false)
     {
+        if (empty($destination)) {
+            throw new Exception('destination cannot be empty');
+        }
+
         if (mb_strpos($destination, '://') === false) {
             $this->dispatchEvent('AppController.beforeRedirect');
 

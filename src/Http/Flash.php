@@ -8,6 +8,7 @@ class Flash
     private $oFlashSession = null;
     protected static $_create = null;
     private static $_flashSession = null;
+
     public function __construct($oFlashSession = null)
     {
         if (null !== $oFlashSession) {
@@ -52,6 +53,7 @@ class Flash
     {
         return $this->get($key);
     }
+
     public function __set($key, $value)
     {
         return $this->set($key, $value);
@@ -71,6 +73,7 @@ class Flash
     {
         return $this->oFlashSession->keepFlash();
     }
+
     public function destroy()
     {
         return $this->oFlashSession->clearFlash();

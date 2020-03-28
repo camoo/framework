@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace CAMOO\Http;
 
 use \CAMOO\Utils\QueryData;
@@ -6,7 +7,13 @@ use \CAMOO\Exception\Exception;
 
 class ServerRequest
 {
-
+    const REQUEST_METHODS = [
+        'POST',
+        'GET',
+        'PUT',
+        'DELETE',
+        'PATCH'
+    ];
     private $oRequest = null;
     public $query = [];
     public $data = [];
@@ -17,6 +24,7 @@ class ServerRequest
     private $__session = [Session::class, 'create'];
     private $__flash = [Flash::class, 'create'];
     private $__cookie = [Cookie::class, 'create'];
+    private $oToken;
 
     private $_queryDataMaps = [
         'query' => 'getQueryParams',
@@ -31,10 +39,9 @@ class ServerRequest
 
     public function __call($name, $xargs)
     {
-	if ( mb_substr($name, 0, 3) === 'get' && in_array(mb_strtolower(mb_substr($name, 3)),array_keys($this->_queryDataMaps)) ) {
+        if (mb_substr($name, 0, 3) === 'get' && in_array(mb_strtolower(mb_substr($name, 3)), array_keys($this->_queryDataMaps))) {
             return $this->__queryData($this->oRequest->{$this->_queryDataMaps[mb_strtolower(mb_substr($name, 3))]}());
-	}
-        elseif (in_array($name, array_keys($this->_queryDataMaps))) {
+        } elseif (in_array($name, array_keys($this->_queryDataMaps))) {
             if (empty($xargs) || count($xargs) > 1 || !preg_match('/\S/', $xargs[0])) {
                 throw new Exception(
                     sprintf('Method %s::%s does not exist', get_class($this), $name)
@@ -75,13 +82,31 @@ class ServerRequest
 
     private function invoker()
     {
-        $this->session = $this->__getSession()->segment();
-        $this->csrf_Token = $this->__getSession()->getCsrfToken()->getValue();
+        $oSession = $this->__getSession();
+        $this->oToken = $oSession->getCsrfToken();
+        $this->csrf_Token = $oSession->getCsrfToken()->getValue();
         if (!empty($this->oRequest)) {
             $this->query = $this->__queryData($this->oRequest->getQueryParams());
             $this->data = $this->__queryData($this->oRequest->getParsedBody());
         }
         $this->cookie = $this->__getCookie();
-        $this->Flash = $this->__getFlash($this->__getSession()->getFlash())->initialize();
+        $this->Flash = $this->__getFlash($oSession->getFlash())->initialize();
+        $oSession = $oSession->segment();
+        $oSession->set('csrf_camoo', $this->oToken);
+        $this->session = $oSession;
+    }
+
+    /**
+     * @param string $request_method
+     * @throw Exception
+     * @return bool
+     */
+    public function is(string $request_method) : bool
+    {
+        if (!in_array(strtoupper($request_method), static::REQUEST_METHODS)) {
+            throw new Exception(sprintf('%s is not an allowed request method', $request_method));
+        }
+
+        return strtoupper(getEnv('REQUEST_METHOD')) === strtoupper($request_method);
     }
 }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace CAMOO\Http;
 
 use \Aura\Session\SessionFactory;
@@ -26,7 +27,7 @@ class Session
     /**
      * @return \CAMOO\Http\Session
      */
-    public static function create($cookie = null)
+    public static function create($cookie = null) : Session
     {
         if (null === static::$_create) {
             static::$_create = new self;
@@ -46,18 +47,15 @@ class Session
         return $this->oSession->destroy();
     }
 
-
     public function clear()
     {
         return $this->oSession->clear();
     }
 
-
     public function save()
     {
         return $this->oSession->commit();
     }
-
 
     public function set($key, $value)
     {
@@ -79,6 +77,7 @@ class Session
     {
         return $this->get($key);
     }
+
     public function __set($key, $value)
     {
         return $this->set($key, $value);
@@ -133,7 +132,6 @@ class Session
     {
         return $this->oSession->getSavePath($path);
     }
-
 
     /**
      *
