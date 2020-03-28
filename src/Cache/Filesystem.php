@@ -3,15 +3,18 @@ namespace CAMOO\Cache;
 
 use Symfony\Component\Cache\Psr16Cache;
 use CAMOO\Interfaces\CacheInterface;
+use DateTime;
+use CAMOO\Interfaces\ExceptionInterface;
+use DateInterval;
 
 class Filesystem extends Base implements CacheInterface
 {
-	
+    /*@var CacheInterface $oCache */
     private $oCache = null;
-	
-	/**
-	 * @param Array $options
-	 */
+
+    /**
+     * @param Array $options
+     */
     public function __construct(array $options=[])
     {
         if ($this->oCache === null) {
@@ -47,7 +50,7 @@ class Filesystem extends Base implements CacheInterface
      *
      * @param string                 $key   The key of the item to store.
      * @param mixed                  $value The value of the item to store, must be serializable.
-     * @param null|int|\DateInterval $ttl   Optional. The TTL value of this item. If no value is sent and
+     * @param null|int|\DateInterval|string $ttl   Optional. The TTL value of this item. If no value is sent and
      *                                      the driver supports TTL then the library may set a default value
      *                                      for it or let the driver take care of that.
      *
@@ -60,6 +63,19 @@ class Filesystem extends Base implements CacheInterface
     {
         if (!is_string($key) || trim($key) === '') {
             throw new InvalidArgumentException("key is not a legal value");
+        }
+
+        if (preg_match('/^\+/', $ttl)) {
+            try {
+                $oNow = new DateTime('now');
+                $sec = $oNow->modify($ttl)->getTimestamp() - time();
+                if ($sec < 0) {
+                    throw new InvalidArgumentException("ttl is not a legal value");
+                }
+                $ttl = new DateInterval(sprintf('PT%dS', (int)$sec));
+            } catch (ExceptionInterface $exception) {
+                throw new InvalidArgumentException("ttl is not a legal value");
+            }
         }
 
         $cache = $this->oCache->getItem($key);
