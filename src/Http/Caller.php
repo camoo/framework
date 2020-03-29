@@ -5,7 +5,7 @@ namespace CAMOO\Http;
 use \Middlewares\Utils\Dispatcher;
 use GuzzleHttp\Psr7;
 use CAMOO\Http\Response;
-use Tebe\HttpFactory\HttpFactory;
+use CAMOO\Interfaces\ControllerInterface;
 
 final class Caller
 {
@@ -35,7 +35,7 @@ final class Caller
         require_once $this->sConfigDir . '/bootstrap.php';
     }
 
-    public function getController($request = null)
+    public function getController(?Psr7\ServerRequest $request = null) : ControllerInterface
     {
         $oController = new $this->controller();
         $oController->request = new ServerRequest($request);
@@ -54,7 +54,10 @@ final class Caller
             });
         });
 
-        $dispatcher = new Dispatcher([new \Middlewares\FastRoute($dispatcher), new \Middlewares\RequestHandler()]);
+        $dispatcher = new Dispatcher([
+            new \Middlewares\FastRoute($dispatcher),
+            new \Middlewares\RequestHandler(),
+        ]);
 
         return $dispatcher->dispatch(Psr7\ServerRequest::fromGlobals());
     }
@@ -108,7 +111,7 @@ final class Caller
                     $this->action = $handler['action'];
                 }
 
-                if ($vars) {
+                if (!empty($vars)) {
                     $this->xargs = $vars;
                 }
 

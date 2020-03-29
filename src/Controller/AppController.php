@@ -9,8 +9,9 @@ use CAMOO\Event\Event;
 use CAMOO\Event\EventDispatcherInterface;
 use CAMOO\Event\EventDispatcherTrait;
 use CAMOO\Event\EventListenerInterface;
+use CAMOO\Interfaces\ControllerInterface;
 
-class AppController implements EventListenerInterface, EventDispatcherInterface
+class AppController implements ControllerInterface, EventListenerInterface, EventDispatcherInterface
 {
     use EventDispatcherTrait;
     public $controller = null;
@@ -50,15 +51,6 @@ class AppController implements EventListenerInterface, EventDispatcherInterface
 
         if ($this->oTemplate === null) {
             $this->oTemplate = $this->oLayout->load(sprintf($this->sTemplate, $this->controller, Inflector::tableize($this->action)));
-        }
-
-        // @See https://github.com/auraphp/Aura.Session
-        if (in_array(getEnv('REQUEST_METHOD'), ['DELETE', 'POST', 'PUT'])) {
-            $csrf_value = $_POST['__csrf_Token'];
-            $oCsrfToken = $this->request->session->get('csrf_camoo');
-            if (! $oCsrfToken->isValid($csrf_value)) {
-                throw new \CAMOO\Exception\Exception("Request Blackholed.");
-            }
         }
         $this->loadModel($this->controller);
     }
@@ -102,6 +94,7 @@ class AppController implements EventListenerInterface, EventDispatcherInterface
         }
         $token = $this->request->csrf_Token;
         $this->tplData['__csrf_Token'] = htmlspecialchars($token, ENT_QUOTES, 'UTF-8');
+        $this->tplData[sprintf('%s_active', strtolower($this->controller))] = 'active';
         return $this;
     }
 

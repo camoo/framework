@@ -7,6 +7,7 @@ use CAMOO\Utils\Configure;
 
 class Session
 {
+    const SEG_NAME = 'CAMOO\Framework\Session';
     private $oSession=null;
     protected static $_create = null;
     protected static $__cookie = null;
@@ -17,8 +18,6 @@ class Session
             $cookies = null !== static::$__cookie? static::$__cookie : $_COOKIE;
             $this->oSession = (new SessionFactory())->newInstance($cookies);
             $hCookieParam = Configure::read('Session.cookie');
-            $hCookieParam['lifetime'] = $hCookieParam['expire'];
-            unset($hCookieParam['expire']);
             $this->oSession->setName(Configure::read('Session.name'));
             $this->oSession->setCookieParams($hCookieParam);
         }
