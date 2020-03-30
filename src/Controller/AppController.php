@@ -25,16 +25,10 @@ class AppController implements ControllerInterface, EventListenerInterface, Even
     protected $response = null;
     private $http_version = '1.1';
     protected $tplData = [];
-    protected $__sessionRaw = [\CAMOO\Http\Session::class, 'create'];
 
     public function __construct()
     {
         $this->getEventManager()->on($this);
-    }
-
-    private function __getSessionRaw()
-    {
-        return call_user_func($this->__sessionRaw);
     }
 
     /**
@@ -175,4 +169,5 @@ class AppController implements ControllerInterface, EventListenerInterface, Even
     {
         $this->{$sModel} = (new TableLocator())->get(Inflector::classify($sModel));
     }
+
 }

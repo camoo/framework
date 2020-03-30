@@ -5,6 +5,7 @@ namespace CAMOO\Http;
 use \CAMOO\Utils\QueryData;
 use \CAMOO\Exception\Exception;
 use \CAMOO\Utils\Security;
+use CAMOO\Exception\Http\MethodNotAllowedException;
 
 class ServerRequest
 {
@@ -129,6 +130,10 @@ class ServerRequest
             throw new Exception(sprintf('%s is not an allowed request method', $request_method));
         }
 
+        if (strtolower($request_method) === 'ajax') {
+            return null !== getEnv('HTTP_X_REQUESTED_WITH') && getEnv('HTTP_X_REQUESTED_WITH') === 'XMLHttpRequest';
+        }
+
         return strtoupper($this->oRequest->getMethod()) === strtoupper($request_method);
     }
 
@@ -165,5 +170,21 @@ class ServerRequest
             }, $xData);
         }
         return Security::satanizer($xData);
+    }
+
+    /**
+     * @param array $asMethod
+     * @throw HttpExceptionInterface
+     * @return void
+     */
+    public function allowMethod(array $asMethod=[]) : void
+    {
+        if (empty($asMethod)) {
+            throw Exception('Allowed method is not defined !');
+        }
+
+        if (!in_array(strtolower($this->oRequest->getMethod()), array_map('strtolower', $asMethod))) {
+            throw new MethodNotAllowedException();
+        }
     }
 }
