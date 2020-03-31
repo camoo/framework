@@ -6,10 +6,14 @@ use \CAMOO\Utils\QueryData;
 use \CAMOO\Exception\Exception;
 use \CAMOO\Utils\Security;
 use CAMOO\Exception\Http\MethodNotAllowedException;
+use CAMOO\Exception\Http\BadRequestException;
+use CAMOO\Utils\Configure;
 
 class ServerRequest
 {
-    const REQUEST_METHODS = [
+    private static $_csrfSegment='Aura\Session\CsrfToken';
+
+    private const REQUEST_METHODS = [
         'POST',
         'GET',
         'PUT',
@@ -97,15 +101,23 @@ class ServerRequest
     private function invoker()
     {
         $oSession = $this->__getSession();
+
+        /** @var SessionSegment */
         $this->session = $oSession->segment(Session::SEG_NAME);
+
+        /** @var SessionSegment $oCsrfSgement */
+        $oCsrfSgement = $this->_getCsrfSegement($oSession);
 
         ################## CSRF protection
         // @See https://github.com/auraphp/Aura.Session
         if (in_array($this->oRequest->getMethod(), ['DELETE', 'POST', 'PUT', 'PATCH'])) {
+            $csrfCreatedAt = (int) $oCsrfSgement->read('__csrf_created_at');
+            $csrfTimeout = Configure::read('Security.csrf_lifetime') ?? 1800;
+
             $oCsrfToken = $oSession->getCsrfToken();
-            $csrf_value = (string) $_POST['__csrf_Token'];
-            if (! $oCsrfToken->isValid($csrf_value)) {
-                throw new Exception("Request Blackholed.");
+            $csrf_value = $this->_satanize($_POST['__csrf_Token']);
+            if ((time() - $csrfCreatedAt) >  (int) $csrfTimeout || ! $oCsrfToken->isValid($csrf_value)) {
+                throw new BadRequestException('Request Black-holed');
             }
         }
 
@@ -113,7 +125,14 @@ class ServerRequest
             $this->query = $this->_satanize($this->__queryData($this->oRequest->getQueryParams()));
             $this->data = $this->_satanize($this->__queryData($this->oRequest->getParsedBody()));
         }
+
+        if ($oCsrfSgement->check('__csrf_created_at')) {
+            $oSession->getCsrfToken()->regenerateValue();
+        }
+
         $this->csrf_Token = $oSession->getCsrfToken()->getValue();
+        $oCsrfSgement->write('__csrf_created_at', time());
+        ################## CSRF protection END
 
         $this->cookie = $this->__getCookie();
         $this->Flash = $this->__getFlash($oSession->getFlash())->initialize();
@@ -186,5 +205,10 @@ class ServerRequest
         if (!in_array(strtolower($this->oRequest->getMethod()), array_map('strtolower', $asMethod))) {
             throw new MethodNotAllowedException();
         }
+    }
+
+    private function _getCsrfSegement($oSession) : SessionSegment
+    {
+        return new SessionSegment($oSession->segment(static::$_csrfSegment));
     }
 }

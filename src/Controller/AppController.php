@@ -21,9 +21,15 @@ class AppController implements ControllerInterface, EventListenerInterface, Even
     protected $oLayout = null;
     protected $sTemplate = '%s/%s.tpl';
     protected $sTemplateDir = 'Templates';
+
+    /** @var \CAMOO\Http\ServerRequest $request */
     public $request = null;
+
+    /** @var \CAMOO\Http\Response $response */
     protected $response = null;
+
     private $http_version = '1.1';
+
     protected $tplData = [];
 
     public function __construct()
@@ -36,7 +42,7 @@ class AppController implements ControllerInterface, EventListenerInterface, Even
      *
      * @return void
      */
-    public function initialize()
+    public function initialize() : void
     {
         if ($this->oLayout === null) {
             $oTemplateLoader = new \Twig\Loader\FilesystemLoader(APP.$this->sTemplateDir);
@@ -169,5 +175,4 @@ class AppController implements ControllerInterface, EventListenerInterface, Even
     {
         $this->{$sModel} = (new TableLocator())->get(Inflector::classify($sModel));
     }
-
 }

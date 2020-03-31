@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace CAMOO\Utils;
 
@@ -8,6 +9,7 @@ use \Noodlehaus\Parser\Json;
 
 class Configure
 {
+    /** @var array Config */
     private static $_oahConfigs = null;
 
     /**
@@ -16,7 +18,7 @@ class Configure
      *
      * @return void
      */
-    public static function load($sPath, $bMerge = false)
+    public static function load(string $sPath, bool $bMerge = false) : void
     {
         if (file_exists($sPath)) {
             $conf = Config::load($sPath);
@@ -29,21 +31,21 @@ class Configure
     }
 
     /**
-     * @string $key
+     * @param string $key
      *
      * @return mixed value
      */
-    public static function read($sKey)
+    public static function read(string $sKey)
     {
         return static::$_oahConfigs->get($sKey);
     }
 
     /**
-     * @string $key
+     * @param string $key
      *
      * @return bool
      */
-    public static function check($sKey)
+    public static function check(string $sKey) : bool
     {
         return static::$_oahConfigs->offsetExists($sKey);
     }
@@ -62,7 +64,7 @@ class Configure
      *
      * @return void
      */
-    public function write($sKey, $xValue=[])
+    public function write($sKey, $xValue=[]) : void
     {
         $hNewConf =[];
         self::addConf($hNewConf, $sKey, $xValue);
@@ -81,7 +83,7 @@ class Configure
      *
      * @return void
      */
-    private static function addConf(&$hNewConf, $sKey, $xValue)
+    private static function addConf(&$hNewConf, $sKey, $xValue) : void
     {
         $asKeys = explode(".", $sKey);
         foreach ($asKeys as $key) {

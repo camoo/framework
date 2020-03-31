@@ -24,9 +24,10 @@ class Session
     }
 
     /**
+	 * @param array|null $cookie
      * @return \CAMOO\Http\Session
      */
-    public static function create($cookie = null) : Session
+    public static function create(?array $cookie = null) : Session
     {
         if (null === static::$_create) {
             static::$_create = new self;
@@ -35,7 +36,11 @@ class Session
         return static::$_create;
     }
 
-    public function segment($sSegment = null)
+	/**
+	 * @param string $sSegment
+	 * @return SegmentFactory
+	 */
+    public function segment(?string $sSegment = null)
     {
         $sSegmentName = $sSegment === null? __NAMESPACE__ : $sSegment;
         return $this->oSession->getSegment($sSegmentName);

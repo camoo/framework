@@ -5,6 +5,7 @@ namespace CAMOO\Http;
 
 use Aura\Session\Segment;
 use \CAMOO\Exception\Exception;
+use \CAMOO\Utils\QueryData;
 
 /**
  * Class SessionSegment
@@ -13,7 +14,7 @@ use \CAMOO\Exception\Exception;
 final class SessionSegment
 {
 
-    /** @var Segment $segment */
+    /** @var \Aura\Session\Segment $segment */
     private $segment;
 
     public function __construct(?Segment $segment)
@@ -26,20 +27,53 @@ final class SessionSegment
 
     /**
      * @param string $key
-     * @return mixed
+     * @return int|string|array|object|mixed $value
      */
     public function read(string $key)
     {
-        return $this->segment->get($key);
+        $hash = explode('.', $key);
+        $key = array_shift($hash);
+        $xValue = $this->segment->get($key);
+        if (empty($hash)) {
+            return $xValue;
+        }
+        $valueArray = is_array($xValue)? $xValue :  (array) $xValue;
+        $dataFiltered = array_filter($valueArray, function ($val) {
+            return null !== $val;
+        });
+        return  (new QueryData($dataFiltered))->get(implode('.', $hash));
     }
 
     /**
      * @param string $key
-     * @param int|string|array|object|mixed $value
+     * @param int|string|array|null $value
      */
     public function write(string $key, $value) : void
     {
-        $this->segment->set($key, $value);
+        if (is_object($value)) {
+            throw new Exception(sprintf('Invalid Type for %s ! The following Types are allowed %s', '$value', '<int|string|array|null>'));
+        }
+
+        $hash = explode('.', $key);
+        $key = array_shift($hash);
+
+        if (empty($hash)) {
+            $this->segment->set($key, $value);
+            return;
+        }
+
+        $xValue = $this->segment->get($key);
+        $dataFiltered = [];
+        if (null !== $xValue) {
+            $valueArray = is_array($xValue)? $xValue :  (array) $xValue;
+            $dataFiltered = array_filter($valueArray, function ($val) {
+                return null !== $val;
+            });
+        }
+
+        $data = (new QueryData($dataFiltered));
+        $data->set(implode('.', $hash), $value);
+        $this->segment->set($key, $data->all());
     }
 
     /**
@@ -48,6 +82,45 @@ final class SessionSegment
      */
     public function check(string $key) : bool
     {
-        return !empty($this->segment->get($key));
+        return null !== $this->read($key);
+    }
+
+    /**
+     * @param string $key
+     * @return void
+     */
+    public function delete(string $key) : void
+    {
+        $hash = explode('.', $key);
+        $key = array_shift($hash);
+        $xValue = $this->segment->get($key);
+
+        if (null === $xValue) {
+            return;
+        }
+
+        if (empty($hash)) {
+            $this->segment->set($key, null);
+            return;
+        }
+
+        $valueArray = is_array($xValue)? $xValue :  (array) $xValue;
+        $dataFiltered = array_filter($valueArray, function ($val) {
+            return null !== $val;
+        });
+        if (empty($dataFiltered)) {
+            return;
+        }
+        $data = (new QueryData($dataFiltered));
+        $data->remove(implode('.', $hash));
+        $this->segment->set($key, $data->all());
+    }
+
+    /**
+     * @return void
+     */
+    public function clear() : void
+    {
+        $this->segment->clear();
     }
 }
