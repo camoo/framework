@@ -40,7 +40,10 @@ class ServerRequest
     public $cookie = [];
 
     private $session;
-    private $csrf_Token = null;
+
+    /** @var null|string $csrf_Token */
+    public $csrf_Token = null;
+
     public $Flash = null;
     private $__session = [Session::class, 'create'];
     private $__flash = [Flash::class, 'create'];
@@ -242,13 +245,5 @@ class ServerRequest
     private function _getCsrfSegement($oSession) : SessionSegment
     {
         return new SessionSegment($oSession->segment(static::$_csrfSegment));
-    }
-
-    /**
-     * @return string
-     */
-    public function getCsrfToken() : ?string
-    {
-        return $this->csrf_Token;
     }
 }

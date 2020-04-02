@@ -58,8 +58,9 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
             $this->oLayout = new \Twig\Environment($oTemplateLoader, ['cache' => TMP.'cache'. DS . 'tpl']);
             $oFuncCollection = new FunctionCollection();
             $oFilterCollection = new FilterCollection();
-            $formHelper = new Form($this->request, $this->request->csrfSessionSegment);
+            $formHelper = new Form($this->request, $this->request->csrfSessionSegment, $this->request->csrf_Token);
             unset($this->request->csrfSessionSegment);
+            unset($this->request->csrf_Token);
             $extensions = new TwigHelper($this->request, $oFuncCollection, $oFilterCollection);
             $extensions->initialize();
             $extensions->loadFunction($formHelper);
@@ -110,7 +111,6 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         } else {
             $this->tplData = array_merge($this->tplData, $varName);
         }
-
     }
 
     /**

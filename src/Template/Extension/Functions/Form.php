@@ -18,16 +18,20 @@ final class Form implements TemplateFunctionInterface
     /** @var ServerRequest $request */
     private $request;
 
+    /** @var null|string $token */
+    private $token;
+
     /** @var SessionSegment $csrfSessionSegment */
     private $csrfSessionSegment = null;
 
-    public function __construct(ServerRequest $request, SessionSegment $csrfSessionSegment)
+    public function __construct(ServerRequest $request, SessionSegment $csrfSessionSegment, string $token)
     {
         $this->request = $request;
         $this->csrfSessionSegment = $csrfSessionSegment;
+        $this->token = $token;
     }
 
-	/** @var array */
+    /** @var array */
     private $hiddenValue = [];
 
     public function getFunctions() : array
@@ -50,7 +54,7 @@ final class Form implements TemplateFunctionInterface
 
     public function formStart(?string $name=null, ?string $method='POST', string $action='', $options=[])
     {
-        $token = $this->request->getCsrfToken();
+        $token = $this->token;
         $name = $name ?? uniqid('form', false);
         $default= [ 'id' => $name];
         $options += $default;
