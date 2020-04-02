@@ -13,8 +13,9 @@ use CAMOO\Interfaces\ControllerInterface;
 use CAMOO\Template\Extension\TwigHelper;
 use CAMOO\Template\Extension\FunctionCollection;
 use CAMOO\Template\Extension\FilterCollection;
+use CAMOO\Template\Extension\Functions\Form;
 
-class AppController implements ControllerInterface, EventListenerInterface, EventDispatcherInterface
+abstract class AppController implements ControllerInterface, EventListenerInterface, EventDispatcherInterface
 {
     use EventDispatcherTrait;
 
@@ -57,8 +58,11 @@ class AppController implements ControllerInterface, EventListenerInterface, Even
             $this->oLayout = new \Twig\Environment($oTemplateLoader, ['cache' => TMP.'cache'. DS . 'tpl']);
             $oFuncCollection = new FunctionCollection();
             $oFilterCollection = new FilterCollection();
+            $formHelper = new Form($this->request, $this->request->csrfSessionSegment);
+            unset($this->request->csrfSessionSegment);
             $extensions = new TwigHelper($this->request, $oFuncCollection, $oFilterCollection);
             $extensions->initialize();
+            $extensions->loadFunction($formHelper);
             $this->oLayout->addExtension($extensions);
         }
 
@@ -85,6 +89,7 @@ class AppController implements ControllerInterface, EventListenerInterface, Even
     {
         $this->response = $response;
 
+        $this->tplData[sprintf('%s_active', strtolower($this->controller))] = 'active';
         return $this;
     }
 
@@ -105,9 +110,7 @@ class AppController implements ControllerInterface, EventListenerInterface, Even
         } else {
             $this->tplData = array_merge($this->tplData, $varName);
         }
-        $token = $this->request->getCsrfToken();
-        $this->tplData['__csrf_Token'] = htmlspecialchars($token, ENT_QUOTES, 'UTF-8');
-        $this->tplData[sprintf('%s_active', strtolower($this->controller))] = 'active';
+
     }
 
     /**

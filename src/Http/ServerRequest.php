@@ -15,6 +15,9 @@ class ServerRequest
     /** @var string $_csrfSegment */
     private static $_csrfSegment='Aura\Session\CsrfToken';
 
+    /** @var SessionSegment $csrfSessionSegment */
+    public $csrfSessionSegment = null;
+
     /** @var array */
     private const REQUEST_METHODS = [
         'POST',
@@ -131,6 +134,14 @@ class ServerRequest
             if ((time() - $csrfCreatedAt) >  (int) $csrfTimeout || ! $oCsrfToken->isValid($csrf_value)) {
                 throw new BadRequestException('Request Black-holed');
             }
+            $hiddenSum = $oCsrfSgement->read('__csrf_checksum');
+            if (!empty($hiddenSum)) {
+                foreach ($hiddenSum as $field => $checkSumvalue) {
+                    if (md5($this->_satanize($_POST[$field])) !== $checkSumvalue) {
+                        throw new BadRequestException('Value has been manipulated !');
+                    }
+                }
+            }
         }
 
         if (!empty($this->oRequest)) {
@@ -144,6 +155,8 @@ class ServerRequest
 
         $this->csrf_Token = $oSession->getCsrfToken()->getValue();
         $oCsrfSgement->write('__csrf_created_at', time());
+        $oCsrfSgement->delete('__csrf_checksum');
+        $this->csrfSessionSegment = $oCsrfSgement;
         ################## CSRF protection END
 
         $this->cookie = $this->__getCookie();
@@ -181,6 +194,10 @@ class ServerRequest
      */
     private function _satanize($xData)
     {
+        if (is_numeric($xData)) {
+            return $xData;
+        }
+
         if (is_object($xData)) {
             throw new Exception('Invalid Data type! Only string|Array are allowed');
         }

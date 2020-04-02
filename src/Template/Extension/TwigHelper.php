@@ -9,7 +9,7 @@ use CAMOO\Template\Extension\FunctionCollection;
 use CAMOO\Template\Extension\FilterCollection;
 use CAMOO\Template\Extension\Functions as BaseFunction;
 use CAMOO\Template\Extension\Filters as BaseFilter;
-use \CAMOO\Exception\Exception;
+use CAMOO\Exception\Exception;
 use CAMOO\Utils\Configure;
 
 /**
@@ -43,11 +43,16 @@ final class TwigHelper extends BaseExtension
     }
 
     /**
-     * @param string $name
+     * @param string|object $name
      * @return void
      */
-    final public function loadFunction(string $name) : void
+    final public function loadFunction($name) : void
     {
+        if (is_object($name)) {
+            $this->functionCollection->add($name);
+            return;
+        }
+
         $namespace = __NAMESPACE__. '\Functions\\';
         $class = $namespace . $name;
 
@@ -133,5 +138,14 @@ final class TwigHelper extends BaseExtension
             $ahFunctions[] = $func;
         }
         return $ahFunctions;
+    }
+
+    public function getFilters()
+    {
+        $ahFilters = [];
+        foreach ($this->filterCollection as $filter) {
+            $ahFilters[] = $filter;
+        }
+        return $ahFilters;
     }
 }
