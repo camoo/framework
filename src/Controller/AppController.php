@@ -10,17 +10,25 @@ use CAMOO\Event\EventDispatcherInterface;
 use CAMOO\Event\EventDispatcherTrait;
 use CAMOO\Event\EventListenerInterface;
 use CAMOO\Interfaces\ControllerInterface;
+use CAMOO\Template\Extension\TwigHelper;
+use CAMOO\Template\Extension\FunctionCollection;
+use CAMOO\Template\Extension\FilterCollection;
 
 class AppController implements ControllerInterface, EventListenerInterface, EventDispatcherInterface
 {
     use EventDispatcherTrait;
+
+    /** @var ControllerInterface $controller */
     public $controller = null;
+
+    /** @var string $action */
     public $action = null;
+
     public $Flash = null;
     protected $oTemplate = null;
     protected $oLayout = null;
     protected $sTemplate = '%s/%s.tpl';
-    protected $sTemplateDir = 'Templates';
+    protected $sTemplateDir = 'Template';
 
     /** @var \CAMOO\Http\ServerRequest $request */
     public $request = null;
@@ -47,6 +55,11 @@ class AppController implements ControllerInterface, EventListenerInterface, Even
         if ($this->oLayout === null) {
             $oTemplateLoader = new \Twig\Loader\FilesystemLoader(APP.$this->sTemplateDir);
             $this->oLayout = new \Twig\Environment($oTemplateLoader, ['cache' => TMP.'cache'. DS . 'tpl']);
+            $oFuncCollection = new FunctionCollection();
+            $oFilterCollection = new FilterCollection();
+            $extensions = new TwigHelper($this->request, $oFuncCollection, $oFilterCollection);
+            $extensions->initialize();
+            $this->oLayout->addExtension($extensions);
         }
 
         if ($this->oTemplate === null) {
@@ -78,11 +91,11 @@ class AppController implements ControllerInterface, EventListenerInterface, Even
     /**
      * Sets variables to templates
      *
-     * @param mixed|string $varName
-     * @param null|mixed $value
-     * @return \CAMOO\Controller\AppController
+     * @param string $varName
+     * @param null|int|string|array|object|mixed $value
+     * @return void
      */
-    public function set(string $varName, $value = null) : AppController
+    public function set(string $varName, $value) : void
     {
         if (empty($varName)) {
             throw new Exception('varName cannot be empty');
@@ -92,10 +105,9 @@ class AppController implements ControllerInterface, EventListenerInterface, Even
         } else {
             $this->tplData = array_merge($this->tplData, $varName);
         }
-        $token = $this->request->csrf_Token;
+        $token = $this->request->getCsrfToken();
         $this->tplData['__csrf_Token'] = htmlspecialchars($token, ENT_QUOTES, 'UTF-8');
         $this->tplData[sprintf('%s_active', strtolower($this->controller))] = 'active';
-        return $this;
     }
 
     /**
@@ -142,8 +154,11 @@ class AppController implements ControllerInterface, EventListenerInterface, Even
 
     /**
      * @param  string $destination URL to redirect to
+     * @param boll $permanent
+     * @throw Exception
+     * @return void
      */
-    public function redirect($destination, bool $permanent = false)
+    public function redirect(string $destination, bool $permanent = false) : bool
     {
         if (empty($destination)) {
             throw new Exception('destination cannot be empty');
@@ -171,7 +186,11 @@ class AppController implements ControllerInterface, EventListenerInterface, Even
         header('Location: ' . $destination);
     }
 
-    protected function loadModel($sModel)
+    /**
+     * @param string $sModel
+     * @return void
+     */
+    protected function loadModel(string $sModel) : void
     {
         $this->{$sModel} = (new TableLocator())->get(Inflector::classify($sModel));
     }

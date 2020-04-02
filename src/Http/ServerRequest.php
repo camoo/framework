@@ -8,11 +8,14 @@ use \CAMOO\Utils\Security;
 use CAMOO\Exception\Http\MethodNotAllowedException;
 use CAMOO\Exception\Http\BadRequestException;
 use CAMOO\Utils\Configure;
+use \GuzzleHttp\Psr7\ServerRequest as BaseServerRequest;
 
 class ServerRequest
 {
+    /** @var string $_csrfSegment */
     private static $_csrfSegment='Aura\Session\CsrfToken';
 
+    /** @var array */
     private const REQUEST_METHODS = [
         'POST',
         'GET',
@@ -20,12 +23,21 @@ class ServerRequest
         'DELETE',
         'PATCH'
     ];
+
+    /** @var \GuzzleHttp\Psr7\ServerRequest $oRequest */
     private $oRequest = null;
+
+    /** @var array $query */
     public $query = [];
+
+    /** @var array $data */
     public $data = [];
+
+    /** @var array $cookie */
     public $cookie = [];
+
     private $session;
-    public $csrf_Token = null;
+    private $csrf_Token = null;
     public $Flash = null;
     private $__session = [Session::class, 'create'];
     private $__flash = [Flash::class, 'create'];
@@ -36,7 +48,7 @@ class ServerRequest
         'data'  => 'getParsedBody',
     ];
 
-    public function __construct($oRequest = null)
+    public function __construct(?BaseServerRequest $oRequest = null)
     {
         $this->oRequest = $oRequest;
         $this->invoker();
@@ -207,8 +219,19 @@ class ServerRequest
         }
     }
 
+    /**
+     * @return SessionSegment
+     */
     private function _getCsrfSegement($oSession) : SessionSegment
     {
         return new SessionSegment($oSession->segment(static::$_csrfSegment));
+    }
+
+    /**
+     * @return string
+     */
+    public function getCsrfToken() : ?string
+    {
+        return $this->csrf_Token;
     }
 }

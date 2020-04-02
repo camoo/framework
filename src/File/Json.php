@@ -1,27 +1,52 @@
 <?php
+declare(strict_types=1);
 namespace CAMOO\File;
 
-use Exception;
+use CAMOO\Exception\Exception;
 
 class Json
 {
+
+    /** @var string $file */
+    private $file;
+
+    /** @var string $json */
+    private $json;
+
+    public function __construct(?string $file=null, ?string $json=null)
+    {
+        $this->file = $file;
+        $this->json = $json;
+    }
+
     /**
      * decode json string
+     * @param string $sJSON
+     * @param bool $bAsHash
+     * @return array|object
      */
-    protected function decode($sJSON, $bAsHash = false)
+    public function decode(?string $sJSON=null, bool $bAsHash = false)
     {
-        if (($xData = json_decode($sJSON, $bAsHash)) !== null
+        $json = $sJSON ?? $this->json;
+        if (($xData = json_decode($json, $bAsHash)) !== null
                 && (json_last_error() === JSON_ERROR_NONE)) {
             return $xData;
         }
+        throw new Exception(json_last_error_msg());
     }
 
-    public function read($sFile)
+    /**
+     * Reads a json file
+     * @param null|string $sFile
+     * @return array
+     */
+    public function read(?string $sFile=null) : array
     {
-        if (! file_exists($sFile)) {
-            trigger_error("$sFile does not exist!", E_USER_ERROR);
+        $file = $sFile ?? $this->file;
+        if (! is_file($file)) {
+            throw new Exception(sprintf('%s does not exist !', $file));
         }
-        $sData = file_get_contents($sFile);
+        $sData = file_get_contents($file);
         return $this->decode($sData, true);
     }
 }
