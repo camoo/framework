@@ -47,18 +47,25 @@ final class Form implements TemplateFunctionInterface
     {
         $attributes = ' ';
         foreach ($options as $attr => $option) {
+            if (strtolower($attr) === 'value' && !empty($option)) {
+                $option = htmlspecialchars($option, ENT_QUOTES, 'UTF-8');
+            }
             $attributes .= $attr. '="' . $option. '" ';
         }
         return $attributes;
     }
 
-    public function formStart(?string $name=null, ?string $method='POST', string $action='', $options=[])
+    public function formStart(?string $name=null, $options=[])
     {
         $token = $this->token;
         $name = $name ?? uniqid('form', false);
-        $default= [ 'id' => $name];
+        $default= [ 'id' => $name, 'method' => 'POST', 'action' => ''];
+        if (array_key_exists('url', $options)) {
+            $options['action'] = $options['url'];
+			unset($options['url']);
+        }
         $options += $default;
-        return sprintf('<form name="%s" method="%s" action="%s"%s>' ."\n".' <input type="hidden" name="__csrf_Token" value="'.$token.'" />', $name, $method, $action, $this->_buildAttr($options));
+        return sprintf('<form name="%s"%s>' ."\n".' <input type="hidden" name="__csrf_Token" value="'.$token.'" />', $name, $this->_buildAttr($options));
     }
 
     public function formEnd()
@@ -68,12 +75,25 @@ final class Form implements TemplateFunctionInterface
 
     public function input(string $name, array $options=[], $template=null)
     {
-        $default= [ 'id' => $name, 'type' => 'text'];
+        $default= [ 'id' => $name, 'type' => 'text', 'value' => ''];
         $options += $default;
-        if (array_key_exists('type', $options) && $options['type'] === 'textarea') {
+        if (array_key_exists('type', $options) && strtolower($options['type']) === 'textarea') {
+            $value = $options['value'];
             unset($options['type']);
-            return sprintf('<textarea name="%s"%s></textarea>', $name, rtrim($this->_buildAttr($options)));
+            unset($options['value']);
+            return sprintf('<textarea name="%s"%s>%s</textarea>', $name, htmlspecialchars($value, ENT_QUOTES, 'UTF-8'), rtrim($this->_buildAttr($options)));
         }
+
+        if (array_key_exists('type', $options) && strtolower($options['type']) === 'submit') {
+            $value = $options['value'];
+            unset($options['value']);
+            return sprintf('<button name="%s"%s>%s</button>', $name, rtrim($this->_buildAttr($options)), htmlspecialchars($value, ENT_QUOTES, 'UTF-8'));
+        }
+
+        if (empty($options['value'])) {
+            unset($options['value']);
+        }
+
 
         if (array_key_exists('type', $options) && strtolower($options['type']) !== 'email' && $name === 'email') {
             $options['type'] = 'email';

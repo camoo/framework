@@ -14,10 +14,12 @@ use CAMOO\Template\Extension\TwigHelper;
 use CAMOO\Template\Extension\FunctionCollection;
 use CAMOO\Template\Extension\FilterCollection;
 use CAMOO\Template\Extension\Functions\Form;
+use CAMOO\Model\Rest\RestLocatorTrait;
 
 abstract class AppController implements ControllerInterface, EventListenerInterface, EventDispatcherInterface
 {
     use EventDispatcherTrait;
+    use RestLocatorTrait;
 
     /** @var ControllerInterface $controller */
     public $controller = null;
@@ -196,5 +198,14 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     protected function loadModel(string $sModel) : void
     {
         $this->{$sModel} = (new TableLocator())->get(Inflector::classify($sModel));
+    }
+
+    /**
+     * @param string $restModel
+     * @return void
+     */
+    protected function loadRest(string $restModel) : void
+    {
+        $this->{$restModel} = $this->getRestLocator()->get(Inflector::classify($restModel));
     }
 }
