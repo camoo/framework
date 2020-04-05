@@ -152,7 +152,7 @@ class ServerRequest
             $this->data = $this->_satanize($this->__queryData($this->oRequest->getParsedBody()));
         }
 
-        if ($oCsrfSgement->check('__csrf_created_at')) {
+        if (Configure::read('Security.csrf_single_once') === true && $oCsrfSgement->check('__csrf_created_at')) {
             $oSession->getCsrfToken()->regenerateValue();
         }
 

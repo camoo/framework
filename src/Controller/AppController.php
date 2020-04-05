@@ -159,7 +159,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
 
     /**
      * @param  string $destination URL to redirect to
-     * @param boll $permanent
+     * @param bool $permanent
      * @throw Exception
      * @return void
      */

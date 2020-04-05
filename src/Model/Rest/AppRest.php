@@ -27,16 +27,46 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
     use ValidatorLocatorTrait;
     use EventDispatcherTrait;
 
+    /** @var array $errors */
     private $errors = [];
+
+    /** @var bool $valid */
     private $valid = false;
+
+    /** @var array $data */
     private $data = [];
+
+    /** @var array $option */
     private $option = [];
+
+    /**@var mixed $output */
+    protected $output;
 
     abstract public function validationDefault(ValidationInterface $validator) : ValidationInterface;
 
     public function __construct()
     {
         $this->getEventManager()->on($this);
+        $this->initialized();
+    }
+
+    /**
+     * Initializes Model Rest
+     *
+     * @return void
+     */
+    public function initialized() : void
+    {
+    }
+
+    /**
+     * @param string $name
+     * @param object $object
+     * @return void
+     */
+    protected function loadRemoteObject(string $name, object $object) : void
+    {
+        $this->{$name} = $object;
     }
 
     /**
@@ -49,6 +79,7 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
 
     public function __get(string $key)
     {
+        //$caller = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT)[1];
         return $this->offsetGet($key);
     }
 
@@ -80,10 +111,6 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
         $this->offsetSet($key, $value);
     }
 
-    public function initialized() : void
-    {
-    }
-
     public function getErrors()
     {
         $this->errors;
@@ -93,20 +120,26 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
      * @param array $callable
      * @param bool $argIsHash
      * @throws Exception
+     * @return mixed
      */
-    public function send(array $callable, bool $argIsHash=true) : bool
+    public function send(array $callable, bool $argIsHash=true)
     {
         if (!$this->valid) {
             throw new Exception('Invalid Data Provided !');
         }
 
         $event = $this->dispatchEvent('Rest.beforeSend', ['data' => new ArrayObject($this->option)]);
-		$object = $event->getSubject();
+        $object = $event->getSubject();
         $args = $argIsHash === true ? [$object->data] : $object->data;
 
-        $resultData = call_user_func_array($callable, $args);
-        $this->dispatchEvent('Rest.afterSend', ['data' => $resultData]);
-        return true;
+        if (is_array($callable) && !empty($callable) && preg_match('/^::/', $callable[0])) {
+            $remoteObject = str_replace('::', '', $callable[0]);
+            $callable[0] = $this->{$remoteObject};
+        }
+        $this->output = call_user_func_array($callable, $args);
+        $this->dispatchEvent('Rest.afterSend', ['data' => $this->output]);
+
+        return $this->output;
     }
 
     public function newRequest(array $data, bool $validate=true, array $options=[])

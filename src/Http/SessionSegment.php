@@ -123,4 +123,5 @@ final class SessionSegment
     {
         $this->segment->clear();
     }
+
 }

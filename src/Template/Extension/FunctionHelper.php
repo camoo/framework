@@ -30,7 +30,12 @@ abstract class FunctionHelper implements TemplateFunctionInterface, EventListene
         $this->getEventManager()->on($this);
         $this->baseHelper = $baseHelper;
         $this->request = $baseHelper->getRequest();
+		$this->initialize();
     }
+
+	public function initialize() : void
+	{
+	}
 
     /**
      * @param string $name
