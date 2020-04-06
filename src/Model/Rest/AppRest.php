@@ -161,6 +161,9 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
                 unset($options['validation']);
                 $this->option = $options;
             }
+        } else {
+            $this->valid = true;
+            $this->data = $data;
         }
         return $this;
     }

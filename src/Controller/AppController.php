@@ -208,4 +208,11 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     {
         $this->{$restModel} = $this->getRestLocator()->get(Inflector::classify($restModel));
     }
+
+    protected function _jsonResponse(array $data)
+    {
+        header('Content-Type: application/json');
+        echo json_encode($data);
+        exit;
+    }
 }

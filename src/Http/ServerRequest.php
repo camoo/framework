@@ -173,12 +173,13 @@ class ServerRequest
      */
     public function is(string $request_method) : bool
     {
-        if (!in_array(strtoupper($request_method), static::REQUEST_METHODS)) {
-            throw new Exception(sprintf('%s is not an allowed request method', $request_method));
-        }
 
         if (strtolower($request_method) === 'ajax') {
             return null !== getEnv('HTTP_X_REQUESTED_WITH') && getEnv('HTTP_X_REQUESTED_WITH') === 'XMLHttpRequest';
+        }
+
+        if (!in_array(strtoupper($request_method), static::REQUEST_METHODS)) {
+            throw new Exception(sprintf('%s is not an allowed request method', $request_method));
         }
 
         return strtoupper($this->oRequest->getMethod()) === strtoupper($request_method);
