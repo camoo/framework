@@ -44,6 +44,9 @@ class ServerRequest
     /** @var null|string $csrf_Token */
     public $csrf_Token = null;
 
+    /** @var bool $isProxy defines if your app is running under a proxy server */
+    public $isProxy = false;
+
     public $Flash = null;
     private $__session = [Session::class, 'create'];
     private $__flash = [Flash::class, 'create'];
@@ -88,6 +91,56 @@ class ServerRequest
         throw new Exception(
             sprintf('Method %s::%s does not exist', get_class($this), $name)
         );
+    }
+
+    /**
+     * @param string $type
+     * @param null|string $key
+     * @return mixed
+     */
+    private function getRequestData(string $type, ?string $key=null)
+    {
+        if ($key === null) {
+            $xData = $this->__queryData($this->oRequest->{$this->_queryDataMaps[$type]}());
+        } else {
+            $xData = $this->__queryData($this->oRequest->{$this->_queryDataMaps[$type]}(), false)->get($key);
+        }
+        return $this->_satanize($xData);
+    }
+
+    /**
+     * @param null|string $key
+     * @return mixed
+     */
+    public function getData(?string $key=null)
+    {
+        return $this->getRequestData('data', $key);
+    }
+
+    /**
+     * @param null|string $key
+     * @return mixed
+     */
+    public function getQuery(?string $key=null)
+    {
+        return $this->getRequestData('query', $key);
+    }
+
+    /**
+     * @return string
+     */
+    public function getRemoteIp() : string
+    {
+        if ($this->isProxy && getEnv('HTTP_X_FORWARDED_FOR')) {
+            $addresses = explode(',', getEnv('HTTP_X_FORWARDED_FOR'));
+            $clientIp = end($addresses);
+        } elseif ($this->isProxy && getEnv('HTTP_CLIENT_IP')) {
+            $clientIp = getEnv('HTTP_CLIENT_IP');
+        } else {
+            $clientIp = getEnv('REMOTE_ADDR');
+        }
+
+        return (string) trim($clientIp);
     }
 
     private function __getSession()
@@ -173,7 +226,6 @@ class ServerRequest
      */
     public function is(string $request_method) : bool
     {
-
         if (strtolower($request_method) === 'ajax') {
             return null !== getEnv('HTTP_X_REQUESTED_WITH') && getEnv('HTTP_X_REQUESTED_WITH') === 'XMLHttpRequest';
         }

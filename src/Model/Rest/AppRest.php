@@ -111,9 +111,12 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
         $this->offsetSet($key, $value);
     }
 
-    public function getErrors()
+    /**
+     * @return array
+     */
+    public function getErrors() : array
     {
-        $this->errors;
+        return $this->errors;
     }
 
     /**
