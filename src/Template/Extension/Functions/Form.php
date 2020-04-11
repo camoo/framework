@@ -62,7 +62,7 @@ final class Form implements TemplateFunctionInterface
         $default= [ 'id' => $name, 'method' => 'POST', 'action' => ''];
         if (array_key_exists('url', $options)) {
             $options['action'] = $options['url'];
-			unset($options['url']);
+            unset($options['url']);
         }
         $options += $default;
         return sprintf('<form name="%s"%s>' ."\n".' <input type="hidden" name="__csrf_Token" value="'.$token.'" />', $name, $this->_buildAttr($options));
@@ -87,7 +87,7 @@ final class Form implements TemplateFunctionInterface
         if (array_key_exists('type', $options) && strtolower($options['type']) === 'submit') {
             $value = $options['value'];
             unset($options['value']);
-            return sprintf('<button name="%s"%s>%s</button>', $name, rtrim($this->_buildAttr($options)), htmlspecialchars($value, ENT_QUOTES, 'UTF-8'));
+            return sprintf('<button %s>%s</button>', rtrim($this->_buildAttr($options)), htmlspecialchars($value, ENT_QUOTES, 'UTF-8'));
         }
 
         if (empty($options['value'])) {

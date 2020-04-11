@@ -1,9 +1,8 @@
 <?php
+declare(strict_types=1);
 namespace CAMOO\Http;
 
-use \Aura\Session\SessionFactory;
-
-class Flash
+final class Flash
 {
     private $oFlashSession = null;
     protected static $_create = null;

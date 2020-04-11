@@ -1,6 +1,9 @@
 <?php
+declare(strict_types=1);
 namespace CAMOO\Utils;
 
-class Inflector extends \Doctrine\Common\Inflector\Inflector
+use Doctrine\Common\Inflector\Inflector as BaseInflector;
+
+class Inflector extends BaseInflector
 {
 }

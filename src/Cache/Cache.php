@@ -39,11 +39,11 @@ final class Cache
         $class = $hConfig['className'];
 
         $value = (new $class)->get($key);
-        if (array_key_exists('serialize', $hConfig) && $hConfig['serialize'] === true) {
+        if (!empty($value) && array_key_exists('serialize', $hConfig) && $hConfig['serialize'] === true) {
             $value = unserialize($value);
         }
 
-        return $value;
+        return null !== $value? $value : false;
     }
 
     /**

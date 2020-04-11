@@ -47,7 +47,9 @@ class ServerRequest
     /** @var bool $isProxy defines if your app is running under a proxy server */
     public $isProxy = false;
 
+    /** @var Flash $Flash */
     public $Flash = null;
+
     private $__session = [Session::class, 'create'];
     private $__flash = [Flash::class, 'create'];
     private $__cookie = [Cookie::class, 'create'];
@@ -148,7 +150,7 @@ class ServerRequest
         return call_user_func($this->__session);
     }
 
-    private function __getFlash($oFlashSession)
+    private function __getFlash($oFlashSession) : Flash
     {
         return call_user_func($this->__flash, $oFlashSession);
     }

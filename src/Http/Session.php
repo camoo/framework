@@ -5,7 +5,7 @@ namespace CAMOO\Http;
 use \Aura\Session\SessionFactory;
 use CAMOO\Utils\Configure;
 
-class Session
+final class Session
 {
     const SEG_NAME = 'CAMOO\Framework\Session';
     private $oSession=null;
@@ -24,7 +24,7 @@ class Session
     }
 
     /**
-	 * @param array|null $cookie
+     * @param array|null $cookie
      * @return \CAMOO\Http\Session
      */
     public static function create(?array $cookie = null) : Session
@@ -36,10 +36,10 @@ class Session
         return static::$_create;
     }
 
-	/**
-	 * @param string $sSegment
-	 * @return SegmentFactory
-	 */
+    /**
+     * @param string $sSegment
+     * @return SegmentFactory
+     */
     public function segment(?string $sSegment = null)
     {
         $sSegmentName = $sSegment === null? __NAMESPACE__ : $sSegment;
