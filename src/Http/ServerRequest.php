@@ -51,7 +51,6 @@ class ServerRequest
     public $Flash = null;
 
     private $__session = [Session::class, 'create'];
-    private $__flash = [Flash::class, 'create'];
     private $__cookie = [Cookie::class, 'create'];
 
     private $_queryDataMaps = [
@@ -150,9 +149,9 @@ class ServerRequest
         return call_user_func($this->__session);
     }
 
-    private function __getFlash($oFlashSession) : Flash
+    private function __getFlash($oFlashSession, $sessionSegment) : Flash
     {
-        return call_user_func($this->__flash, $oFlashSession);
+        return new Flash($oFlashSession, $sessionSegment);
     }
 
     private function __getCookie()
@@ -218,7 +217,7 @@ class ServerRequest
         ################## CSRF protection END
 
         $this->cookie = $this->__getCookie();
-        $this->Flash = $this->__getFlash($oSession->getFlash())->initialize();
+        $this->Flash = $this->__getFlash($oSession->getFlash(), $this->getSession());
     }
 
     /**

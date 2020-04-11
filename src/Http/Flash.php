@@ -2,49 +2,77 @@
 declare(strict_types=1);
 namespace CAMOO\Http;
 
+use CAMOO\Exception\Exception;
+
 final class Flash
 {
+    /** @var \Aura\Session\Segment $oFlashSession */
     private $oFlashSession = null;
     protected static $_create = null;
-    private static $_flashSession = null;
 
-    public function __construct($oFlashSession = null)
+    private static $_alterTypes = [
+        'success',
+        'info',
+        'warning',
+        'error',
+        'default',
+    ];
+
+    /** @var SessionSegment $session */
+    private $session;
+
+    /** @var array $keys */
+    private $keys =[];
+
+    public function __construct($oFlashSession = null, ?SessionSegment $session)
     {
         if (null !== $oFlashSession) {
             $this->oFlashSession = $oFlashSession;
         }
+
+        if (!empty($session)) {
+            $this->session = $session;
+        }
     }
 
     /**
-     * @return \CAMOO\Http\Flash
+     * @param string $message
+     * @param array $options
+     * @return void
      */
-    public static function create($oFlash)
+    public function set(string $message, array $options) : void
     {
-        if (null === static::$_create) {
-            static::$_create = new self;
+        $default = ['key' => 'flash', 'alert' => 'default'];
+        $options += $default;
+        $this->keys[$options['key']] = $options['alert'];
+        $this->oFlashSession->setFlashNow($options['key'], $message);
+        $this->session->write('CAMOO.SYS.FLASH', $this->keys);
+    }
+
+    public function __call($name, $xargs)
+    {
+        if (!in_array($name, array_keys(self::$_alterTypes))) {
+            throw new Exception(
+                sprintf('Method %s::%s does not exist', get_class($this), $name)
+                );
         }
-        static::$_flashSession = $oFlash;
-        return static::$_create;
+
+        if (empty($xargs) || count($xargs) > 1 || !preg_match('/\S/', $xargs[0])) {
+            throw new Exception(
+                sprintf('Parameter is minnsing for %s::%s ', get_class($this), $name)
+                );
+        }
+
+        $this->set($xargs[0], ['alert' => $name]);
     }
 
     /**
-     * @return \CAMOO\Http\Flash
+     * @param string $key
+     * @return mixed
      */
-    public function initialize()
+    public function get(string $key)
     {
-        if (null === $this->oFlashSession) {
-            $this->oFlashSession = self::$_flashSession;
-        }
-        return $this;
-    }
-
-    public function set($key, $message)
-    {
-        return $this->oFlashSession->setFlashNow($key, $message);
-    }
-
-    public function get($key)
-    {
+        $this->session->delete('CAMOO.SYS.FLASH.'.$key);
         return $this->oFlashSession->getFlash($key);
     }
 

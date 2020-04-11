@@ -2,8 +2,9 @@
 declare(strict_types=1);
 namespace CAMOO\Http;
 
-use \Aura\Session\SessionFactory;
+use Aura\Session\SessionFactory;
 use CAMOO\Utils\Configure;
+use Aura\Session\Segment;
 
 final class Session
 {
@@ -71,7 +72,7 @@ final class Session
         return $this->segment()->get($key);
     }
 
-    public function getFlash($sSegment = null)
+    public function getFlash($sSegment = null) : Segment
     {
         $sSegmentName = $sSegment === null? __NAMESPACE__. '\\Flash' : $sSegment;
         return $this->oSession->getSegment($sSegmentName);
