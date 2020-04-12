@@ -14,6 +14,7 @@ use CAMOO\Template\Extension\TwigHelper;
 use CAMOO\Template\Extension\FunctionCollection;
 use CAMOO\Template\Extension\FilterCollection;
 use CAMOO\Template\Extension\Functions\Form;
+use CAMOO\Template\Extension\Filters\Flash;
 use CAMOO\Model\Rest\RestLocatorTrait;
 
 abstract class AppController implements ControllerInterface, EventListenerInterface, EventDispatcherInterface
@@ -61,11 +62,13 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
             $oFuncCollection = new FunctionCollection();
             $oFilterCollection = new FilterCollection();
             $formHelper = new Form($this->request, $this->request->csrfSessionSegment, $this->request->csrf_Token);
+            $flashFilter = new Flash($this->request);
             unset($this->request->csrfSessionSegment);
             unset($this->request->csrf_Token);
             $extensions = new TwigHelper($this->request, $oFuncCollection, $oFilterCollection);
             $extensions->initialize();
             $extensions->loadFunction($formHelper);
+            $extensions->loadFilter($flashFilter);
             $this->oLayout->addExtension($extensions);
         }
 

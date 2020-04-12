@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace CAMOO\Template\Extension\Functions;
 
-use \CAMOO\Utils\Security;
+use CAMOO\Utils\Security;
 use Twig\TwigFunction;
 use CAMOO\Http\ServerRequest;
 use CAMOO\Interfaces\TemplateFunctionInterface;
@@ -37,9 +37,9 @@ final class Form implements TemplateFunctionInterface
     public function getFunctions() : array
     {
         return [
-            new TwigFunction('form_start', [$this, 'formStart']),
-            new TwigFunction('form_end', [$this, 'formEnd']),
-            new TwigFunction('form_input', [$this, 'input']),
+            new TwigFunction('form_start', [$this, 'formStart'], ['is_safe' => ['html']]),
+            new TwigFunction('form_end', [$this, 'formEnd'], ['is_safe' => ['html']]),
+            new TwigFunction('form_input', [$this, 'input'], ['is_safe' => ['html']]),
         ];
     }
 

@@ -70,11 +70,16 @@ final class TwigHelper extends BaseExtension
     }
 
     /**
-     * @param string $name
+     * @param string|object $name
      * @return void
      */
-    final public function loadFilter(string $name) : void
+    final public function loadFilter($name) : void
     {
+        if (is_object($name)) {
+            $this->filterCollection->add($name);
+            return;
+        }
+
         $namespace = __NAMESPACE__. '\Filters\\';
         $class = $namespace . $name;
 
