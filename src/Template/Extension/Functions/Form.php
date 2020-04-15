@@ -81,7 +81,7 @@ final class Form implements TemplateFunctionInterface
             $value = $options['value'];
             unset($options['type']);
             unset($options['value']);
-            return sprintf('<textarea name="%s"%s>%s</textarea>', $name, htmlspecialchars($value, ENT_QUOTES, 'UTF-8'), rtrim($this->_buildAttr($options)));
+            return sprintf('<textarea name="%s"%s>%s</textarea>', $name, rtrim($this->_buildAttr($options)), htmlspecialchars($value, ENT_QUOTES, 'UTF-8'));
         }
 
         if (array_key_exists('type', $options) && strtolower($options['type']) === 'submit') {

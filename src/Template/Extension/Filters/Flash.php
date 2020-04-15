@@ -42,6 +42,10 @@ final class Flash implements TemplateFilterInterface
     {
         if ($flash = $this->request->getSession()->read('CAMOO.SYS.FLASH')) {
             $asFlash = [];
+            $message = $this->flash->get($key);
+            if (null === $message) {
+                return null;
+            }
             foreach ($flash as $keyContainer => $alert) {
                 if (null === $alert) {
                     continue;

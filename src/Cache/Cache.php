@@ -18,7 +18,7 @@ final class Cache
      * @param string $config
      * @return bool
      */
-    public static function write(string $key, $value, string $config) : bool
+    public static function write(string $key, $value, string $config) : ?bool
     {
         $hConfig = self::getConfig($config);
         $class = $hConfig['className'];

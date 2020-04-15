@@ -71,11 +71,14 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
             $extensions->loadFilter($flashFilter);
             $this->oLayout->addExtension($extensions);
         }
+        $this->loadModel($this->controller);
+    }
 
+    private function loadActionTemplate() : void
+    {
         if ($this->oTemplate === null) {
             $this->oTemplate = $this->oLayout->load(sprintf($this->sTemplate, $this->controller, Inflector::tableize($this->action)));
         }
-        $this->loadModel($this->controller);
     }
 
     public function implementedEvents() : array
@@ -124,6 +127,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
      */
     public function render() : void
     {
+        $this->loadActionTemplate();
         $event = $this->dispatchEvent('AppController.beforeRender');
         if ($event->getResult() instanceof Response) {
             echo $event->getResult();
@@ -216,6 +220,27 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     {
         header('Content-Type: application/json');
         echo json_encode($data);
-        exit;
+        $this->camooExit();
+    }
+
+    /**
+     * @param object $ohEntity
+     * @return void
+     */
+    protected function showValidateErrors($ohEntity)
+    {
+        $ahErrors = $ohEntity->getErrors();
+        $asFields = [];
+        if (!empty($ahErrors)) {
+            foreach ($ahErrors as $sField => $ahError) {
+                $asFields[] = $sField;
+                foreach ($ahError as $sMessage) {
+                    $this->request->Flash->error($sMessage);
+                }
+            }
+            if (count($asFields)>0) {
+                $this->set('errorFields', $asFields);
+            }
+        }
     }
 }

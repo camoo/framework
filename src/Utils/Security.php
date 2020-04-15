@@ -9,7 +9,7 @@ namespace CAMOO\Utils;
  */
 class Security
 {
-    public static function satanizer(string $str, bool $keep_newlines = false)
+    public static function satanizer(?string $str, bool $keep_newlines = false)
     {
         if (is_object($str) || is_array($str)) {
             return '';
