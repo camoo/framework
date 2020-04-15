@@ -16,11 +16,17 @@ use CAMOO\Template\Extension\FilterCollection;
 use CAMOO\Template\Extension\Functions\Form;
 use CAMOO\Template\Extension\Filters\Flash;
 use CAMOO\Model\Rest\RestLocatorTrait;
+use CAMOO\Controller\Component\ComponentCollection;
 
 abstract class AppController implements ControllerInterface, EventListenerInterface, EventDispatcherInterface
 {
     use EventDispatcherTrait;
     use RestLocatorTrait;
+
+    protected $defaultConfig = [];
+
+    /** @var CommandCollection $componentCollection */
+    private $componentCollection = null;
 
     /** @var ControllerInterface $controller */
     public $controller = null;
@@ -59,6 +65,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         if ($this->oLayout === null) {
             $oTemplateLoader = new \Twig\Loader\FilesystemLoader(APP.$this->sTemplateDir);
             $this->oLayout = new \Twig\Environment($oTemplateLoader, ['cache' => TMP.'cache'. DS . 'tpl']);
+            $this->componentCollection = new ComponentCollection($this);
             $oFuncCollection = new FunctionCollection();
             $oFilterCollection = new FilterCollection();
             $formHelper = new Form($this->request, $this->request->csrfSessionSegment, $this->request->csrf_Token);
@@ -146,6 +153,15 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
      * @return null
      */
     public function beforeRender(Event $event) :?Response
+    {
+        return null;
+    }
+
+    /**
+     * @param Event $event
+     * @return null
+     */
+    public function beforeFilter(Event $event) :?Response
     {
         return null;
     }
@@ -242,5 +258,15 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
                 $this->set('errorFields', $asFields);
             }
         }
+    }
+
+    /**
+     * @param string $component
+     * @return void
+     */
+    protected function loadComponent(string $component, array $config=[]) : void
+    {
+        $component = Inflector::classify($component);
+        $this->componentCollection->add($component, $config);
     }
 }
