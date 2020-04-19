@@ -4,18 +4,21 @@ declare(strict_types=1);
 namespace CAMOO\Controller\Component;
 
 use Countable;
-use Iterator;
 use ArrayAccess;
 use InvalidArgumentException;
 use CAMOO\Interfaces\ComponentInterface;
 use CAMOO\Interfaces\ControllerInterface;
 use CAMOO\Utils\Configure;
+use IteratorAggregate;
+use ArrayIterator;
+use Traversable;
+use ArrayObject;
 
 /**
  * Class ComponentCollection
  * @author CamooSarl
  */
-final class ComponentCollection implements Countable, Iterator, ArrayAccess
+final class ComponentCollection implements Countable, IteratorAggregate, ArrayAccess
 {
     /** @var array */
     private $values = [];
@@ -32,6 +35,14 @@ final class ComponentCollection implements Countable, Iterator, ArrayAccess
     public function __construct(ControllerInterface $controller)
     {
         $this->controller =& $controller;
+    }
+
+    /**
+     * @return Traversable
+     */
+    public function getIterator() : Traversable
+    {
+        return new ArrayIterator(new ArrayObject($this->values));
     }
 
     /**
@@ -53,6 +64,7 @@ final class ComponentCollection implements Countable, Iterator, ArrayAccess
         }
 
         $oComponent = new $class($this->controller, $config);
+
         /** @var ComponentInterface */
         $this->controller->{$component} = $oComponent;
         $this->offsetSet($component, $oComponent);
@@ -141,10 +153,7 @@ final class ComponentCollection implements Countable, Iterator, ArrayAccess
         }
 
         if (empty($offset)) {
-            $asFilters = $value->getFilters();
-            foreach ($asFilters as $sFilter) {
-                array_push($this->values, $sFilter);
-            }
+            $this->values[] = $value;
         } else {
             $this->values[$offset] = $value;
         }

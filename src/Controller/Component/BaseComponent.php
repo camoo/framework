@@ -8,12 +8,13 @@ use CAMOO\Interfaces\ControllerInterface;
 use CAMOO\Utils\ConfigTrait;
 use InvalidArgumentException;
 use CAMOO\Utils\Inflector;
+use CAMOO\Event\EventListenerInterface;
 
 /**
  * Class BaseComponent
  * @author CamooSarl
  */
-class BaseComponent implements ComponentInterface
+class BaseComponent implements ComponentInterface, EventListenerInterface
 {
     use ConfigTrait;
     /** @var ControllerInterface $controller */
@@ -33,7 +34,6 @@ class BaseComponent implements ComponentInterface
      */
     protected $_defaultConfig = [];
 
-
     public function __construct(?ControllerInterface $controller=null, array $config=[])
     {
         if (null !== $controller) {
@@ -51,13 +51,14 @@ class BaseComponent implements ComponentInterface
                     throw new InvalidArgumentException(sprintf('Class %s does not exist', $component));
                 }
             }
-            $this->{$component} = new $class($controller);
+            $controller->loadComponent($component);
+            $this->{$component} = $controller->{$component};
         }
 
         $this->initialize($config);
     }
 
-    public function initialize(array $config=[])
+    public function initialize(array $config=[]) : void
     {
     }
 
@@ -69,5 +70,23 @@ class BaseComponent implements ComponentInterface
     protected function getController() : ControllerInterface
     {
         return $this->controller;
+    }
+
+    public function implementedEvents()
+    {
+        $eventMap = [
+            'AppController.initialize'     => 'beforeAction',
+            'AppController.beforeRender'   => 'beforeRender',
+            'AppController.beforeRedirect' => 'beforeRedirect',
+            'AppController.wakeUp'         => 'wakeUp',
+        ];
+        $events = [];
+        foreach ($eventMap as $event => $method) {
+            if (method_exists($this, $method)) {
+                $events[$event] = $method;
+            }
+        }
+
+        return $events;
     }
 }

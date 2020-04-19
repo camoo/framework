@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace CAMOO\Event;
 
-use \Cake\Event\EventManager;
-
 /**
  * Trait EventDispatcherTrait
  * @author CamooSarl

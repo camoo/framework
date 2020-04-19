@@ -6,9 +6,13 @@ use \Middlewares\Utils\Dispatcher;
 use GuzzleHttp\Psr7;
 use CAMOO\Http\Response;
 use CAMOO\Interfaces\ControllerInterface;
+use CAMOO\Event\Event;
+use CAMOO\Event\EventDispatcherTrait;
 
 final class Caller
 {
+    use EventDispatcherTrait;
+
     protected $hRequest = [];
     public $controller = '\\App\\Controller\\PagesController';
     public $action = 'overview';
@@ -35,14 +39,18 @@ final class Caller
         require_once $this->sConfigDir . '/bootstrap.php';
     }
 
+    /**
+     * @return ControllerInterface
+     */
     public function getController(?Psr7\ServerRequest $request = null) : ControllerInterface
     {
         $oController = new $this->controller();
-        $oController->request = new ServerRequest($request);
+        $serverRequest =  new ServerRequest($request);
+        $oController->request = $serverRequest;
         $oController->action = $this->action;
         $oController->controller = $this->__controllerRaw;
         $oController->setResponse(new Response());
-        $oController->initialize();
+        $oController->wakeUpController();
         return $oController;
     }
 
@@ -50,7 +58,23 @@ final class Caller
     {
         $dispatcher = \FastRoute\simpleDispatcher(function (\FastRoute\RouteCollector $r) {
             $r->addRoute($_SERVER['REQUEST_METHOD'], $this->uri, function ($request) {
-                return call_user_func_array([$this->getController($request), $this->action], $this->xargs);
+                $controller = $this->getController($request);
+                $event = new Event('AppController.initialize', $controller);
+                $controller->getEventManager()->dispatch($event);
+
+                $components = $controller->getComponentCollection();
+                if (!empty($components)) {
+                    foreach ($components as $value => $component) {
+                        foreach ($component->implementedEvents() as $hook => $func) {
+                            if ($func === 'beforeAction') {
+                                $this->getEventManager()->on($component);
+                                $this->dispatchEvent($hook);
+                            }
+                        }
+                    }
+                }
+
+                return call_user_func_array([$controller, $this->action], $this->xargs);
             });
         });
 

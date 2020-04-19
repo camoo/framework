@@ -55,6 +55,64 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         $this->getEventManager()->on($this);
     }
 
+    public function wakeUpController()
+    {
+        $this->loadModel($this->controller);
+        $this->componentCollection = new ComponentCollection($this);
+        $this->initialize();
+
+        $event = $this->dispatchEvent('AppController.initialize');
+        if ($event->getResult() instanceof Response) {
+            echo $event->getResult();
+            $this->camooExit();
+        }
+
+        $event = $this->dispatchEvent('AppController.wakeUp');
+        $components = $this->getComponentCollection();
+        if (!empty($components)) {
+            foreach ($components as $value => $component) {
+                foreach ($component->implementedEvents() as $hook => $func) {
+                    if ($func === 'wakeUp') {
+                        $this->getEventManager()->on($component);
+                        $this->dispatchEvent($hook);
+                    }
+                }
+            }
+        }
+
+        if ($this->oLayout === null) {
+            $oTemplateLoader = new \Twig\Loader\FilesystemLoader(APP.$this->sTemplateDir);
+            $this->oLayout = new \Twig\Environment($oTemplateLoader, ['cache' => TMP.'cache'. DS . 'tpl']);
+            $oFuncCollection = new FunctionCollection();
+            $oFilterCollection = new FilterCollection();
+            // check has Security Component
+            $csrfSessionSegment = null;
+            $csrf_Token = null;
+            if ($this->hasComponent('Security') === true) {
+                $oSecComponent =& $this->componentCollection['Security'];
+                $csrf_Token = $oSecComponent->csrf_Token;
+                $csrfSessionSegment = $oSecComponent->csrfSessionSegment;
+                unset($oSecComponent->csrfSessionSegment);
+                unset($oSecComponent->csrf_Token);
+            }
+
+            $flashFilter = new Flash($this->request);
+            $formHelper = new Form($this->request, $csrfSessionSegment, $csrf_Token);
+            $extensions = new TwigHelper($this->request, $oFuncCollection, $oFilterCollection);
+            $extensions->initialize();
+            $extensions->loadFunction($formHelper);
+            $extensions->loadFilter($flashFilter);
+            $this->oLayout->addExtension($extensions);
+        }
+
+        if ($event->getResult() instanceof Response) {
+            echo $event->getResult();
+            $this->camooExit();
+        }
+
+        return null;
+    }
+
     /**
      * Initiliazes the controller engine
      *
@@ -62,23 +120,6 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
      */
     public function initialize() : void
     {
-        if ($this->oLayout === null) {
-            $oTemplateLoader = new \Twig\Loader\FilesystemLoader(APP.$this->sTemplateDir);
-            $this->oLayout = new \Twig\Environment($oTemplateLoader, ['cache' => TMP.'cache'. DS . 'tpl']);
-            $this->componentCollection = new ComponentCollection($this);
-            $oFuncCollection = new FunctionCollection();
-            $oFilterCollection = new FilterCollection();
-            $formHelper = new Form($this->request, $this->request->csrfSessionSegment, $this->request->csrf_Token);
-            $flashFilter = new Flash($this->request);
-            unset($this->request->csrfSessionSegment);
-            unset($this->request->csrf_Token);
-            $extensions = new TwigHelper($this->request, $oFuncCollection, $oFilterCollection);
-            $extensions->initialize();
-            $extensions->loadFunction($formHelper);
-            $extensions->loadFilter($flashFilter);
-            $this->oLayout->addExtension($extensions);
-        }
-        $this->loadModel($this->controller);
     }
 
     private function loadActionTemplate() : void
@@ -91,7 +132,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     public function implementedEvents() : array
     {
         return [
-            'AppController.initialize'     => 'beforeRunning',
+            'AppController.initialize'     => 'beforeAction',
             'AppController.beforeRender'   => 'beforeRender',
             'AppController.beforeRedirect' => 'beforeRedirect',
         ];
@@ -141,6 +182,20 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
             $this->camooExit();
         }
 
+
+        $components = $this->getComponentCollection();
+        if (!empty($components)) {
+            foreach ($components as $value => $component) {
+                foreach ($component->implementedEvents() as $hook => $func) {
+                    if ($func === 'beforeRender') {
+                        $this->getEventManager()->on($component);
+                        $this->dispatchEvent($hook);
+                    }
+                }
+            }
+        }
+
+
         $contents = $this->oTemplate->render($this->tplData);
         $this->setResponse($this->response->withStringBody($contents));
 
@@ -152,7 +207,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
      * @param Event $event
      * @return null
      */
-    public function beforeRender(Event $event) :?Response
+    public function beforeRender(Event $event)
     {
         return null;
     }
@@ -161,7 +216,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
      * @param Event $event
      * @return null
      */
-    public function beforeFilter(Event $event) :?Response
+    public function beforeAction(Event $event)
     {
         return null;
     }
@@ -170,7 +225,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
      * @param Event $event
      * @return null
      */
-    public function beforeRedirect(Event $event) :?Response
+    public function beforeRedirect(Event $event)
     {
         return null;
     }
@@ -194,6 +249,18 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
 
         if (mb_strpos($destination, '://') === false) {
             $this->dispatchEvent('AppController.beforeRedirect');
+
+            $components = $this->getComponentCollection();
+            if (!empty($components)) {
+                foreach ($components as $value => $component) {
+                    foreach ($component->implementedEvents() as $hook => $func) {
+                        if ($func === 'beforeRedirect') {
+                            $this->getEventManager()->on($component);
+                            $this->dispatchEvent($hook);
+                        }
+                    }
+                }
+            }
 
             if (empty(getEnv('HTTPS')) || getEnv('HTTPS') == 'off') {
                 $protocol = 'http';
@@ -264,9 +331,23 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
      * @param string $component
      * @return void
      */
-    protected function loadComponent(string $component, array $config=[]) : void
+    public function loadComponent(string $component, array $config=[]) : void
     {
         $component = Inflector::classify($component);
         $this->componentCollection->add($component, $config);
+    }
+
+    public function getComponentCollection()
+    {
+        return $this->componentCollection;
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function hasComponent(string $name) : bool
+    {
+        return !empty($this->componentCollection[$name]);
     }
 }

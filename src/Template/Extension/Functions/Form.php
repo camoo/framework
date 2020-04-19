@@ -24,7 +24,7 @@ final class Form implements TemplateFunctionInterface
     /** @var SessionSegment $csrfSessionSegment */
     private $csrfSessionSegment = null;
 
-    public function __construct(ServerRequest $request, SessionSegment $csrfSessionSegment, string $token)
+    public function __construct(ServerRequest $request, ?SessionSegment $csrfSessionSegment, ?string $token=null)
     {
         $this->request = $request;
         $this->csrfSessionSegment = $csrfSessionSegment;
@@ -65,7 +65,8 @@ final class Form implements TemplateFunctionInterface
             unset($options['url']);
         }
         $options += $default;
-        return sprintf('<form name="%s"%s>' ."\n".' <input type="hidden" name="__csrf_Token" value="'.$token.'" />', $name, $this->_buildAttr($options));
+        $inputToken = $token !== null? ' <input type="hidden" name="__csrf_Token" value="'.$token.'" />' : '';
+        return sprintf('<form name="%s"%s>' ."\n".'%s', $name, $this->_buildAttr($options), $inputToken);
     }
 
     public function formEnd()
@@ -105,7 +106,9 @@ final class Form implements TemplateFunctionInterface
 
         if (array_key_exists('type', $options) && strtolower($options['type']) === 'hidden') {
             $this->hiddenValue[$name] = md5(Security::satanizer((string)$options['value']));
-            $this->request->csrfSessionSegment->write('__csrf_checksum', $this->hiddenValue);
+            if ($this->csrfSessionSegment) {
+                $this->csrfSessionSegment->write('__csrf_checksum', $this->hiddenValue);
+            }
         }
 
         return sprintf('<input name="%s"%s />', $name, rtrim($this->_buildAttr($options)));
