@@ -9,6 +9,9 @@ use CAMOO\Event\EventDispatcherInterface;
 use CAMOO\Event\EventDispatcherTrait;
 use CAMOO\Event\EventListenerInterface;
 use CAMOO\Event\Event;
+use CAMOO\Utils\Inflector;
+use InvalidArgumentException;
+use CAMOO\Utils\Configure;
 
 /**
  * Class FunctionHelper
@@ -25,17 +28,41 @@ abstract class FunctionHelper implements TemplateFunctionInterface, EventListene
     /** @var ServerRequest $request */
     protected $request;
 
+    /** @var array $functions Functions to use in a helper */
+    public $functions = [];
+
     public function __construct(TwigHelper $baseHelper)
     {
         $this->getEventManager()->on($this);
         $this->baseHelper = $baseHelper;
         $this->request = $baseHelper->getRequest();
-		$this->initialize();
+        $this->initialize();
+
+        if (!empty($this->functions)) {
+            foreach ($this->functions as $function) {
+                $function = Inflector::classify($function);
+
+                $namespace = __NAMESPACE__. '\Functions\\';
+                $class = $namespace . $function;
+
+                if (!class_exists($class)) {
+                    $asNameSpace = explode('\\', $namespace);
+                    array_shift($asNameSpace);
+                    $nameSpace = '\\' . Configure::read('App.namespace') .'\\'. implode('\\', $asNameSpace);
+                    $class = $nameSpace . $function;
+                    if (!class_exists($class)) {
+                        throw new InvalidArgumentException(sprintf('Class %s not found !', $class));
+                    }
+                }
+
+                $this->{$function} = new $class($baseHelper);
+            }
+        }
     }
 
-	public function initialize() : void
-	{
-	}
+    public function initialize() : void
+    {
+    }
 
     /**
      * @param string $name

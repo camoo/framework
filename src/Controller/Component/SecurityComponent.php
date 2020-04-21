@@ -55,7 +55,7 @@ final class SecurityComponent extends BaseComponent
         return new SessionSegment($oSession->segment(static::$_csrfSegment));
     }
 
-    public function initialize(array $config) : void
+    public function initialize(array $config=[]) : void
     {
     }
 
