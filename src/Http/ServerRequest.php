@@ -128,13 +128,13 @@ class ServerRequest
      */
     public function getRemoteIp() : string
     {
-        if ($this->isProxy && getEnv('HTTP_X_FORWARDED_FOR')) {
-            $addresses = explode(',', getEnv('HTTP_X_FORWARDED_FOR'));
+        if ($this->isProxy && $this->getEnv('HTTP_X_FORWARDED_FOR')) {
+            $addresses = explode(',', $this->getEnv('HTTP_X_FORWARDED_FOR'));
             $clientIp = end($addresses);
-        } elseif ($this->isProxy && getEnv('HTTP_CLIENT_IP')) {
-            $clientIp = getEnv('HTTP_CLIENT_IP');
+        } elseif ($this->isProxy && $this->getEnv('HTTP_CLIENT_IP')) {
+            $clientIp = $this->getEnv('HTTP_CLIENT_IP');
         } else {
-            $clientIp = getEnv('REMOTE_ADDR');
+            $clientIp = $this->getEnv('REMOTE_ADDR');
         }
 
         return (string) trim($clientIp);
@@ -261,5 +261,31 @@ class ServerRequest
     public function getMethod() : string
     {
         return $this->oRequest->getMethod();
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getReferer() :?string
+    {
+        return $this->getEnv('HTTP_REFERER');
+    }
+
+    /**
+     * @param string $param
+     * @return mixed
+     */
+    public function getEnv(string $param)
+    {
+        $serverParams = $this->oRequest->getServerParams();
+        return array_key_exists($param, $serverParams) ? $serverParams[$param] : null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRequestTarget()
+    {
+        return $this->oRequest->getRequestTarget();
     }
 }

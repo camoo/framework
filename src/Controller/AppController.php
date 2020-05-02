@@ -14,6 +14,7 @@ use CAMOO\Template\Extension\TwigHelper;
 use CAMOO\Template\Extension\FunctionCollection;
 use CAMOO\Template\Extension\FilterCollection;
 use CAMOO\Template\Extension\Functions\Form;
+use CAMOO\Template\Extension\Functions\Html;
 use CAMOO\Template\Extension\Filters\Flash;
 use CAMOO\Model\Rest\RestLocatorTrait;
 use CAMOO\Controller\Component\ComponentCollection;
@@ -98,9 +99,11 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
 
             $flashFilter = new Flash($this->request);
             $formHelper = new Form($this->request, $csrfSessionSegment, $csrf_Token);
+            $htmlHelper = new Html($this->request);
             $extensions = new TwigHelper($this->request, $oFuncCollection, $oFilterCollection);
             $extensions->initialize();
             $extensions->loadFunction($formHelper);
+            $extensions->loadFunction($htmlHelper);
             $extensions->loadFilter($flashFilter);
             $this->oLayout->addExtension($extensions);
         }
@@ -147,6 +150,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         $this->response = $response;
 
         $this->tplData[sprintf('%s_active', strtolower($this->controller))] = 'active';
+        $this->tplData['page_title'] = ucfirst($this->controller);
         return $this;
     }
 
@@ -194,7 +198,6 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
                 }
             }
         }
-
 
         $contents = $this->oTemplate->render($this->tplData);
         $this->setResponse($this->response->withStringBody($contents));

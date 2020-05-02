@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace CAMOO\Exception\Http;
 
-use CAMOO\Exception\Exception as BaseHttpException;
 use CAMOO\Interfaces\ExceptionInterface;
 
 /**
