@@ -353,4 +353,12 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     {
         return !empty($this->componentCollection[$name]);
     }
+
+    /**
+     * @return null|string
+     */
+    protected function getReferer() : ?string
+    {
+        return $this->request->getReferer();
+    }
 }

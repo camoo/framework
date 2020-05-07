@@ -273,7 +273,7 @@ class ServerRequest
 
     /**
      * @param string $param
-     * @return mixed
+     * @return null|mixed
      */
     public function getEnv(string $param)
     {
