@@ -66,6 +66,30 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
     }
 
     /**
+     * Refresh current Cart Session Identifier
+     *
+     * @param bool $force
+     * @return void
+     */
+    public function refresh($force=false) : void
+    {
+        if ($this->count() > 0) {
+            $uid = $this->getUserId();
+            $request = $this->getRequest();
+            if (!empty($request->getSession()->check('Basket')) || $force === true) {
+                $currentIdentifier = $request->getSession()->check('Basket') ? $request->getSession()->read('Basket') : uniqid('Basket', false);
+                $asCurrentIdentifier = explode('_', $currentIdentifier);
+                if (count($asCurrentIdentifier) < 2 && !empty($uid)) {
+                    self::$basketKey = sprintf('Basket_%s', $uid);
+                } else {
+                    self::$basketKey = $currentIdentifier;
+                }
+                $request->getSession()->write('Basket', self::$basketKey);
+            }
+        }
+    }
+
+    /**
      * Deletes entire Cart
      */
     public function delete() : void
@@ -108,11 +132,15 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
             // DELETE PREVIOUS CACHE
             Cache::delete($request->getSession()->read('Basket'), '_camoo_hosting_conf');
         }
-        $Object = $this;
-        $uid = $this->getUserId();
-        self::$basketKey = !empty($uid)? sprintf('Basket_%s', $uid) : uniqid('Basket', false);
-        $request->getSession()->write('Basket', self::$basketKey);
-        return Cache::write(self::$basketKey, $Object, '_camoo_hosting_conf');
+
+        // REFRESH SESSION
+        $this->refresh(true);
+
+        if (null === self::$basketKey) {
+            throw new InvalidArgumentException('Cart Key Session cannot be empty');
+        }
+
+        return Cache::write(self::$basketKey, $this, '_camoo_hosting_conf');
     }
 
     /**
@@ -242,6 +270,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
             if (array_key_exists('price', $value)) {
                 $this->total_price -= (float) $value['price'];
             }
+            $this->save();
         }
     }
 }

@@ -98,18 +98,18 @@ final class Caller
             case \FastRoute\Dispatcher::NOT_FOUND:
                 $action = null;
                 $asUri = explode("/", ltrim($uri, '/'));
-                if (count($asUri) > 2) {
-                    list($controller, $action) = explode("/", ltrim($uri, '/'), 2);
+                if (count($asUri) >= 2) {
+                    list($controller, $action) = explode('/', ltrim($uri, '/'), 2);
                     array_shift($asUri);
                     array_shift($asUri);
-                    if ($action) {
+                    if (!empty($action)) {
                         $this->xargs = $asUri;
                     }
                 } else {
                     $controller = $asUri[0];
                 }
 
-                if ($action) {
+                if (!empty($action)) {
                     $this->action = $action;
                 }
 

@@ -71,11 +71,11 @@ final class SecurityComponent extends BaseComponent
         return false;
     }
 
-	/**
-	 * @param Event $event
-	 * @throw BadRequestException
-	 * @return void
-	 */
+    /**
+     * @param Event $event
+     * @throw BadRequestException
+     * @return void
+     */
     public function wakeUp(Event $event) : void
     {
         $controller = $this->getController();
@@ -85,7 +85,6 @@ final class SecurityComponent extends BaseComponent
         $oCsrfSgement = $this->_getCsrfSegement($oSession);
 
         ################## CSRF protection
-        //	debug([$this->event]);
         // @See https://github.com/auraphp/Aura.Session
         if ($this->isUnlockedAction() === false && in_array($this->request->getMethod(), ['DELETE', 'POST', 'PUT', 'PATCH'])) {
             $csrfCreatedAt = (int) $oCsrfSgement->read('__csrf_created_at');
