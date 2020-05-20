@@ -9,6 +9,7 @@ use CAMOO\Http\Session;
 use CAMOO\Http\SessionSegment;
 use CAMOO\Utils\Configure;
 use CAMOO\Exception\Http\BadRequestException;
+use CAMOO\Exception\Http\ForbiddenException;
 use CAMOO\Utils\Security;
 
 /**
@@ -17,6 +18,7 @@ use CAMOO\Utils\Security;
  */
 final class SecurityComponent extends BaseComponent
 {
+    /** @var array $_configKeys */
     private $_configKeys = [
         'unlockedActions'
     ];
@@ -90,6 +92,15 @@ final class SecurityComponent extends BaseComponent
             $csrfCreatedAt = (int) $oCsrfSgement->read('__csrf_created_at');
             $csrfTimeout = Configure::read('Security.csrf_lifetime') ?? 1800;
 
+            // CHECK TO ENSURE REFERRER URL IS ON THIS DOMAIN
+            if (strpos($this->request->getEnv('HTTP_REFERER'), $this->request->getEnv('HTTP_HOST')) === false) {
+                throw new ForbiddenException('Bad Referrer !');
+            }
+
+            if (!array_key_exists('__csrf_Token', $_POST)) {
+                throw new BadRequestException('__csrf_Token is missing !');
+            }
+
             $oCsrfToken = $oSession->getCsrfToken();
             $csrf_value = Security::satanizer($_POST['__csrf_Token']);
             if ((time() - $csrfCreatedAt) >  (int) $csrfTimeout || ! $oCsrfToken->isValid($csrf_value)) {
@@ -99,7 +110,7 @@ final class SecurityComponent extends BaseComponent
             if (!empty($hiddenSum)) {
                 foreach ($hiddenSum as $field => $checkSumvalue) {
                     if (md5(Security::satanizer($_POST[$field])) !== $checkSumvalue) {
-                        throw new BadRequestException('Value has been manipulated !');
+                        throw new BadRequestException('Value has been Manipulated !');
                     }
                 }
             }

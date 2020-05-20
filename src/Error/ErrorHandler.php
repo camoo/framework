@@ -47,7 +47,7 @@ final class ErrorHandler extends PrettyPageHandler
         $errorTrace = $exception->getMessage() . "\n";
         $errorTrace .= $exception->getTraceAsString();
         $errorTrace .= $this->_getRequestMessage();
-        error_log($errorTrace, 3, LOGS. strtolower($className).'.log');
+        error_log($errorTrace, 3, LOGS. 'error.log');
 
         if (Configure::read('debug')) {
             parent::handle();

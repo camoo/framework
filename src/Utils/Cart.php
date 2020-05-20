@@ -245,17 +245,42 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
     {
         if (!empty($key)) {
             if (!$this->has($key)) {
-                ++$this->count;
-                if (array_key_exists('price', $value)) {
-                    $this->total_price += (float) $value['price'];
+                if (!empty($value)) {
+                    if (is_array($value) && $this->isValueMultiDimensional($value)) {
+                        foreach ($value as $hVal) {
+                            if (array_key_exists('price', $hVal)) {
+                                $this->total_price += (float) $hVal['price'];
+                            }
+
+                            ++$this->count;
+                        }
+                    } else {
+                        ++$this->count;
+                        if (array_key_exists('price', $value)) {
+                            $this->total_price += (float) $value['price'];
+                        }
+                    }
                 }
             }
             $this->data[$key] = $value;
         } else {
             $this->data[] = $value;
-            ++$this->count;
-            if (array_key_exists('price', $value)) {
-                $this->total_price += (float) $value['price'];
+
+            if (!empty($value)) {
+                if (is_array($value) && $this->isValueMultiDimensional($value)) {
+                    foreach ($value as $hVal) {
+                        if (array_key_exists('price', $hVal)) {
+                            $this->total_price += (float) $hVal['price'];
+                        }
+
+                        ++$this->count;
+                    }
+                } else {
+                    ++$this->count;
+                    if (array_key_exists('price', $value)) {
+                        $this->total_price += (float) $value['price'];
+                    }
+                }
             }
         }
         $this->save();
@@ -266,11 +291,28 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
         if ($this->has($key)) {
             $value = $this->data[$key];
             unset($this->data[$key]);
-            --$this->count;
-            if (array_key_exists('price', $value)) {
-                $this->total_price -= (float) $value['price'];
+            if (!empty($value)) {
+                if (is_array($value) && $this->isValueMultiDimensional($value)) {
+                    foreach ($value as $hVal) {
+                        if (array_key_exists('price', $hVal)) {
+                            $this->total_price -= (float) $hVal['price'];
+                        }
+
+                        --$this->count;
+                    }
+                } else {
+                    --$this->count;
+                    if (array_key_exists('price', $value)) {
+                        $this->total_price -= (float) $value['price'];
+                    }
+                }
             }
             $this->save();
         }
+    }
+
+    private function isValueMultiDimensional(array $value) : bool
+    {
+        return count($value) !== count($value, COUNT_RECURSIVE);
     }
 }

@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+
 namespace CAMOO\Http;
 
 use \Middlewares\Utils\Dispatcher;
@@ -7,6 +8,7 @@ use GuzzleHttp\Psr7;
 use CAMOO\Http\Response;
 use CAMOO\Interfaces\ControllerInterface;
 use CAMOO\Event\Event;
+use CAMOO\Exception\Exception;
 use CAMOO\Event\EventDispatcherTrait;
 
 final class Caller
@@ -74,6 +76,9 @@ final class Caller
                     }
                 }
 
+                if (!method_exists($controller, $this->action)) {
+                    throw new Exception(sprintf('Action %s does not exist in %s', $this->action, get_class($controller)));
+                }
                 return call_user_func_array([$controller, $this->action], $this->xargs);
             });
         });
@@ -110,6 +115,9 @@ final class Caller
                 }
 
                 if (!empty($action)) {
+                    if (strpos($action, '-') !== false) {
+                        $action = \CAMOO\Utils\Inflector::camelize($action);
+                    }
                     $this->action = $action;
                 }
 
