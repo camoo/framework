@@ -9,6 +9,7 @@ use CAMOO\Exception\Http\MethodNotAllowedException;
 use CAMOO\Exception\Http\BadRequestException;
 use CAMOO\Utils\Configure;
 use \GuzzleHttp\Psr7\ServerRequest as BaseServerRequest;
+use CAMOO\Exception\Http\ForbiddenException;
 
 class ServerRequest
 {
@@ -185,12 +186,19 @@ class ServerRequest
     /**
      * @param string $request_method
      * @throw Exception
+     * @throw ForbiddenException
      * @return bool
      */
     public function is(string $request_method) : bool
     {
         if (strtolower($request_method) === 'ajax') {
-            return null !== getEnv('HTTP_X_REQUESTED_WITH') && getEnv('HTTP_X_REQUESTED_WITH') === 'XMLHttpRequest';
+            $checkAjax = null !== $this->getEnv('HTTP_X_REQUESTED_WITH') && $this->getEnv('HTTP_X_REQUESTED_WITH') === 'XMLHttpRequest';
+            // CHECK TO ENSURE REFERRER URL IS ON THIS DOMAIN
+            if ($checkAjax === true && strpos($this->getEnv('HTTP_REFERER'), $this->getEnv('HTTP_HOST')) === false) {
+                throw new ForbiddenException('Ajax:: Bad Referrer !');
+            }
+
+            return $checkAjax;
         }
 
         if (!in_array(strtoupper($request_method), static::REQUEST_METHODS)) {
