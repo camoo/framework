@@ -118,7 +118,7 @@ final class Caller
                     if (strpos($action, '-') !== false) {
                         $action = \CAMOO\Utils\Inflector::camelize($action);
                     }
-                    $this->action = $action;
+                    $this->action = trim($action,'/');
                 }
 
                 if ($controller) {
@@ -140,7 +140,7 @@ final class Caller
                 }
 
                 if (array_key_exists('action', $handler)) {
-                    $this->action = $handler['action'];
+                    $this->action = trim($handler['action'],'/');
                 }
 
                 if (!empty($vars)) {
