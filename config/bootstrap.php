@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 require_once CORE_PATH. 'include/function.php';
 require_once CORE_PATH. 'config/constants.php';
@@ -7,6 +8,7 @@ use Cake\Cache\Engine\FileEngine;
 use Cake\Cache\Cache;
 use Whoops\Run;
 use Whoops\Handler\JsonResponseHandler;
+use Whoops\Handler\PlainTextHandler;
 use CAMOO\Utils\Configure;
 use Cake\Datasource\ConnectionManager;
 use CAMOO\Error\ErrorHandler;
@@ -26,6 +28,13 @@ if (\Whoops\Util\Misc::isAjaxRequest()) {
     $jsonHandler->addTraceToOutput(true);
     $jsonHandler->setJsonApi(true);
     $run->pushHandler($jsonHandler);
+}
+
+// CLI
+if (\Whoops\Util\Misc::isCommandLine()) {
+    $cliHandler = new PlainTextHandler();
+    $cliHandler->addTraceToOutput(true);
+    $run->pushHandler($cliHandler);
 }
 
 $run->register();
