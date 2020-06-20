@@ -43,7 +43,6 @@ final class Runner
             if (!method_exists($this->class, $method)) {
                 throw new ConsoleException(sprintf('Method %s::%s not found!', get_class($this->class), $method));
             }
-
             call_user_func_array([$this->class, $method], $this->class->getCommandParam());
         } elseif (method_exists($this->class, 'main')) {
             $this->class->main();

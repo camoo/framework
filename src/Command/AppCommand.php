@@ -2,7 +2,10 @@
 declare(strict_types=1);
 
 namespace CAMOO\Command;
+
 use CAMOO\Interfaces\CommandInterface;
+use InvalidArgumentException;
+use CAMOO\Utils\Security;
 
 /**
  * Class AppCommand
@@ -23,15 +26,43 @@ class AppCommand implements CommandInterface
 
     public function getCommandParam() : array
     {
-        return $this->param;
+        return $this->_satanize($this->param);
     }
 
     public function getCommandMethod() : ?string
     {
-        return $this->method;
+        return $this->_satanize($this->method);
     }
 
     public function main() : void
     {
+    }
+
+    /**
+     * @param string|array $xData
+     * @return string|array $xData
+     */
+    private function _satanize($xData)
+    {
+        if (is_numeric($xData)) {
+            return $xData;
+        }
+
+        if (is_object($xData)) {
+            throw new InvalidArgumentException('Invalid Data type! Only string|Array are allowed');
+        }
+
+        if (is_array($xData)) {
+            if (count($xData) === 0) {
+                return $xData;
+            }
+            return array_map(function ($data) {
+                if (!is_array($data)) {
+                    return Security::satanizer($data);
+                }
+                return $this->_satanize($data);
+            }, $xData);
+        }
+        return Security::satanizer($xData);
     }
 }
