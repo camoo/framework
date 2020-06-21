@@ -10,6 +10,7 @@ use Whoops\Exception\Inspector;
 use Error;
 use GuzzleHttp\Psr7;
 use CAMOO\Http\ServerRequest;
+use CAMOO\Utils\Utility;
 
 /**
  * Class ErrorHandler
@@ -36,7 +37,7 @@ final class ErrorHandler extends PrettyPageHandler
 
     private function isCli() : bool
     {
-        return PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg';
+        return Utility::isCli();
     }
 
     public function handle()
@@ -47,7 +48,11 @@ final class ErrorHandler extends PrettyPageHandler
         $errorTrace = $exception->getMessage() . "\n";
         $errorTrace .= $exception->getTraceAsString();
         $errorTrace .= $this->_getRequestMessage();
-        error_log($errorTrace, 3, LOGS. 'error.log');
+        $logName = 'error.log';
+        if ($this->isCli() === true) {
+            $logName = 'cli-error.log';
+        }
+        error_log($errorTrace, 3, LOGS. $logName);
 
         if (Configure::read('debug')) {
             parent::handle();

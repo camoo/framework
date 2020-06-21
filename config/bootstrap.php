@@ -10,6 +10,7 @@ use Whoops\Run;
 use Whoops\Handler\JsonResponseHandler;
 use Whoops\Handler\PlainTextHandler;
 use CAMOO\Utils\Configure;
+use CAMOO\Utils\Utility;
 use Cake\Datasource\ConnectionManager;
 use CAMOO\Error\ErrorHandler;
 
@@ -31,7 +32,7 @@ if (\Whoops\Util\Misc::isAjaxRequest()) {
 }
 
 // CLI
-if (\Whoops\Util\Misc::isCommandLine()) {
+if (Utility::isCli() === true){
     $cliHandler = new PlainTextHandler();
     $cliHandler->addTraceToOutput(true);
     $run->pushHandler($cliHandler);
