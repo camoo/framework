@@ -107,7 +107,8 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
      */
     public function setUserId($uid=null) : void
     {
-        if (null !== $uid && (!is_numeric($uid) || !is_string($uid))) {
+
+        if (null !== $uid && !in_array(gettype($uid), ['string', 'integer'])) {
             throw new InvalidArgumentException(sprintf('Value of "uid" should be of type %s or %s', 'Numeric', 'String'));
         }
 
@@ -172,6 +173,16 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
     private function getRequest() : ServerRequest
     {
         return self::$withRequest;
+    }
+
+    /**
+     * @param ServerRequest $request
+     *
+     * @return void
+     */
+    public function addRequest(ServerRequest $request) : void
+    {
+        self::$withRequest = $request;
     }
 
     /**
