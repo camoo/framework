@@ -25,7 +25,8 @@
 		"ircmaxell/random-lib": "^1.2",
 		"squizlabs/php_codesniffer": "^3.2",
 		"http-interop/http-factory-discovery": "^1.5",
-		"overclokk/cookie": "^1.0"
+		"overclokk/cookie": "^1.0",
+		"nette/mail": "^v3.0"
 	},
 	"minimum-stability": "dev",
 	"homepage": "https://camoo.cm",
