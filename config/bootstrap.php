@@ -13,18 +13,20 @@ use CAMOO\Utils\Configure;
 use CAMOO\Utils\Utility;
 use Cake\Datasource\ConnectionManager;
 use CAMOO\Error\ErrorHandler;
+use CAMOO\Error\ExceptionRenderer;
+use Whoops\Util\Misc;
 
 Configure::load(CONFIG. 'app.php', false);
 require_once CORE_PATH. 'include/tools.php';
 
 $run     = new Run();
 $handler = new ErrorHandler();
-$handler->addDataTable('Camoo Framework', ['ErrorHandling' => \CAMOO\Error\ExceptionRenderer::class]);
+$handler->addDataTable('Camoo Framework', ['ErrorHandling' => ExceptionRenderer::class]);
 
 $handler->setApplicationPaths([__FILE__]);
 $run->pushHandler($handler);
 
-if (\Whoops\Util\Misc::isAjaxRequest()) {
+if (Misc::isAjaxRequest()) {
     $jsonHandler = new JsonResponseHandler();
     $jsonHandler->addTraceToOutput(true);
     $jsonHandler->setJsonApi(true);
@@ -32,7 +34,7 @@ if (\Whoops\Util\Misc::isAjaxRequest()) {
 }
 
 // CLI
-if (Utility::isCli() === true){
+if (Utility::isCli() === true) {
     $cliHandler = new PlainTextHandler();
     $cliHandler->addTraceToOutput(true);
     $run->pushHandler($cliHandler);
