@@ -94,6 +94,11 @@ class Mailer
     {
         $smtpMailer = new SmtpMailer(Configure::read('SmtpTransport.' . $this->transport));
         try {
+            $from = $this->mail->getFrom();
+            if ($from === null) {
+                $from = Configure::read('SmtpTransport.' . $this->transport. '.username');
+                $this->mail->setFrom($from);
+            }
             $smtpMailer->send($this->mail);
         } catch (SmtpException $exception) {
             throw new MailerException($exception->getMessage(), $exception->getCode(), $exception->getPrevious());
