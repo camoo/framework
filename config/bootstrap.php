@@ -42,4 +42,6 @@ if (Utility::isCli() === true) {
 
 $run->register();
 
-ConnectionManager::setConfig('default', Configure::read('Database.default'));
+if (Configure::check('Database') === true) {
+    ConnectionManager::setConfig('default', Configure::read('Database.default'));
+}

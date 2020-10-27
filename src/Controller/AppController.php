@@ -18,6 +18,7 @@ use CAMOO\Template\Extension\Functions\Html;
 use CAMOO\Template\Extension\Filters\Flash;
 use CAMOO\Model\Rest\RestLocatorTrait;
 use CAMOO\Controller\Component\ComponentCollection;
+use CAMOO\Utils\Configure;
 
 abstract class AppController implements ControllerInterface, EventListenerInterface, EventDispatcherInterface
 {
@@ -290,6 +291,9 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
      */
     protected function loadModel(string $sModel) : void
     {
+        if (Configure::check('Database') === false) {
+            return;
+        }
         $this->{$sModel} = (new TableLocator())->get(Inflector::classify($sModel));
     }
 
