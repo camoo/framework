@@ -17,36 +17,36 @@ use CAMOO\Exception\MailerException;
 /**
  * Class Message provides functionality to compose and send both text and MIME-compliant multipart email messages.
  *
- * @method MessageWrapper setFrom(string $email, string $name = null) Sets the sender of the message. Email or format "John Doe" <doe@example.com>
+ * @method static setFrom(string $email, string $name = null) Sets the sender of the message. Email or format "John Doe" <doe@example.com>
  * @method null|array getFrom() Returns the sender of the message
- * @method MessageWrapper addReplyTo(string $email, string $name = null) Adds the reply-to address. Email or format "John Doe" <doe@example.com>
- * @method MessageWrapper setSubject(string $subject) Sets the subject of the message
+ * @method static addReplyTo(string $email, string $name = null) Adds the reply-to address. Email or format "John Doe" <doe@example.com>
+ * @method static setSubject(string $subject) Sets the subject of the message
  * @method null|string getSubject() Returns the subject of the message
- * @method MessageWrapper addTo(string $email, string $name = null) Adds email recipient. Email or format "John Doe" <doe@example.com>
- * @method MessageWrapper addCc(string $email, string $name = null) Adds carbon copy email recipient. Email or format "John Doe" <doe@example.com>
- * @method MessageWrapper addBcc(string $email, string $name = null) Adds blind carbon copy email recipient. Email or format "John Doe" <doe@example.com>
- * @method MessageWrapper setReturnPath(string $email) Sets the Return-Path header of the message
+ * @method static addTo(string $email, string $name = null) Adds email recipient. Email or format "John Doe" <doe@example.com>
+ * @method static addCc(string $email, string $name = null) Adds carbon copy email recipient. Email or format "John Doe" <doe@example.com>
+ * @method static addBcc(string $email, string $name = null) Adds blind carbon copy email recipient. Email or format "John Doe" <doe@example.com>
+ * @method static setReturnPath(string $email) Sets the Return-Path header of the message
  * @method null|string getReturnPath() Returns the Return-Path header
- * @method MessageWrapper setPriority(int $priority) Sets email priority
+ * @method static setPriority(int $priority) Sets email priority
  * @method null|int getPriority() Returns email priority
- * @method MessageWrapper setHtmlBody(string $html, string $basePath = null) Sets Html Body
+ * @method static setHtmlBody(string $html, string $basePath = null) Sets Html Body
  * @method string getHtmlBody() Gets HTML body
  * @method MimePart addEmbeddedFile(string $file, string $content = null, string $contentType = null) Adds embedded file
- * @method MessageWrapper addInlinePart(MimePart $part) Adds inlined Mime Part
+ * @method static addInlinePart(MimePart $part) Adds inlined Mime Part
  * @method MimePart addAttachment(string $file, string $content = null, string $contentType = null) Adds Attachment
  * @method array getAttachments() Gets all email attachments
  * @method string generateMessage() Returns encoded message
- * @method MessageWrapper build() Builds email. Does not modify itself, but returns a new object
- * @method MessageWrapper setHeader(string $name, $value, bool $append = false) Sets a header
+ * @method static build() Builds email. Does not modify itself, but returns a new object
+ * @method static setHeader(string $name, $value, bool $append = false) Sets a header
  * @method mixed getHeader(string $name) Returns a header
- * @method MessageWrapper clearHeader(string $name) Removes a header
+ * @method static clearHeader(string $name) Removes a header
  * @method null|string getEncodedHeader(string $name) Returns an encoded header
  * @method array getHeaders() Returns Headers
- * @method MessageWrapper setContentType(string $contentType, string $charset = null) Sets Content-Type header
- * @method MessageWrapper setEncoding(string $encoding) Sets Content-Transfer-Encoding header
+ * @method static setContentType(string $contentType, string $charset = null) Sets Content-Type header
+ * @method static setEncoding(string $encoding) Sets Content-Transfer-Encoding header
  * @method string getEncoding() Returns Content-Transfer-Encoding header
- * @method MessageWrapper addPart(self $part = null) Adds or creates new multipart
- * @method MessageWrapper setBody(string $body) Sets textual body
+ * @method static addPart(self $part = null) Adds or creates new multipart
+ * @method static setBody(string $body) Sets textual body
  * @method string getBody() Gets textual body
  * @method string getEncodedMessage() Returns encoded message
  *
@@ -73,7 +73,7 @@ class Mailer
      * @param string $transport
      * @param array $headersConfig
      */
-    public function __construct(string $transport = 'default', array $headersConfig = [])
+    public function __construct(string $transport = 'default')
     {
         if (Configure::check('SmtpTransport.' . $transport) === false) {
             throw new MailerException(sprintf('Smtp Transport %s can not be found', $transport));
@@ -81,8 +81,7 @@ class Mailer
 
         $this->transport = $transport;
 
-        $headersConfig = array_merge($this->defaultHeaders, $headersConfig);
-        $this->mail = new MessageWrapper($headersConfig);
+        $this->mail = new MessageWrapper($this->defaultHeaders);
     }
 
     /**
@@ -95,7 +94,7 @@ class Mailer
      *
      * @return mixed
      */
-    public function __call($method, array $arguments)
+    public function __call(string $method, array $arguments)
     {
         return $this->mail->__call($method, $arguments);
     }

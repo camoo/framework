@@ -7,6 +7,6 @@ namespace CAMOO\Exception;
  * Class MailerException
  * @author CamooSarl
  */
-class MailerException extends Exception
+final class MailerException extends Exception
 {
 }
