@@ -6,6 +6,10 @@ namespace CAMOO\Command;
 use CAMOO\Interfaces\CommandInterface;
 use InvalidArgumentException;
 use CAMOO\Utils\Security;
+use Symfony\Component\Console\Style\SymfonyStyle;
+use CAMOO\Console\CommandWrapper;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Input\ArgvInput;
 
 /**
  * Class AppCommand
@@ -16,12 +20,48 @@ class AppCommand implements CommandInterface
     private $param = [];
     private $method = null;
 
-    public function __construct(array $inp=[])
+    /** @var CommandWrapper */
+    private $command;
+
+    /** @var SymfonyStyle $out */
+    protected $out;
+
+    public function __construct(string $name, array $argv = [])
     {
-        if (!empty($inp)) {
-            $this->method = array_shift($inp);
-            $this->param = $inp;
+        $inp = array_merge([$name], $argv);
+        $this->command = new CommandWrapper($name);
+
+        $this->configure();
+
+        $output = new ConsoleOutput();
+        $input = new ArgvInput($inp, $this->getDefinition());
+        $this->out = new SymfonyStyle($input, $output);
+
+        $arguments = $input->getArguments();
+
+        if (!empty($arguments)) {
+            $this->method = array_shift($arguments);
+            $this->param = $arguments;
         }
+    }
+
+    /**
+     * Call an internal method or a Message method handled by the wrapper.
+     *
+     * Wrap the Symfony Command PHP functions to call as method of Command object.
+     *
+     * @param  string       $method
+     * @param  array        $arguments
+     *
+     * @return mixed
+     */
+    public function __call(string $method, array $arguments)
+    {
+        return $this->command->__call($method, $arguments);
+    }
+
+    protected function configure() : void
+    {
     }
 
     public function getCommandParam() : array
@@ -34,7 +74,7 @@ class AppCommand implements CommandInterface
         return $this->_satanize($this->method);
     }
 
-    public function main() : void
+    public function execute() : void
     {
     }
 

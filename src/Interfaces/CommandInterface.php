@@ -9,5 +9,5 @@ namespace CAMOO\Interfaces;
  */
 interface CommandInterface
 {
-    public function main() : void;
+    public function execute() : void;
 }

@@ -21,10 +21,7 @@ final class Runner
     public function run(array $argv)
     {
         array_shift($argv);
-
-        $data = $argv;
-
-        $this->execute($data);
+        $this->execute($argv);
     }
 
     private function execute(array $inp) : void
@@ -35,7 +32,6 @@ final class Runner
 
         $class = array_shift($inp);
         $classClassify = sprintf('%s%s', Inflector::classify($class), 'Command');
-
         $this->class = $this->loadCommand($classClassify, $inp);
 
         if ($method = $this->class->getCommandMethod()) {
@@ -44,8 +40,8 @@ final class Runner
                 throw new ConsoleException(sprintf('Method %s::%s not found!', get_class($this->class), $method));
             }
             call_user_func_array([$this->class, $method], $this->class->getCommandParam());
-        } elseif (method_exists($this->class, 'main')) {
-            $this->class->main();
+        } elseif (method_exists($this->class, 'execute')) {
+            $this->class->execute();
         }
     }
 
@@ -67,7 +63,6 @@ final class Runner
                 throw new ConsoleException(sprintf('Class %s not found !', $class));
             }
         }
-
-        return new $class($inp);
+        return new $class($name, $inp);
     }
 }

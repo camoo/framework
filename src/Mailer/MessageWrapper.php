@@ -71,6 +71,6 @@ final class MessageWrapper extends BaseMessage
         if (!method_exists($this, $function)) {
             throw new MailerException("{$function} is not a valid Message methode");
         }
-        return @call_user_func_array($function, $arguments);
+        return @call_user_func_array([$this,$function], $arguments);
     }
 }
