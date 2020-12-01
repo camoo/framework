@@ -13,11 +13,15 @@ use Symfony\Component\Console\Input\ArgvInput;
 
 /**
  * Class AppCommand
+ *
  * @author CamooSarl
  */
 class AppCommand implements CommandInterface
 {
+    /** @var array $param */
     private $param = [];
+
+    /** @var null|string $method */
     private $method = null;
 
     /** @var CommandWrapper */
@@ -26,6 +30,10 @@ class AppCommand implements CommandInterface
     /** @var SymfonyStyle $out */
     protected $out;
 
+    /**
+     * @param string $name
+     * @param array $argv
+     */
     public function __construct(string $name, array $argv = [])
     {
         $inp = array_merge([$name], $argv);
@@ -46,7 +54,7 @@ class AppCommand implements CommandInterface
     }
 
     /**
-     * Call an internal method or a Message method handled by the wrapper.
+     * Call an internal method or a Symfony Command method handled by the wrapper.
      *
      * Wrap the Symfony Command PHP functions to call as method of Command object.
      *
@@ -60,6 +68,11 @@ class AppCommand implements CommandInterface
         return $this->command->__call($method, $arguments);
     }
 
+    /**
+     * Configures the current command.
+     *
+     * @return void
+     */
     protected function configure() : void
     {
     }
@@ -74,7 +87,12 @@ class AppCommand implements CommandInterface
         return $this->_satanize($this->method);
     }
 
-    public function execute() : void
+    /**
+     * Executes the current command.
+	 *
+     * @return int 0 if everything went fine, or an exit code
+     */
+    public function execute() : int
     {
     }
 

@@ -11,9 +11,6 @@ class Security
 {
     public static function satanizer(?string $str, bool $keep_newlines = false)
     {
-        if (is_object($str) || is_array($str)) {
-            return '';
-        }
         $filtered = (string) $str;
         if (!mb_check_encoding($filtered, 'UTF-8')) {
             return '';

@@ -41,7 +41,7 @@ final class ExceptionRenderer
      *
      * @param Error $exception Exception.
      */
-    public function __construct(Error $exception, ServerRequest $request)
+    public function __construct($exception, ServerRequest $request)
     {
         $this->request = $request;
         $this->error = $exception;

@@ -242,10 +242,12 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     /**
      * @param  string $destination URL to redirect to
      * @param bool $permanent
+	 *
      * @throw Exception
+	 *
      * @return void
      */
-    public function redirect(string $destination, bool $permanent = false) : bool
+    public function redirect(string $destination, bool $permanent = false) : void
     {
         if (empty($destination)) {
             throw new Exception('destination cannot be empty');
