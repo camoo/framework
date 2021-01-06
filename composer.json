@@ -27,7 +27,8 @@
 		"http-interop/http-factory-discovery": "^1.5",
 		"overclokk/cookie": "^1.0",
 		"symfony/console": "^5.1",
-		"nette/mail": "^v3.0"
+		"nette/mail": "^v3.0",
+		"jms/serializer": "^3.9"
 	},
 	"minimum-stability": "dev",
 	"homepage": "https://camoo.cm",

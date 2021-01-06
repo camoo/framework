@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+
 namespace CAMOO\Controller;
 
 use Cake\ORM\Locator\TableLocator;
@@ -167,6 +168,14 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         if (empty($varName)) {
             throw new Exception('varName cannot be empty');
         }
+
+        if ($varName === '_serialize') {
+            $type = 'json';
+            $serializer = \JMS\Serializer\SerializerBuilder::create()->build();
+            $content = $serializer->serialize($value, $type);
+            echo $content;
+            exit;
+        }
         if ($varName !== null) {
             $this->tplData[$varName] = $value;
         } else {
@@ -242,9 +251,9 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     /**
      * @param  string $destination URL to redirect to
      * @param bool $permanent
-	 *
+     *
      * @throw Exception
-	 *
+     *
      * @return void
      */
     public function redirect(string $destination, bool $permanent = false) : void
