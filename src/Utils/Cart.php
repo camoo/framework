@@ -48,12 +48,12 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
     /**
      * Gets Cart total price
      */
-    public function getTotalPrice() : float
+    public function getTotalPrice(): float
     {
         return $this->total_price;
     }
 
-    public static function create(ServerRequest $withRequest)
+    public static function create(ServerRequest $withRequest): ?Cart
     {
         self::$withRequest = $withRequest;
         if (!empty(self::$withRequest->getSession()->check('Basket'))) {
@@ -71,7 +71,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
      * @param bool $force
      * @return void
      */
-    public function refresh($force=false) : void
+    public function refresh($force = false): void
     {
         if ($this->count() > 0) {
             $uid = $this->getUserId();
@@ -92,7 +92,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
     /**
      * Deletes entire Cart
      */
-    public function delete() : void
+    public function delete(): void
     {
         $request = $this->getRequest();
         if (!empty($request->getSession()->check('Basket'))) {
@@ -105,11 +105,12 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
     /**
      * @param null|int|string $uid user ID
      */
-    public function setUserId($uid=null) : void
+    public function setUserId($uid = null): void
     {
 
         if (null !== $uid && !in_array(gettype($uid), ['string', 'integer'])) {
-            throw new InvalidArgumentException(sprintf('Value of "uid" should be of type %s or %s', 'Numeric', 'String'));
+            throw new InvalidArgumentException(sprintf('Value of "uid" should be of type %s or %s',
+                'Numeric', 'String'));
         }
 
         $this->user = $uid;
@@ -126,7 +127,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
     /**
      * Saves current Cart
      */
-    public function save() : ?bool
+    public function save(): ?bool
     {
         $request = $this->getRequest();
         if (!empty($request->getSession()->check('Basket'))) {
@@ -170,7 +171,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
     /**
      * @return ServerRequest
      */
-    private function getRequest() : ServerRequest
+    private function getRequest(): ServerRequest
     {
         return self::$withRequest;
     }
@@ -180,7 +181,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
      *
      * @return void
      */
-    public function addRequest(ServerRequest $request) : void
+    public function addRequest(ServerRequest $request): void
     {
         self::$withRequest = $request;
     }
@@ -188,14 +189,13 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
     /**
      * @return Traversable
      */
-    public function getIterator() : Traversable
+    public function getIterator(): Traversable
     {
         return new ArrayIterator(new ArrayObject($this->data));
     }
 
     public function __get(string $key)
     {
-        //$caller = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT)[1];
         return $this->offsetGet($key);
     }
 
@@ -203,7 +203,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
      * @param string $key
      * @return bool
      */
-    public function has(string $key) : bool
+    public function has(string $key): bool
     {
         return $this->offsetExists($key);
     }
@@ -224,17 +224,13 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
      * @param string $value
      * @return void
      */
-    public function addItem(string $key, $value) : void
+    public function addItem(string $key, string $value): void
     {
         $this->offsetSet($key, $value);
     }
 
-    /**
-     * Removes an Item from Cart
-     *
-     * @return void
-     */
-    public function removeItem(string $key) : void
+
+    public function removeItem(string $key): void
     {
         $this->offsetUnset($key);
     }
@@ -247,8 +243,9 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
     public function offsetGet($key)
     {
         if ($this->offsetExists($key)):
-            return $this->data[$key]; else:
-        return null;
+            return $this->data[$key];
+        else:
+            return null;
         endif;
     }
 
@@ -260,7 +257,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
                     if (is_array($value) && $this->isValueMultiDimensional($value)) {
                         foreach ($value as $hVal) {
                             if (array_key_exists('price', $hVal)) {
-                                $this->total_price += (float) $hVal['price'];
+                                $this->total_price += (float)$hVal['price'];
                             }
 
                             ++$this->count;
@@ -268,7 +265,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
                     } else {
                         ++$this->count;
                         if (array_key_exists('price', $value)) {
-                            $this->total_price += (float) $value['price'];
+                            $this->total_price += (float)$value['price'];
                         }
                     }
                 }
@@ -281,7 +278,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
                 if (is_array($value) && $this->isValueMultiDimensional($value)) {
                     foreach ($value as $hVal) {
                         if (array_key_exists('price', $hVal)) {
-                            $this->total_price += (float) $hVal['price'];
+                            $this->total_price += (float)$hVal['price'];
                         }
 
                         ++$this->count;
@@ -289,7 +286,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
                 } else {
                     ++$this->count;
                     if (array_key_exists('price', $value)) {
-                        $this->total_price += (float) $value['price'];
+                        $this->total_price += (float)$value['price'];
                     }
                 }
             }
@@ -306,7 +303,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
                 if (is_array($value) && $this->isValueMultiDimensional($value)) {
                     foreach ($value as $hVal) {
                         if (array_key_exists('price', $hVal)) {
-                            $this->total_price -= (float) $hVal['price'];
+                            $this->total_price -= (float)$hVal['price'];
                         }
 
                         --$this->count;
@@ -314,7 +311,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
                 } else {
                     --$this->count;
                     if (array_key_exists('price', $value)) {
-                        $this->total_price -= (float) $value['price'];
+                        $this->total_price -= (float)$value['price'];
                     }
                 }
             }
@@ -322,7 +319,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
         }
     }
 
-    private function isValueMultiDimensional(array $value) : bool
+    private function isValueMultiDimensional(array $value): bool
     {
         return count($value) !== count($value, COUNT_RECURSIVE);
     }

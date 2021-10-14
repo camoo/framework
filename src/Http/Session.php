@@ -2,13 +2,14 @@
 declare(strict_types=1);
 namespace CAMOO\Http;
 
+use Aura\Session\CsrfToken;
 use Aura\Session\SessionFactory;
 use CAMOO\Utils\Configure;
 use Aura\Session\Segment;
 
 final class Session
 {
-    const SEG_NAME = 'CAMOO\Framework\Session';
+    public const SEG_NAME = Session::class;
     private $oSession=null;
     protected static $_create = null;
     protected static $__cookie = null;
@@ -16,7 +17,7 @@ final class Session
     public function __construct()
     {
         if (null === $this->oSession) {
-            $cookies = null !== static::$__cookie? static::$__cookie : $_COOKIE;
+            $cookies = null !== self::$__cookie? self::$__cookie : $_COOKIE;
             $this->oSession = (new SessionFactory())->newInstance($cookies);
             $hCookieParam = Configure::read('Session.cookie');
             $this->oSession->setName(Configure::read('Session.name'));
@@ -26,28 +27,28 @@ final class Session
 
     /**
      * @param array|null $cookie
-     * @return \CAMOO\Http\Session
+     * @return Session
      */
     public static function create(?array $cookie = null) : Session
     {
-        if (null === static::$_create) {
-            static::$_create = new self;
+        if (null === self::$_create) {
+            self::$_create = new self;
         }
-        static::$__cookie = $cookie;
-        return static::$_create;
+        self::$__cookie = $cookie;
+        return self::$_create;
     }
 
     /**
-     * @param string $sSegment
-     * @return SegmentFactory
+     * @param string|null $sSegment
+     * @return Segment
      */
-    public function segment(?string $sSegment = null)
+    public function segment(?string $sSegment = null): Segment
     {
         $sSegmentName = $sSegment === null? __NAMESPACE__ : $sSegment;
         return $this->oSession->getSegment($sSegmentName);
     }
 
-    public function destroy()
+    public function destroy(): bool
     {
         return $this->oSession->destroy();
     }
@@ -64,7 +65,7 @@ final class Session
 
     public function set($key, $value)
     {
-        return $this->segment()->set($key, $value);
+        $this->segment()->set($key, $value);
     }
 
     public function get($key)
@@ -85,25 +86,25 @@ final class Session
 
     public function __set($key, $value)
     {
-        return $this->set($key, $value);
+        $this->set($key, $value);
     }
 
-    public function regenerateId()
+    public function regenerateId(): bool
     {
         return $this->oSession->regenerateId();
     }
 
-    public function getId()
+    public function getId(): string
     {
         return $this->oSession->getId();
     }
 
-    public function getName()
+    public function getName(): string
     {
         return $this->oSession->getName();
     }
 
-    public function setName($name)
+    public function setName($name): string
     {
         return $this->oSession->setName($name);
     }
@@ -119,7 +120,7 @@ final class Session
      * @see session_save_path()
      *
      */
-    public function setSavePath($path)
+    public function setSavePath(string $path): string
     {
         return $this->oSession->setSavePath($path);
     }
@@ -133,9 +134,9 @@ final class Session
      * @see session_save_path()
      *
      */
-    public function getSavePath()
+    public function getSavePath(): string
     {
-        return $this->oSession->getSavePath($path);
+        return $this->oSession->getSavePath();
     }
 
     /**
@@ -146,7 +147,7 @@ final class Session
      * @return CsrfToken
      *
      */
-    public function getCsrfToken()
+    public function getCsrfToken(): CsrfToken
     {
         return $this->oSession->getCsrfToken();
     }

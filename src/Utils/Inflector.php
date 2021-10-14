@@ -3,8 +3,35 @@ declare(strict_types=1);
 
 namespace CAMOO\Utils;
 
-use Doctrine\Inflector\Inflector as BaseInflector;
+use Doctrine\Inflector\InflectorFactory;
+use CAMOO\Exception\Exception;
 
-class Inflector extends BaseInflector
+/**
+ * @method static string capitalize(string $word)
+ * @method static string classify(string $word)
+ * @method static string camelize(string $word)
+ * @method static string tableize(string $word)
+ * @method static string seemsUtf8(string $word)
+ * @method static string unaccent(string $word)
+ * @method static string urlize(string $word)
+ * @method static string singularize(string $word)
+ * @method static string pluralize(string $word)
+ */
+class Inflector
 {
+    /**
+     * Inflector should not be Instantiated
+     */
+    private function __construct()
+    {
+    }
+
+    public static function __callStatic(string $method, $args)
+    {
+        $inflector = InflectorFactory::create()->build();
+        if (!method_exists($inflector, $method)) {
+            throw new Exception(sprintf('Method %s::%s does not exist', get_class(new self), $method));
+        }
+        return call_user_func_array([$inflector, $method], $args);
+    }
 }

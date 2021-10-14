@@ -16,7 +16,7 @@ use Symfony\Component\Console\Input\ArgvInput;
  *
  * @author CamooSarl
  */
-class AppCommand implements CommandInterface
+abstract class AppCommand implements CommandInterface
 {
     /** @var array $param */
     private $param = [];
@@ -79,28 +79,19 @@ class AppCommand implements CommandInterface
 
     public function getCommandParam() : array
     {
-        return $this->_satanize($this->param);
+        return $this->_satanise($this->param);
     }
 
     public function getCommandMethod() : ?string
     {
-        return $this->_satanize($this->method);
-    }
-
-    /**
-     * Executes the current command.
-	 *
-     * @return int 0 if everything went fine, or an exit code
-     */
-    public function execute() : int
-    {
+        return $this->_satanise($this->method);
     }
 
     /**
      * @param string|array $xData
      * @return string|array $xData
      */
-    private function _satanize($xData)
+    private function _satanise($xData)
     {
         if (is_numeric($xData)) {
             return $xData;
@@ -118,7 +109,7 @@ class AppCommand implements CommandInterface
                 if (!is_array($data)) {
                     return Security::satanizer($data);
                 }
-                return $this->_satanize($data);
+                return $this->_satanise($data);
             }, $xData);
         }
         return Security::satanizer($xData);

@@ -1,10 +1,12 @@
 <?php
+declare(strict_types=1);
+
 namespace CAMOO\Http;
 
-use \Aura\Session\SessionFactory;
 use CAMOO\Utils\Configure;
+use Overclokk\Cookie\Cookie as BaseCookie;
 
-class Cookie extends \Overclokk\Cookie\Cookie
+class Cookie extends BaseCookie
 {
     protected static $_create = null;
 
@@ -19,9 +21,9 @@ class Cookie extends \Overclokk\Cookie\Cookie
     }
 
     /**
-     * @return \CAMOO\Http\Session
+     * @return Cookie|null
      */
-    public static function create()
+    public static function create(): ?self
     {
         if (null === static::$_create) {
             static::$_create = new self;
@@ -33,15 +35,23 @@ class Cookie extends \Overclokk\Cookie\Cookie
     {
         return $this->get($key);
     }
+
     public function __set($name, $xValue)
     {
-        $default = array_merge(['name' => $name,'value' => ''], Configure::read('Session.cookie'));
+        $default = array_merge(['name' => $name, 'value' => ''], Configure::read('Session.cookie'));
         if (!is_array($xValue)) {
             $default['value'] = $xValue;
         } else {
             $default += $default;
         }
-        extract($default);
-        return $this->set($name, $value, $expire, $path, $domain, $secure, $httponly);
+
+        return $this->set($name,
+            $default['value'],
+            $default['expire'],
+            $default['path'],
+            $default['domain'],
+            $default['secure'],
+            $default['httponly']
+        );
     }
 }

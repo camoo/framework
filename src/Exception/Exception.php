@@ -5,6 +5,7 @@ namespace CAMOO\Exception;
 
 use RuntimeException as BaseException;
 use CAMOO\Interfaces\ExceptionInterface;
+use Throwable;
 
 class Exception extends BaseException implements ExceptionInterface
 {
@@ -70,7 +71,7 @@ class Exception extends BaseException implements ExceptionInterface
         string $userTitle = null,
         ?string $userMessage = null,
         array $httpHeaders = [],
-        ?Exception $previous = null
+        ?Throwable $previous = null
     ) {
         $this->errorDescription = $errorDescription ?? 'Internal Server Error';
         $this->errorData        = $errorData;

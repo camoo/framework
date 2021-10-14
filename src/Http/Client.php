@@ -2,9 +2,10 @@
 namespace CAMOO\Http;
 
 use CAMOO\Exception\Exception;
-use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\RequestOptions;
+use Psr\Http\Message\ResponseInterface;
+use Throwable;
 
 /**
  * Class Http Client
@@ -17,12 +18,7 @@ class Client
     const PUT_REQUEST = 'PUT';
     const PATCH_REQUEST = 'PATCH';
     const DELETE_REQUEST = 'DELETE';
-
     const CLIENT_TIMEOUT = 10;
-    /**
-     * @var string
-     */
-    protected $endpoint;
 
     /**
      * @var array
@@ -46,22 +42,16 @@ class Client
     private $timeout = self::CLIENT_TIMEOUT;
 
     /**
-     * @var mixed
-     */
-    private $hAuthentication = [];
-
-    /**
      * @var object
      */
     private $oClient = null;
 
     /**
-     * @param string $endpoint
      * @param int $timeout > 0
      *
      * @throws \Exception if timeout settings are invalid
      */
-    public function __construct($timeout = 0)
+    public function __construct(int $timeout = 0)
     {
 
         $this->addUserAgentString('CAMOO/Client/' . CAMOO_FMW_VERSION);
@@ -84,24 +74,22 @@ class Client
     /**
      * @param string $userAgent
      */
-    public function addUserAgentString($userAgent)
+    public function addUserAgentString(string $userAgent)
     {
         $this->userAgent[] = $userAgent;
     }
 
     /**
-     * @param string      $method
+     * @param string $method
      * @param string|null $endpoint
-     * @param string|null $payload
-     * @param string|null $header
+     * @param array|null|string $payload
+     * @param array|null $header
      *
-     * @return array
-     *
-     * @throws Exception
+     * @return ResponseInterface
      */
-    protected function performRequest($method, $endpoint, $payload, $header)
+    protected function performRequest(string $method, ?string $endpoint, $payload, ?array $header): ResponseInterface
     {
-        $type=$this->_validVerb($payload, $header);
+        $type = $this->_validVerb($payload, $header);
         $data = ['headers' => $header];
         if (!empty($payload)) {
             $data[$this->hRequestVerbs[$method][$type]] = $payload;
@@ -109,21 +97,19 @@ class Client
 
         try {
             return $this->oClient->request($method, $endpoint, $data);
-        } catch (RequestException $e) {
-            throw new Exception(Psr7\str($e->getRequest()));
-            if ($e->hasResponse()) {
-                throw new Exception(Psr7\str($e->getResponse()));
-            }
+        } catch (Throwable $exception) {
+            throw new Exception($exception->getMessage(), $exception->getCode());
+
         }
     }
 
-    private function isJson($string)
+    private function isJson($string): bool
     {
         json_decode($string);
         return (json_last_error() == JSON_ERROR_NONE);
     }
 
-    protected function _validVerb($payload, &$header)
+    protected function _validVerb($payload, &$header): string
     {
         $type = 'raw';
         $sUserAgent = implode(' ', $this->userAgent);
@@ -139,27 +125,27 @@ class Client
         return $type;
     }
 
-    public function get($endpoint, $payload = null, $header = [])
+    public function get($endpoint, $payload = null, $header = []): ResponseInterface
     {
         return $this->performRequest(static::GET_REQUEST, $endpoint, $payload, $header);
     }
 
-    public function post($endpoint, $payload = null, $header = [])
+    public function post($endpoint, $payload = null, $header = []): ResponseInterface
     {
         return $this->performRequest(static::POST_REQUEST, $endpoint, $payload, $header);
     }
 
-    public function delete($endpoint, $payload = null, $header = [])
+    public function delete($endpoint, $payload = null, $header = []): ResponseInterface
     {
         return $this->performRequest(static::DELETE_REQUEST, $endpoint, $payload, $header);
     }
 
-    public function pacth($endpoint, $payload = null, $header = [])
+    public function patch($endpoint, $payload = null, $header = []): ResponseInterface
     {
         return $this->performRequest(static::PATCH_REQUEST, $endpoint, $payload, $header);
     }
 
-    public function getPhpVersion()
+    public function getPhpVersion(): string
     {
         if (!defined('PHP_VERSION_ID')) {
             $version = explode('.', PHP_VERSION);

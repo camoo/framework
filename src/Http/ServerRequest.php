@@ -1,14 +1,13 @@
 <?php
 declare(strict_types=1);
+
 namespace CAMOO\Http;
 
 use CAMOO\Utils\QueryData;
 use CAMOO\Exception\Exception;
 use CAMOO\Utils\Security;
 use CAMOO\Exception\Http\MethodNotAllowedException;
-use CAMOO\Exception\Http\BadRequestException;
-use CAMOO\Utils\Configure;
-use \GuzzleHttp\Psr7\ServerRequest as BaseServerRequest;
+use GuzzleHttp\Psr7\ServerRequest as BaseServerRequest;
 use CAMOO\Exception\Http\ForbiddenException;
 
 class ServerRequest
@@ -23,8 +22,8 @@ class ServerRequest
         'PATCH'
     ];
 
-    /** @var \GuzzleHttp\Psr7\ServerRequest $oRequest */
-    private $oRequest = null;
+    /** @var BaseServerRequest $oRequest */
+    private $oRequest;
 
     /** @var array $query */
     public $query = [];
@@ -138,7 +137,7 @@ class ServerRequest
             $clientIp = $this->getEnv('REMOTE_ADDR');
         }
 
-        return (string) trim($clientIp);
+        return trim($clientIp);
     }
 
     private function __getSession()
@@ -154,11 +153,6 @@ class ServerRequest
     private function __getCookie()
     {
         return call_user_func($this->__cookie);
-    }
-
-    private function __getRequest($oRequest)
-    {
-        return call_user_func($this->__request, $oRequest)->initialize();
     }
 
     private function __queryData($xData, $bAll = true)
@@ -255,7 +249,7 @@ class ServerRequest
     public function allowMethod(array $asMethod=[]) : void
     {
         if (empty($asMethod)) {
-            throw Exception('Allowed method is not defined !');
+            throw new Exception('Allowed method is not defined !');
         }
 
         if (!in_array(strtolower($this->oRequest->getMethod()), array_map('strtolower', $asMethod))) {
@@ -292,7 +286,7 @@ class ServerRequest
     /**
      * @return string
      */
-    public function getRequestTarget()
+    public function getRequestTarget(): string
     {
         return $this->oRequest->getRequestTarget();
     }

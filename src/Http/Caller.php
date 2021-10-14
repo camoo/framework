@@ -3,13 +3,20 @@ declare(strict_types=1);
 
 namespace CAMOO\Http;
 
-use \Middlewares\Utils\Dispatcher;
+use CAMOO\Controller\AppController;
+use FastRoute\Dispatcher\GroupCountBased;
+use FastRoute\RouteCollector;
+use Middlewares\FastRoute;
+use Middlewares\RequestHandler;
+use Middlewares\Utils\Dispatcher;
 use GuzzleHttp\Psr7;
-use CAMOO\Http\Response;
 use CAMOO\Interfaces\ControllerInterface;
 use CAMOO\Event\Event;
 use CAMOO\Exception\Exception;
 use CAMOO\Event\EventDispatcherTrait;
+use CAMOO\Utils\Inflector;
+use Psr\Http\Message\ResponseInterface;
+use function FastRoute\simpleDispatcher;
 
 final class Caller
 {
@@ -22,9 +29,11 @@ final class Caller
     public $xargs = [];
     public $uri = null;
     private $__controllerRaw = 'Pages';
+
+    /** @var string $sConfigDir */
     protected $sConfigDir;
 
-    public function __construct($configDir)
+    public function __construct(string $configDir)
     {
         $this->sConfigDir = $configDir;
         $this->initialize();
@@ -42,7 +51,8 @@ final class Caller
     }
 
     /**
-     * @return ControllerInterface
+     * @param Psr7\ServerRequest|null $request
+     * @return ControllerInterface|AppController
      */
     public function getController(?Psr7\ServerRequest $request = null) : ControllerInterface
     {
@@ -56,9 +66,9 @@ final class Caller
         return $oController;
     }
 
-    public function dispatchRequest()
+    public function dispatchRequest(): ResponseInterface
     {
-        $dispatcher = \FastRoute\simpleDispatcher(function (\FastRoute\RouteCollector $r) {
+        $dispatcher = simpleDispatcher(function (RouteCollector $r) {
             $r->addRoute($_SERVER['REQUEST_METHOD'], $this->uri, function ($request) {
                 $controller = $this->getController($request);
                 $event = new Event('AppController.initialize', $controller);
@@ -66,7 +76,7 @@ final class Caller
 
                 $components = $controller->getComponentCollection();
                 if (!empty($components)) {
-                    foreach ($components as $value => $component) {
+                    foreach ($components as $component) {
                         foreach ($component->implementedEvents() as $hook => $func) {
                             if ($func === 'beforeAction') {
                                 $this->getEventManager()->on($component);
@@ -84,8 +94,8 @@ final class Caller
         });
 
         $dispatcher = new Dispatcher([
-            new \Middlewares\FastRoute($dispatcher),
-            new \Middlewares\RequestHandler(),
+            new FastRoute($dispatcher),
+            new RequestHandler(),
         ]);
 
         return $dispatcher->dispatch(Psr7\ServerRequest::fromGlobals());
@@ -93,11 +103,13 @@ final class Caller
 
     public function route() : void
     {
-        require_once $this->sConfigDir . '/route.php';
 
+        $dispatcher = require_once $this->sConfigDir . '/route.php';
+        /** @var GroupCountBased $routeDispatcher */
+        $routeDispatcher = $dispatcher[0];
         $this->uri = $uri = (new Psr7\Uri(getEnv('REQUEST_URI')))->getPath();
 
-        $routeInfo = $oRouteDispatcher->dispatch(getEnv('REQUEST_METHOD'), $uri);
+        $routeInfo = $routeDispatcher->dispatch(getEnv('REQUEST_METHOD'), $uri);
 
         switch ($routeInfo[0]) {
             case \FastRoute\Dispatcher::NOT_FOUND:
@@ -116,7 +128,7 @@ final class Caller
 
                 if (!empty($action)) {
                     if (strpos($action, '-') !== false) {
-                        $action = \CAMOO\Utils\Inflector::camelize($action);
+                        $action = Inflector::camelize($action);
                     }
                     $this->action = trim($action,'/');
                 }
@@ -129,7 +141,6 @@ final class Caller
                 $this->dispatchRequest();
                 break;
             case \FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
-                $allowedMethods = $routeInfo[1];
                 break;
             case \FastRoute\Dispatcher::FOUND:
                 $handler = $routeInfo[1];

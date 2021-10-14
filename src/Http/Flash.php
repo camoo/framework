@@ -1,12 +1,21 @@
 <?php
 declare(strict_types=1);
+
 namespace CAMOO\Http;
 
+use Aura\Session\Segment;
 use CAMOO\Exception\Exception;
 
+/**
+ * @method void success(string $message)
+ * @method void info(string $message)
+ * @method void warning(string $message)
+ * @method void error(string $message)
+ * @method void default(string $message)
+ */
 final class Flash
 {
-    /** @var \Aura\Session\Segment $oFlashSession */
+    /** @var Segment $oFlashSession */
     private $oFlashSession = null;
     protected static $_create = null;
 
@@ -22,9 +31,9 @@ final class Flash
     private $session;
 
     /** @var array $keys */
-    private $keys =[];
+    private $keys = [];
 
-    public function __construct($oFlashSession = null, ?SessionSegment $session)
+    public function __construct($oFlashSession = null, ?SessionSegment $session = null)
     {
         if (null !== $oFlashSession) {
             $this->oFlashSession = $oFlashSession;
@@ -40,7 +49,7 @@ final class Flash
      * @param array $options
      * @return void
      */
-    public function set(string $message, array $options) : void
+    public function set(string $message, array $options): void
     {
         $default = ['key' => 'flash', 'alert' => 'default'];
         $options += $default;
@@ -54,13 +63,13 @@ final class Flash
         if (!in_array($name, array_keys(self::$_alterTypes))) {
             throw new Exception(
                 sprintf('Method %s::%s does not exist', get_class($this), $name)
-                );
+            );
         }
 
         if (empty($xargs) || count($xargs) > 1 || !preg_match('/\S/', $xargs[0])) {
             throw new Exception(
-                sprintf('Parameter is minnsing for %s::%s ', get_class($this), $name)
-                );
+                sprintf('Parameter is missing for %s::%s ', get_class($this), $name)
+            );
         }
 
         $this->set($xargs[0], ['alert' => $name]);
@@ -72,7 +81,7 @@ final class Flash
      */
     public function get(string $key)
     {
-        $this->session->delete('CAMOO.SYS.FLASH.'.$key);
+        $this->session->delete('CAMOO.SYS.FLASH.' . $key);
         return $this->oFlashSession->getFlash($key);
     }
 
@@ -83,12 +92,12 @@ final class Flash
 
     public function __set($key, $value)
     {
-        return $this->set($key, $value);
+        $this->set($key, $value);
     }
 
     public function setNext($key, $message)
     {
-        return $this->oFlashSession->setFlash($key, $message);
+        $this->oFlashSession->setFlash($key, $message);
     }
 
     public function getNext($key, $alt)

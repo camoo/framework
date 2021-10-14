@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace CAMOO\Controller;
 
 use Cake\ORM\Locator\TableLocator;
+use CAMOO\Exception\Exception;
+use CAMOO\Http\ServerRequest;
 use CAMOO\Utils\Inflector;
 use CAMOO\Http\Response;
 use CAMOO\Event\Event;
@@ -20,6 +22,9 @@ use CAMOO\Template\Extension\Filters\Flash;
 use CAMOO\Model\Rest\RestLocatorTrait;
 use CAMOO\Controller\Component\ComponentCollection;
 use CAMOO\Utils\Configure;
+use JMS\Serializer\SerializerBuilder;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
 abstract class AppController implements ControllerInterface, EventListenerInterface, EventDispatcherInterface
 {
@@ -28,10 +33,10 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
 
     protected $defaultConfig = [];
 
-    /** @var CommandCollection $componentCollection */
+    /** @var ComponentCollection $componentCollection */
     private $componentCollection = null;
 
-    /** @var ControllerInterface $controller */
+    /** @var string|null $controller */
     public $controller = null;
 
     /** @var string $action */
@@ -43,10 +48,10 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     protected $sTemplate = '%s/%s.tpl';
     protected $sTemplateDir = 'Template';
 
-    /** @var \CAMOO\Http\ServerRequest $request */
+    /** @var ServerRequest $request */
     public $request = null;
 
-    /** @var \CAMOO\Http\Response $response */
+    /** @var Response $response */
     protected $response = null;
 
     private $http_version = '1.1';
@@ -84,8 +89,8 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         }
 
         if ($this->oLayout === null) {
-            $oTemplateLoader = new \Twig\Loader\FilesystemLoader(APP.$this->sTemplateDir);
-            $this->oLayout = new \Twig\Environment($oTemplateLoader, ['cache' => TMP.'cache'. DS . 'tpl']);
+            $oTemplateLoader = new FilesystemLoader(APP.$this->sTemplateDir);
+            $this->oLayout = new Environment($oTemplateLoader, ['cache' => TMP.'cache'. DS . 'tpl']);
             $oFuncCollection = new FunctionCollection();
             $oFilterCollection = new FilterCollection();
             // check has Security Component
@@ -119,7 +124,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     }
 
     /**
-     * Initiliazes the controller engine
+     * Initializes the controller engine
      *
      * @return void
      */
@@ -130,7 +135,11 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     private function loadActionTemplate() : void
     {
         if ($this->oTemplate === null) {
-            $this->oTemplate = $this->oLayout->load(sprintf($this->sTemplate, $this->controller, Inflector::tableize($this->action)));
+            $this->oTemplate = $this->oLayout->load(
+                sprintf($this->sTemplate,
+                $this->controller,
+                Inflector::tableize($this->action)
+            ));
         }
     }
 
@@ -147,7 +156,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
      * @param Response $response
      * @return AppController
      */
-    public function setResponse(Response $response)
+    public function setResponse(Response $response): AppController
     {
         $this->response = $response;
 
@@ -171,12 +180,12 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
 
         if ($varName === '_serialize') {
             $type = 'json';
-            $serializer = \JMS\Serializer\SerializerBuilder::create()->build();
+            $serializer = SerializerBuilder::create()->build();
             $content = $serializer->serialize($value, $type);
             echo $content;
             exit;
         }
-        if ($varName !== null) {
+        if (!is_array($varName)) {
             $this->tplData[$varName] = $value;
         } else {
             $this->tplData = array_merge($this->tplData, $varName);
@@ -184,7 +193,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     }
 
     /**
-     * Renders the a template
+     * Renders the template
      * @return void
      */
     public function render() : void
@@ -253,10 +262,8 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
      * @param bool $permanent
      *
      * @throw Exception
-     *
-     * @return void
      */
-    public function redirect(string $destination, bool $permanent = false) : void
+    public function redirect(string $destination, bool $permanent = false)
     {
         if (empty($destination)) {
             throw new Exception('destination cannot be empty');
@@ -267,7 +274,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
 
             $components = $this->getComponentCollection();
             if (!empty($components)) {
-                foreach ($components as $value => $component) {
+                foreach ($components as $component) {
                     foreach ($component->implementedEvents() as $hook => $func) {
                         if ($func === 'beforeRedirect') {
                             $this->getEventManager()->on($component);
@@ -325,12 +332,12 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     }
 
     /**
-     * @param object $ohEntity
+     * @param $model
      * @return void
      */
-    protected function showValidateErrors($ohEntity)
+    protected function showValidateErrors($model)
     {
-        $ahErrors = $ohEntity->getErrors();
+        $ahErrors = $model->getErrors();
         $asFields = [];
         if (!empty($ahErrors)) {
             foreach ($ahErrors as $sField => $ahError) {
@@ -347,6 +354,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
 
     /**
      * @param string $component
+     * @param array $config
      * @return void
      */
     public function loadComponent(string $component, array $config=[]) : void
@@ -355,7 +363,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         $this->componentCollection->add($component, $config);
     }
 
-    public function getComponentCollection()
+    public function getComponentCollection(): ?ComponentCollection
     {
         return $this->componentCollection;
     }
