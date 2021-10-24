@@ -17,9 +17,9 @@ final class Flash
 {
     /** @var Segment $oFlashSession */
     private $oFlashSession = null;
-    protected static $_create = null;
 
-    private static $_alterTypes = [
+    /** @var string[] $flashTypes */
+    private static $flashTypes = [
         'success',
         'info',
         'warning',
@@ -60,7 +60,7 @@ final class Flash
 
     public function __call($name, $xargs)
     {
-        if (!in_array($name, array_keys(self::$_alterTypes))) {
+        if (!in_array($name, array_keys(self::$flashTypes))) {
             throw new Exception(
                 sprintf('Method %s::%s does not exist', get_class($this), $name)
             );

@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+
 namespace CAMOO\Http;
 
 use CAMOO\Exception\Exception;
@@ -25,21 +26,31 @@ final class Response extends BaseResponse
 
     /** @var string $statusText HTTP status text */
     protected $statusText;
+    /**
+     * @var float
+     */
+    private $protocolVersion;
 
     public function __construct(
-        int $statusCode = 200,
-        array $headers = [],
+        int     $statusCode = 200,
+        array   $headers = [],
         ?string $content = null,
-        float $protocolVersion = 1.1,
+        float   $protocolVersion = 1.1,
         ?string $statusText = null
-  ) {
-        $this->statusCode = (int)$statusCode;
+    ) {
+        $this->statusCode = $statusCode;
         $this->headers = $headers;
-        $this->content = (string) $content;
+        $this->content = (string)$content;
         $this->protocolVersion = $protocolVersion;
         $this->statusText = $statusText;
 
-        parent::__construct($this->statusCode, $this->headers, $this->content, $this->protocolVersion, $this->statusText);
+        parent::__construct(
+            $this->statusCode,
+            $this->headers,
+            $this->content,
+            $this->protocolVersion,
+            $this->statusText
+        );
     }
 
     /**
@@ -47,7 +58,7 @@ final class Response extends BaseResponse
      *
      * @return string|null
      */
-    public function getContent()
+    public function getContent(): ?string
     {
         return $this->content;
     }
@@ -59,7 +70,8 @@ final class Response extends BaseResponse
      */
     public function getJson()
     {
-        if (($json = json_decode((string)$this->getContent(), true)) === null || (json_last_error() !== JSON_ERROR_NONE)) {
+        if (($json = json_decode((string)$this->getContent(), true)) === null ||
+            (json_last_error() !== JSON_ERROR_NONE)) {
             return [];
         }
         return $json;
@@ -70,7 +82,7 @@ final class Response extends BaseResponse
      *
      * @return string
      */
-    public function getError()
+    public function getError(): string
     {
         if (!in_array($this->getStatusCode(), [200, 201])) {
             if (($resp = $this->getJson()) && array_key_exists('error', $resp)) {
@@ -85,8 +97,9 @@ final class Response extends BaseResponse
      * Sets the response body.
      *
      * @param string|null $content
+     * @return Response
      */
-    public function withStringBody($content)
+    public function withStringBody(?string $content): Response
     {
         if ($content !== null) {
             $this->content = (string)$content;
@@ -101,15 +114,15 @@ final class Response extends BaseResponse
     /**
      * Sets header (overwrites existing header).
      *
-     * @param string          $name
+     * @param string $name
      * @param string|string[] $values
      */
-    public function setHeader($name, $values)
+    public function setHeader(string $name, $values)
     {
         if (!is_string($values) && !is_array($values)) {
             throw new Exception(
                 'Invalid header, only string|string[] allowed'
-      );
+            );
         }
         if ($values === '' || $values === []) {
             throw new Exception('Empty header not allowed');
@@ -133,9 +146,9 @@ final class Response extends BaseResponse
      * @param string $name
      * @param string $value
      */
-    public function addHeader($name, $value)
+    public function addHeader(string $name, string $value)
     {
-        if (in_array($this->normalizeHeaderName($name), self::$oneValueHeaders, true)) {
+        if (in_array($this->normalizeHeaderName($name), $this->getHeaders(), true)) {
             throw new Exception(sprintf('Cannot append header "%s".', $name));
         }
         if (!is_string($value)) {
@@ -195,7 +208,7 @@ final class Response extends BaseResponse
      * @example 'HEADER-NAME' -> 'header-name'
      *
      */
-    protected function normalizeHeaderName($name)
+    protected function normalizeHeaderName(string $name): string
     {
         if (!preg_match('/^[a-zA-Z0-9\-]+$/', $name)) {
             throw new Exception(sprintf('Invalid character in header name "%s".', $name));
@@ -204,11 +217,11 @@ final class Response extends BaseResponse
         return str_replace('_', '-', strtolower($name));
     }
 
-	/**
-	 * @return string
-	 */
-	public function __toString() : string
-	{
-		return $this->getContent();
-	}
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->getContent();
+    }
 }

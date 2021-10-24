@@ -28,7 +28,7 @@ final class Caller
     public $plugin = null;
     public $xargs = [];
     public $uri = null;
-    private $__controllerRaw = 'Pages';
+    private $controllerName = 'Pages';
 
     /** @var string $sConfigDir */
     protected $sConfigDir;
@@ -60,7 +60,7 @@ final class Caller
         $serverRequest =  new ServerRequest($request);
         $oController->request = $serverRequest;
         $oController->action = $this->action;
-        $oController->controller = $this->__controllerRaw;
+        $oController->controller = $this->controllerName;
         $oController->setResponse(new Response());
         $oController->wakeUpController();
         return $oController;
@@ -87,7 +87,11 @@ final class Caller
                 }
 
                 if (!method_exists($controller, $this->action)) {
-                    throw new Exception(sprintf('Action %s does not exist in %s', $this->action, get_class($controller)));
+                    throw new Exception(sprintf(
+                        'Action %s does not exist in %s',
+                        $this->action,
+                        get_class($controller)
+                    ));
                 }
                 return call_user_func_array([$controller, $this->action], $this->xargs);
             });
@@ -130,12 +134,12 @@ final class Caller
                     if (strpos($action, '-') !== false) {
                         $action = Inflector::camelize($action);
                     }
-                    $this->action = trim($action,'/');
+                    $this->action = trim($action, '/');
                 }
 
                 if ($controller) {
-                    $this->__controllerRaw = ucfirst($controller);
-                    $this->controller = '\\App\\Controller\\' .$this->__controllerRaw.'Controller';
+                    $this->controllerName = ucfirst($controller);
+                    $this->controller = '\\App\\Controller\\' .$this->controllerName.'Controller';
                 }
 
                 $this->dispatchRequest();
@@ -146,12 +150,12 @@ final class Caller
                 $handler = $routeInfo[1];
                 $vars = $routeInfo[2];
                 if (array_key_exists('controller', $handler)) {
-                    $this->__controllerRaw = ucfirst($handler['controller']);
-                    $this->controller = '\\App\\Controller\\' .$this->__controllerRaw.'Controller';
+                    $this->controllerName = ucfirst($handler['controller']);
+                    $this->controller = '\\App\\Controller\\' .$this->controllerName.'Controller';
                 }
 
                 if (array_key_exists('action', $handler)) {
-                    $this->action = trim($handler['action'],'/');
+                    $this->action = trim($handler['action'], '/');
                 }
 
                 if (!empty($vars)) {

@@ -4,8 +4,7 @@ declare(strict_types=1);
 require_once CORE_PATH. 'include/function.php';
 require_once CORE_PATH. 'config/constants.php';
 
-use Cake\Cache\Engine\FileEngine;
-use Cake\Cache\Cache;
+
 use Whoops\Run;
 use Whoops\Handler\JsonResponseHandler;
 use Whoops\Handler\PlainTextHandler;
@@ -15,6 +14,7 @@ use Cake\Datasource\ConnectionManager;
 use CAMOO\Error\ErrorHandler;
 use CAMOO\Error\ExceptionRenderer;
 use Whoops\Util\Misc;
+use Cake\Core\Configure as CakeConfigure;
 
 Configure::load(CONFIG. 'app.php', false);
 require_once CORE_PATH. 'include/tools.php';
@@ -45,3 +45,4 @@ $run->register();
 if (Configure::check('Database') === true) {
     ConnectionManager::setConfig('default', Configure::read('Database.default'));
 }
+CakeConfigure::write('App.paths.locales', [Configure::read('App.paths.locales')]);

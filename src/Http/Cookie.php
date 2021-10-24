@@ -8,7 +8,7 @@ use Overclokk\Cookie\Cookie as BaseCookie;
 
 class Cookie extends BaseCookie
 {
-    protected static $_create = null;
+    protected static $createInstance = null;
 
     /**
      * Init class
@@ -25,10 +25,10 @@ class Cookie extends BaseCookie
      */
     public static function create(): ?self
     {
-        if (null === static::$_create) {
-            static::$_create = new self;
+        if (null === static::$createInstance) {
+            static::$createInstance = new self;
         }
-        return static::$_create;
+        return static::$createInstance;
     }
 
     public function __get($key)
@@ -45,7 +45,8 @@ class Cookie extends BaseCookie
             $default += $default;
         }
 
-        return $this->set($name,
+        return $this->set(
+            $name,
             $default['value'],
             $default['expire'],
             $default['path'],

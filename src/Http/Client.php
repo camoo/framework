@@ -60,7 +60,8 @@ class Client
         if (!is_int($timeout) || $timeout < 0) {
             throw new Exception(sprintf(
                 'Connection timeout must be an int >= 0, got "%s".',
-                is_object($timeout) ? get_class($timeout) : gettype($timeout).' '.var_export($timeout, true)
+                is_object($timeout) ? get_class($timeout) : gettype($timeout).' '.
+                    var_export($timeout, true)
             ));
         }
         if (!empty($timeout)) {
@@ -89,7 +90,7 @@ class Client
      */
     protected function performRequest(string $method, ?string $endpoint, $payload, ?array $header): ResponseInterface
     {
-        $type = $this->_validVerb($payload, $header);
+        $type = $this->validateRequestType($payload, $header);
         $data = ['headers' => $header];
         if (!empty($payload)) {
             $data[$this->hRequestVerbs[$method][$type]] = $payload;
@@ -99,7 +100,6 @@ class Client
             return $this->oClient->request($method, $endpoint, $data);
         } catch (Throwable $exception) {
             throw new Exception($exception->getMessage(), $exception->getCode());
-
         }
     }
 
@@ -109,7 +109,7 @@ class Client
         return (json_last_error() == JSON_ERROR_NONE);
     }
 
-    protected function _validVerb($payload, &$header): string
+    protected function validateRequestType($payload, &$header): string
     {
         $type = 'raw';
         $sUserAgent = implode(' ', $this->userAgent);
