@@ -3,7 +3,6 @@
 namespace CAMOO\Cache;
 
 use CAMOO\Interfaces\CacheSystemFactoryInterface;
-use CAMOO\Interfaces\FilesystemAdapterInterface;
 use CAMOO\Exception\Exception;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 
@@ -14,8 +13,8 @@ use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 final class CacheSystemFactory implements CacheSystemFactoryInterface
 {
 
-    /** @var CacheSystemFactoryInterface|null $_created */
-    private static $_created = null;
+    /** @var CacheSystemFactoryInterface|null $created */
+    private static $created = null;
 
     /**
      * creates instances of Factory
@@ -23,18 +22,18 @@ final class CacheSystemFactory implements CacheSystemFactoryInterface
      */
     public static function create() : CacheSystemFactoryInterface
     {
-        if (null === static::$_created) {
-            static::$_created = new self;
+        if (null === self::$created) {
+            self::$created = new self;
         }
 
-        return static::$_created;
+        return self::$created;
     }
 
     /**
      * @param string $name class name
      * @return bool
      */
-    protected function classExists($name)
+    protected function classExists(string $name): bool
     {
         return class_exists($name);
     }
@@ -42,19 +41,21 @@ final class CacheSystemFactory implements CacheSystemFactoryInterface
     /**
      * @param array $options
      *
-     * @return FilesystemAdapterInterface
-     * @throws Exception
+     * @return FilesystemAdapter
      */
-    public function getFileSystemAdapter(array $options=[]) : FilesystemAdapter
+    public function getFileSystemAdapter(array $options = []) : FilesystemAdapter
     {
         $default = [
             'namespace' => CacheSystemFactoryInterface::CACHE_DIRNAME,
-            'ttl'		=> CacheSystemFactoryInterface::CACHE_TTL,
+            'ttl'       => CacheSystemFactoryInterface::CACHE_TTL,
             'dirname'   => CacheSystemFactoryInterface::CACHE_DIRNAME
         ];
         $options = array_merge($default, $options);
-        if (!$this->classExists(\Symfony\Component\Cache\Adapter\FilesystemAdapter::class)) {
-            throw new Exception(sprintf('Adapter Class %s cannot be foud', 'Symfony\Component\Cache\Adapter\FilesystemAdapter'));
+        if (!$this->classExists(FilesystemAdapter::class)) {
+            throw new Exception(sprintf(
+                'Adapter Class %s cannot be found',
+                'Symfony\Component\Cache\Adapter\FilesystemAdapter'
+            ));
         }
         return new FilesystemAdapter($options['namespace'], $options['ttl'], TMP.'cache'.DS.$options['dirname']);
     }

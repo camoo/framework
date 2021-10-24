@@ -2,6 +2,8 @@
 
 namespace CAMOO\Cache;
 
+use CAMOO\Interfaces\CacheSystemFactoryInterface;
+
 /**
  * Class Base
  * @author CamooSarl
@@ -13,9 +15,9 @@ class Base
     private $cacheFactory = [CacheSystemFactory::class, 'create'];
 
     /**
-     * @return FileSystemFactoryInterface
+     * @return CacheSystemFactoryInterface
      */
-    protected function loadFactory()
+    protected function loadFactory(): CacheSystemFactoryInterface
     {
         return call_user_func($this->cacheFactory);
     }

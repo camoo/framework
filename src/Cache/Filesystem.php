@@ -1,21 +1,24 @@
 <?php
 namespace CAMOO\Cache;
 
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use CAMOO\Interfaces\CacheInterface;
 use DateTime;
-use CAMOO\Interfaces\ExceptionInterface;
 use DateInterval;
+use Throwable;
 
 class Filesystem extends Base implements CacheInterface
 {
-    /*@var CacheInterface $oCache */
+    /** @var CacheInterface|FilesystemAdapter $oCache */
     private $oCache = null;
 
+    private const INVALID_MESSAGE = 'key is not a legal value';
+
     /**
-     * @param Array $options
+     * @param array $options
      */
-    public function __construct(array $options=[])
+    public function __construct(array $options = [])
     {
         if ($this->oCache === null) {
             $this->oCache = $this->loadFactory()->getFileSystemAdapter($options);
@@ -30,7 +33,7 @@ class Filesystem extends Base implements CacheInterface
      *
      * @return mixed The value of the item from the cache, or $default in case of cache miss.
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException|\Psr\Cache\InvalidArgumentException
      *   MUST be thrown if the $key string is not a legal value.
      */
     public function get($key, $default = null)
@@ -48,44 +51,47 @@ class Filesystem extends Base implements CacheInterface
     /**
      * Persists data in the cache, uniquely referenced by a key with an optional expiration TTL time.
      *
-     * @param string                 $key   The key of the item to store.
-     * @param mixed                  $value The value of the item to store, must be serializable.
-     * @param null|int|\DateInterval|string $ttl   Optional. The TTL value of this item. If no value is sent and
+     * @param string $key The key of the item to store.
+     * @param mixed $value The value of the item to store, must be serializable.
+     * @param null|int|\DateInterval|string $ttl Optional. The TTL value of this item. If no value is sent and
      *                                      the driver supports TTL then the library may set a default value
      *                                      for it or let the driver take care of that.
      *
      * @return bool True on success and false on failure.
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \Psr\Cache\InvalidArgumentException
      *   MUST be thrown if the $key string is not a legal value.
      */
-    public function set($key, $value, $ttl = 0)
+    public function set($key, $value, $ttl = null): ?bool
     {
         if (!is_string($key) || trim($key) === '') {
-            throw new InvalidArgumentException("key is not a legal value");
+            throw new InvalidArgumentException(self::INVALID_MESSAGE);
         }
 
-        if (preg_match('/^\+/', $ttl)) {
+        if (is_string($ttl) && preg_match('/^\+/', $ttl)) {
             try {
                 $oNow = new DateTime('now');
                 $sec = $oNow->modify($ttl)->getTimestamp() - time();
                 if ($sec < 0) {
                     throw new InvalidArgumentException("ttl is not a legal value");
                 }
-                $ttl = new DateInterval(sprintf('PT%dS', (int)$sec));
-            } catch (ExceptionInterface $exception) {
+                $ttl = new DateInterval(sprintf('PT%dS', $sec));
+            } catch (Throwable $exception) {
                 throw new InvalidArgumentException("ttl is not a legal value");
             }
         }
 
         $cache = $this->oCache->getItem($key);
-        if (!$cache->isHit()) {
-            $cache->set($value);
-            if (!empty($ttl)) {
-                $cache->expiresAfter($ttl);
-            }
-            return $this->oCache->save($cache);
+        if ($cache->isHit()) {
+            return null;
         }
+
+        $cache->set($value);
+        if (!empty($ttl)) {
+            $cache->expiresAfter($ttl);
+        }
+        return $this->oCache->save($cache);
     }
 
     /**
@@ -95,7 +101,7 @@ class Filesystem extends Base implements CacheInterface
      *
      * @return bool True if the item was successfully removed. False if there was an error.
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException|\Psr\Cache\InvalidArgumentException
      *   MUST be thrown if the $key string is not a legal value.
      */
     public function delete($key)
@@ -133,7 +139,7 @@ class Filesystem extends Base implements CacheInterface
     {
         try {
             return (new Psr16Cache($this->oCache))->getMultiple($keys, $default);
-        } catch (\Symfony\Component\Cache\Exception\InvalidArgumentException $err) {
+        } catch (Throwable $err) {
             throw new InvalidArgumentException($err->getMessage());
         }
     }
@@ -156,7 +162,7 @@ class Filesystem extends Base implements CacheInterface
     {
         try {
             return (new Psr16Cache($this->oCache))->setMultiple($values, $ttl);
-        } catch (\Symfony\Component\Cache\Exception\InvalidArgumentException $err) {
+        } catch (Throwable $err) {
             throw new InvalidArgumentException($err->getMessage());
         }
     }
@@ -176,7 +182,7 @@ class Filesystem extends Base implements CacheInterface
     {
         try {
             return (new Psr16Cache($this->oCache))->deleteMultiple($keys);
-        } catch (\Symfony\Component\Cache\Exception\InvalidArgumentException $err) {
+        } catch (Throwable $err) {
             throw new InvalidArgumentException($err->getMessage());
         }
     }
@@ -193,8 +199,8 @@ class Filesystem extends Base implements CacheInterface
      *
      * @return bool
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      *   MUST be thrown if the $key string is not a legal value.
+     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function has($key)
     {

@@ -22,7 +22,7 @@ final class Cache
     {
         $hConfig = self::getConfig($config);
         $class = $hConfig['className'];
-        if (array_key_exists('serialize', $hConfig) && $hConfig['serialize'] === true) {
+        if (array_key_exists('serialize', $hConfig) && $hConfig['serialize'] == true) {
             $value = serialize($value);
         }
         return (new $class)->set($key, $value, Configure::read('Cache.'.$config.'.duration'));
@@ -39,7 +39,7 @@ final class Cache
         $class = $hConfig['className'];
 
         $value = (new $class)->get($key);
-        if (!empty($value) && array_key_exists('serialize', $hConfig) && $hConfig['serialize'] === true) {
+        if (!empty($value) && array_key_exists('serialize', $hConfig) && $hConfig['serialize'] == true) {
             $value = unserialize($value);
         }
 
@@ -78,7 +78,7 @@ final class Cache
     {
         $hConfig = self::getConfig($config);
         $class = $hConfig['className'];
-        return (new $class)->clear($key);
+        return (new $class)->clear();
     }
 
     /**
