@@ -64,7 +64,7 @@ class Configure
      *
      * @return void
      */
-    public function write($sKey, $xValue=[]) : void
+    public static function write($sKey, $xValue=[]) : void
     {
         $hNewConf =[];
         self::addConf($hNewConf, $sKey, $xValue);

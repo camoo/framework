@@ -77,7 +77,8 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
             $uid = $this->getUserId();
             $request = $this->getRequest();
             if (!empty($request->getSession()->check('Basket')) || $force === true) {
-                $currentIdentifier = $request->getSession()->check('Basket') ? $request->getSession()->read('Basket') : uniqid('Basket', false);
+                $currentIdentifier = $request->getSession()->check('Basket') ?
+                    $request->getSession()->read('Basket') : uniqid('Basket', false);
                 $asCurrentIdentifier = explode('_', $currentIdentifier);
                 if (count($asCurrentIdentifier) < 2 && !empty($uid)) {
                     self::$basketKey = sprintf('Basket_%s', $uid);
@@ -221,10 +222,10 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
      * Adds an Item into Cart
      *
      * @param string $key
-     * @param string $value
+     * @param mixed $value
      * @return void
      */
-    public function addItem(string $key, string $value): void
+    public function addItem(string $key, $value): void
     {
         $this->offsetSet($key, $value);
     }

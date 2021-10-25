@@ -87,7 +87,7 @@ final class Cache
      */
     private static function getConfig(string $config) : array
     {
-        $default = ['className' => 'CAMOO\Cache\Filesystem'];
+        $default = ['className' => Filesystem::class];
         if (!Configure::check('Cache.' . $config)) {
             throw new AppException(sprintf('Cache Configuration %s is missing', $config));
         }
