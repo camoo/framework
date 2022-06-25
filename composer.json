@@ -3,7 +3,7 @@
   "description": "CAMOO Framework",
   "type": "library",
   "require": {
-    "php": ">=7.2.0",
+    "php": ">=7.4.0",
     "vlucas/valitron": "^1.4",
     "guzzlehttp/guzzle": "^6.2",
     "ext-mbstring": "*",
@@ -68,5 +68,10 @@
   "support": {
     "issues": "https://gitlab.com/camoo/framework/issues",
     "source": "https://gitlab.com/camoo/framework"
+  },
+  "config": {
+    "allow-plugins": {
+      "composer/package-versions-deprecated": true
+    }
   }
 }

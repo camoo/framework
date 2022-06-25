@@ -34,4 +34,9 @@ class Inflector
         }
         return call_user_func_array([$inflector, $method], $args);
     }
+
+    public static function humanize(string $word, string $separator = '_'): string
+    {
+        return implode(' ', array_map([self::class, 'classify'], explode($separator, $word)));
+    }
 }
