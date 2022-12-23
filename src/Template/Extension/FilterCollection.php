@@ -1,16 +1,18 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Template\Extension;
 
-use Countable;
-use Iterator;
 use ArrayAccess;
-use InvalidArgumentException;
 use CAMOO\Interfaces\TemplateFilterInterface;
+use Countable;
+use InvalidArgumentException;
+use Iterator;
 
 /**
  * Class FilterCollection
+ *
  * @author CamooSarl
  */
 final class FilterCollection implements Countable, Iterator, ArrayAccess
@@ -32,9 +34,6 @@ final class FilterCollection implements Countable, Iterator, ArrayAccess
         }
     }
 
-    /**
-     * @param mixed $filter
-     */
     public function add($filter)
     {
         $this->offsetSet(null, $filter);
@@ -115,8 +114,10 @@ final class FilterCollection implements Countable, Iterator, ArrayAccess
     /**
      * Implementation of method declared in \ArrayAccess
      * Used for direct setting of values
+     *
+     * @param mixed|null $offset
      */
-    public function offsetSet($offset=null, $value)
+    public function offsetSet($offset = null, $value)
     {
         if (!($value instanceof TemplateFilterInterface)) {
             throw new InvalidArgumentException(sprintf('Offset must be an instance of %s', 'TemplateFilterInterface'));

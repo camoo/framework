@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Http;
@@ -44,20 +45,6 @@ final class Flash
         }
     }
 
-    /**
-     * @param string $message
-     * @param array $options
-     * @return void
-     */
-    public function set(string $message, array $options): void
-    {
-        $default = ['key' => 'flash', 'alert' => 'default'];
-        $options += $default;
-        $this->keys[$options['key']] = $options['alert'];
-        $this->oFlashSession->setFlashNow($options['key'], $message);
-        $this->session->write('CAMOO.SYS.FLASH', $this->keys);
-    }
-
     public function __call($name, $xargs)
     {
         if (!in_array($name, array_keys(self::$flashTypes))) {
@@ -75,16 +62,6 @@ final class Flash
         $this->set($xargs[0], ['alert' => $name]);
     }
 
-    /**
-     * @param string $key
-     * @return mixed
-     */
-    public function get(string $key)
-    {
-        $this->session->delete('CAMOO.SYS.FLASH.' . $key);
-        return $this->oFlashSession->getFlash($key);
-    }
-
     public function __get($key)
     {
         return $this->get($key);
@@ -93,6 +70,22 @@ final class Flash
     public function __set($key, $value)
     {
         $this->set($key, $value);
+    }
+
+    public function set(string $message, array $options): void
+    {
+        $default = ['key' => 'flash', 'alert' => 'default'];
+        $options += $default;
+        $this->keys[$options['key']] = $options['alert'];
+        $this->oFlashSession->setFlashNow($options['key'], $message);
+        $this->session->write('CAMOO.SYS.FLASH', $this->keys);
+    }
+
+    public function get(string $key)
+    {
+        $this->session->delete('CAMOO.SYS.FLASH.' . $key);
+
+        return $this->oFlashSession->getFlash($key);
     }
 
     public function setNext($key, $message)

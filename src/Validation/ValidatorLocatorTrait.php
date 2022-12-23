@@ -1,10 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Validation;
 
 /**
  * Trait ValidatorLocatorTrait
+ *
  * @author CamooSarl
  */
 trait ValidatorLocatorTrait

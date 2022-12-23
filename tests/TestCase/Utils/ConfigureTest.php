@@ -2,23 +2,25 @@
 
 namespace CAMOO\Test\TestCase\Utils;
 
+use CAMOO\Utils\Configure;
 use PHPUnit\Framework\TestCase;
-use \CAMOO\Utils\Configure;
 
 /**
  * Class ConfigureTest
+ *
  * @author CamooSarl
+ *
  * @covers \CAMOO\Utils\Configure
  */
 class ConfigureTest extends TestCase
 {
-    public function setUp() : void
+    public function setUp(): void
     {
         file_put_contents('/tmp/test_configure1.php', "<?php\nreturn['Config' => ['test' => true]];\n");
         file_put_contents('/tmp/test_configure2.php', "<?php\nreturn['Plugin' => ['version' => '1.0.0']];\n");
     }
 
-    public function tearDown() : void
+    public function tearDown(): void
     {
         unlink('/tmp/test_configure1.php');
         unlink('/tmp/test_configure2.php');
@@ -26,6 +28,7 @@ class ConfigureTest extends TestCase
 
     /**
      * @covers \CAMOO\Utils\Configure::load
+     *
      * @testWith        ["/tmp/test_configure1.php"]
      */
     public function testInstance($path)
@@ -35,6 +38,7 @@ class ConfigureTest extends TestCase
 
     /**
      * @covers \CAMOO\Utils\Configure::read
+     *
      * @depends testInstance
      */
     public function testRead()
@@ -45,6 +49,7 @@ class ConfigureTest extends TestCase
 
     /**
      * @covers \CAMOO\Utils\Configure::check
+     *
      * @depends testInstance
      */
     public function testCheck()
@@ -55,6 +60,7 @@ class ConfigureTest extends TestCase
 
     /**
      * @covers \CAMOO\Utils\Configure::get
+     *
      * @depends testInstance
      */
     public function testGet()
@@ -64,6 +70,7 @@ class ConfigureTest extends TestCase
 
     /**
      * @covers \CAMOO\Utils\Configure::load
+     *
      * @testWith        ["/tmp/test_configure2.php"]
      */
     public function testMerge($path2)
@@ -74,6 +81,7 @@ class ConfigureTest extends TestCase
 
     /**
      * @covers \CAMOO\Utils\Configure::write
+     *
      * @dataProvider writeProvider
      */
     public function testWriteMerge($key, $data)
@@ -84,7 +92,9 @@ class ConfigureTest extends TestCase
 
     /**
      * @covers \CAMOO\Utils\Configure::write
+     *
      * @dataProvider writeProvider
+     *
      * @runInSeparateProcess
      */
     public function testWriteNoMerge($key, $data)

@@ -1,6 +1,7 @@
 <?php
-use CAMOO\Utils\Configure;
+
 use CAMOO\Exception\Exception;
+use CAMOO\Utils\Configure;
 
 if (!function_exists('whoops_add_stack_frame')) {
     function whoops_add_stack_frame($callback)

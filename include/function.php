@@ -9,7 +9,6 @@ if (!function_exists('getEnv')) {
 
 if (!function_exists('array_key_first')) {
     /**
-     * @param array $arr
      * @return int|string|null
      */
     function array_key_first(array $arr)
@@ -17,6 +16,7 @@ if (!function_exists('array_key_first')) {
         foreach ($arr as $key => $unused) {
             return $key;
         }
+
         return null;
     }
 }

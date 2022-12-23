@@ -1,23 +1,27 @@
 <?php
+
 declare(strict_types=1);
 namespace CAMOO\Http;
 
 use Aura\Session\CsrfToken;
+use Aura\Session\Segment;
 use Aura\Session\SessionFactory;
 use CAMOO\Utils\Configure;
-use Aura\Session\Segment;
 
 final class Session
 {
     public const SEG_NAME = Session::class;
-    private $oSession=null;
+
     protected static $_create = null;
+
     protected static $__cookie = null;
+
+    private $oSession = null;
 
     public function __construct()
     {
         if (null === $this->oSession) {
-            $cookies = null !== self::$__cookie? self::$__cookie : $_COOKIE;
+            $cookies = null !== self::$__cookie ? self::$__cookie : $_COOKIE;
             $this->oSession = (new SessionFactory())->newInstance($cookies);
             $hCookieParam = Configure::read('Session.cookie');
             $this->oSession->setName(Configure::read('Session.name'));
@@ -25,26 +29,30 @@ final class Session
         }
     }
 
-    /**
-     * @param array|null $cookie
-     * @return Session
-     */
-    public static function create(?array $cookie = null) : Session
+    public function __get($key)
+    {
+        return $this->get($key);
+    }
+
+    public function __set($key, $value)
+    {
+        $this->set($key, $value);
+    }
+
+    public static function create(?array $cookie = null): Session
     {
         if (null === self::$_create) {
-            self::$_create = new self;
+            self::$_create = new self();
         }
         self::$__cookie = $cookie;
+
         return self::$_create;
     }
 
-    /**
-     * @param string|null $sSegment
-     * @return Segment
-     */
     public function segment(?string $sSegment = null): Segment
     {
-        $sSegmentName = $sSegment === null? __NAMESPACE__ : $sSegment;
+        $sSegmentName = $sSegment === null ? __NAMESPACE__ : $sSegment;
+
         return $this->oSession->getSegment($sSegmentName);
     }
 
@@ -73,20 +81,11 @@ final class Session
         return $this->segment()->get($key);
     }
 
-    public function getFlash($sSegment = null) : Segment
+    public function getFlash($sSegment = null): Segment
     {
-        $sSegmentName = $sSegment === null? __NAMESPACE__. '\\Flash' : $sSegment;
+        $sSegmentName = $sSegment === null ? __NAMESPACE__ . '\\Flash' : $sSegment;
+
         return $this->oSession->getSegment($sSegmentName);
-    }
-
-    public function __get($key)
-    {
-        return $this->get($key);
-    }
-
-    public function __set($key, $value)
-    {
-        $this->set($key, $value);
     }
 
     public function regenerateId(): bool
@@ -110,15 +109,11 @@ final class Session
     }
 
     /**
-     *
      * Sets the session save path.
      *
      * @param string $path The new save path.
      *
-     * @return string
-     *
      * @see session_save_path()
-     *
      */
     public function setSavePath(string $path): string
     {
@@ -126,13 +121,9 @@ final class Session
     }
 
     /**
-     *
      * Gets the session save path.
      *
-     * @return string
-     *
      * @see session_save_path()
-     *
      */
     public function getSavePath(): string
     {
@@ -140,12 +131,8 @@ final class Session
     }
 
     /**
-     *
      * Returns the CSRF token, creating it if needed (and thereby starting a
      * session).
-     *
-     * @return CsrfToken
-     *
      */
     public function getCsrfToken(): CsrfToken
     {

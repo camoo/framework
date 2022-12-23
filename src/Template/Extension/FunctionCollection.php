@@ -1,24 +1,26 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Template\Extension;
 
-use Countable;
-use Iterator;
 use ArrayAccess;
-use InvalidArgumentException;
 use CAMOO\Interfaces\TemplateFunctionInterface;
+use Countable;
+use InvalidArgumentException;
+use Iterator;
 
 /**
  * Class FunctionCollection
+ *
  * @author CamooSarl
  */
 final class FunctionCollection implements Countable, Iterator, ArrayAccess
 {
-	/** @var array */
+    /** @var array */
     private $values = [];
 
-	/** @var int */
+    /** @var int */
     private $position = 0;
 
     /**
@@ -32,9 +34,6 @@ final class FunctionCollection implements Countable, Iterator, ArrayAccess
         }
     }
 
-    /**
-     * @param mixed $function
-     */
     public function add($function)
     {
         $this->offsetSet(null, $function);
@@ -115,8 +114,10 @@ final class FunctionCollection implements Countable, Iterator, ArrayAccess
     /**
      * Implementation of method declared in \ArrayAccess
      * Used for direct setting of values
+     *
+     * @param mixed|null $offset
      */
-    public function offsetSet($offset=null, $value)
+    public function offsetSet($offset = null, $value)
     {
         if (!($value instanceof TemplateFunctionInterface)) {
             throw new InvalidArgumentException(sprintf('Offset must be an instance of %s', 'TemplateFunctionInterface'));

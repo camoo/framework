@@ -2,29 +2,32 @@
 
 namespace CAMOO\Test\TestCase\Model;
 
+use CAMOO\Model\AppModel;
+use CAMOO\Utils\Configure;
 use PHPUnit\Framework\TestCase;
-use \CAMOO\Model\AppModel;
-use \CAMOO\Utils\Configure;
 
 /**
  * Class AppModelTest
+ *
  * @author CamooSarl
+ *
  * @covers \CAMOO\Model\AppModel
  */
 class AppModelTest extends TestCase
 {
     private $oModel;
-    private $hDBConfig = [
-             'database' => 'cm_test',
-             'user' => 'travis',
-             'password' => '',
-             'host' => '127.0.0.1',
-     ];
 
-    public function setUp() : void
+    private $hDBConfig = [
+        'database' => 'cm_test',
+        'user' => 'travis',
+        'password' => '',
+        'host' => '127.0.0.1',
+    ];
+
+    public function setUp(): void
     {
         Configure::write('Database.test', $this->hDBConfig);
-        $this->oModel = new AppModel;
+        $this->oModel = new AppModel();
     }
 
     public function testInstance()
@@ -34,6 +37,7 @@ class AppModelTest extends TestCase
 
     /**
      * @covers \CAMOO\Model\AppModel::getConnection
+     *
      * @depends testInstance
      */
     public function testGetConnection()
@@ -46,13 +50,13 @@ class AppModelTest extends TestCase
 
     /**
      * @covers \CAMOO\Model\AppModel::getConnection
+     *
      * @depends testInstance
      */
     public function testGeBuilder()
     {
         $this->oModel->setDB('test');
         $db = $this->oModel->getConnection();
-        $this->assertInstanceOf(\Doctrine\DBAL\Query\QueryBuilder::class,$this->oModel->getQueryBuilder());
+        $this->assertInstanceOf(\Doctrine\DBAL\Query\QueryBuilder::class, $this->oModel->getQueryBuilder());
     }
-
 }

@@ -1,10 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Event;
 
 /**
  * Interface EventDispatcherInterface
+ *
  * @author CamooSarl
  */
 interface EventDispatcherInterface

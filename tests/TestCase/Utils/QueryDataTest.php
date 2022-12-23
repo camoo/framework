@@ -2,12 +2,14 @@
 
 namespace CAMOO\Test\TestCase\Utils;
 
+use CAMOO\Utils\QueryData;
 use PHPUnit\Framework\TestCase;
-use \CAMOO\Utils\QueryData;
 
 /**
  * Class QueryDataTest
+ *
  * @author CamooSarl
+ *
  * @covers \CAMOO\Utils\QueryData
  */
 class QueryDataTest extends TestCase

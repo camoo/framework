@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Model\Rest;
@@ -7,6 +8,7 @@ use CAMOO\Interfaces\RestInterface;
 
 /**
  * Trait RestLocatorTrait
+ *
  * @author CamooSarl
  */
 trait RestLocatorTrait
@@ -19,7 +21,7 @@ trait RestLocatorTrait
      *
      * @return RestInterface
      */
-    public function getRestLocator() : RestFactory
+    public function getRestLocator(): RestFactory
     {
         return call_user_func($this->__restFactory);
     }

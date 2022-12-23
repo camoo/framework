@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Http;
@@ -15,20 +16,9 @@ class Cookie extends BaseCookie
      *
      * @param array $cookie $_COOKIE global variable.
      */
-    public function __construct(array $cookie = array())
+    public function __construct(array $cookie = [])
     {
         parent::__construct($cookie);
-    }
-
-    /**
-     * @return Cookie|null
-     */
-    public static function create(): ?self
-    {
-        if (null === static::$createInstance) {
-            static::$createInstance = new self;
-        }
-        return static::$createInstance;
     }
 
     public function __get($key)
@@ -54,5 +44,14 @@ class Cookie extends BaseCookie
             $default['secure'],
             $default['httponly']
         );
+    }
+
+    public static function create(): ?self
+    {
+        if (null === static::$createInstance) {
+            static::$createInstance = new self();
+        }
+
+        return static::$createInstance;
     }
 }

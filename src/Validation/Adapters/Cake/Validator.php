@@ -1,13 +1,15 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Validation\Adapters\Cake;
 
-use CAMOO\Interfaces\ValidationInterface;
 use Cake\Validation\Validator as BaseValidator;
+use CAMOO\Interfaces\ValidationInterface;
 
 /**
  * Class Validator
+ *
  * @author CamooSarl
  */
 class Validator extends BaseValidator implements ValidationInterface
@@ -21,20 +23,14 @@ class Validator extends BaseValidator implements ValidationInterface
         $this->_useI18n = false;
     }
 
-    /**
-     * @param array $data
-     * @return bool
-     */
-    public function isValid(array $data) : bool
+    public function isValid(array $data): bool
     {
         $this->xErrors = $this->errors($data);
+
         return empty($this->xErrors);
     }
 
-    /**
-     * @return array
-     */
-    public function getErrors() : array
+    public function getErrors(): array
     {
         return $this->xErrors;
     }

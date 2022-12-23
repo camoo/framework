@@ -1,4 +1,5 @@
 <?php
+
 namespace CAMOO\Cache;
 
 use Cake\Core\Exception\Exception;

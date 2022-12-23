@@ -1,21 +1,23 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Controller\Component;
 
-use Countable;
 use ArrayAccess;
-use InvalidArgumentException;
+use ArrayIterator;
+use ArrayObject;
 use CAMOO\Interfaces\ComponentInterface;
 use CAMOO\Interfaces\ControllerInterface;
 use CAMOO\Utils\Configure;
+use Countable;
+use InvalidArgumentException;
 use IteratorAggregate;
-use ArrayIterator;
 use Traversable;
-use ArrayObject;
 
 /**
  * Class ComponentCollection
+ *
  * @author CamooSarl
  */
 final class ComponentCollection implements Countable, IteratorAggregate, ArrayAccess
@@ -34,30 +36,24 @@ final class ComponentCollection implements Countable, IteratorAggregate, ArrayAc
      */
     public function __construct(ControllerInterface $controller)
     {
-        $this->controller =& $controller;
+        $this->controller = &$controller;
     }
 
-    /**
-     * @return Traversable
-     */
-    public function getIterator() : Traversable
+    public function getIterator(): Traversable
     {
         return new ArrayIterator(new ArrayObject($this->values));
     }
 
-    /**
-     * @param string $component
-     */
-    public function add(string $component, array $config=[])
+    public function add(string $component, array $config = [])
     {
-        $namespace = __NAMESPACE__ .'\\';
-        $class = sprintf('%s'.$component.'%s', $namespace, 'Component');
+        $namespace = __NAMESPACE__ . '\\';
+        $class = sprintf('%s' . $component . '%s', $namespace, 'Component');
 
         if (!class_exists($class)) {
             $asNameSpace = explode('\\', $namespace);
             array_shift($asNameSpace);
-            $nameSpace = '\\' . Configure::read('App.namespace') .'\\'. implode('\\', $asNameSpace);
-            $class = sprintf('%s'.$component.'%s', $nameSpace, 'Component');
+            $nameSpace = '\\' . Configure::read('App.namespace') . '\\' . implode('\\', $asNameSpace);
+            $class = sprintf('%s' . $component . '%s', $nameSpace, 'Component');
             if (!class_exists($class)) {
                 throw new InvalidArgumentException(sprintf('Class %s not found !', $class));
             }
@@ -145,8 +141,10 @@ final class ComponentCollection implements Countable, IteratorAggregate, ArrayAc
     /**
      * Implementation of method declared in \ArrayAccess
      * Used for direct setting of values
+     *
+     * @param mixed|null $offset
      */
-    public function offsetSet($offset=null, $value)
+    public function offsetSet($offset = null, $value)
     {
         if (!($value instanceof ComponentInterface)) {
             throw new InvalidArgumentException(sprintf('Offset must be an instance of %s', 'ComponentInterface'));

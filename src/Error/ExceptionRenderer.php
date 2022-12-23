@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Error;
@@ -6,19 +7,22 @@ namespace CAMOO\Error;
 use CAMOO\Controller\ErrorController;
 use CAMOO\Http\Response;
 use CAMOO\Http\ServerRequest;
-use Error;
+use CAMOO\Interfaces\ControllerInterface;
 use CAMOO\Interfaces\HttpExceptionInterface;
 use CAMOO\Utils\Configure;
-use CAMOO\Interfaces\ControllerInterface;
+use Error;
 
 /**
  * Class ExceptionRenderer
+ *
  * @author CamooSarl
  */
 final class ExceptionRenderer
 {
-    const MSG_NOT_FOUND = 'Page Not Found';
-    const MSG_INTERNAL_ERR = 'An Internal Error Has Occurred';
+    public const MSG_NOT_FOUND = 'Page Not Found';
+
+    public const MSG_INTERNAL_ERR = 'An Internal Error Has Occurred';
+
     /**
      * The exception being handled.
      *
@@ -48,26 +52,7 @@ final class ExceptionRenderer
         $this->controller = $this->_getController();
     }
 
-    /**
-     * Get the controller instance to handle the exception.
-     *
-     * @return \CAMOO\Controller\ErrorController
-     */
-    protected function _getController() : ControllerInterface
-    {
-        $oController = new ErrorController();
-        $oController->request = $this->request;
-        $oController->action = 'overview';
-        $oController->controller = 'Error';
-        $oController->setResponse(new Response());
-        $oController->wakeUpController();
-
-        return $oController;
-    }
-
-    /**
-     * Renders the response for the exception.
-     */
+    /** Renders the response for the exception. */
     public function render()
     {
         $exception = $this->error;
@@ -80,8 +65,26 @@ final class ExceptionRenderer
         $controller->set('code', $code);
         $controller->set('message', $message);
         $headerResponse = '%d %s';
-        header('HTTP/1.1 '. sprintf($headerResponse, $code, $message));
+        header('HTTP/1.1 ' . sprintf($headerResponse, $code, $message));
+
         return call_user_func_array([$controller, 'overview'], []);
+    }
+
+    /**
+     * Get the controller instance to handle the exception.
+     *
+     * @return \CAMOO\Controller\ErrorController
+     */
+    protected function _getController(): ControllerInterface
+    {
+        $oController = new ErrorController();
+        $oController->request = $this->request;
+        $oController->action = 'overview';
+        $oController->controller = 'Error';
+        $oController->setResponse(new Response());
+        $oController->wakeUpController();
+
+        return $oController;
     }
 
     /**
@@ -89,7 +92,7 @@ final class ExceptionRenderer
      *
      * @return string Error message
      */
-    protected function _getMessage() : string
+    protected function _getMessage(): string
     {
         $exception = $this->error;
         $message = $exception->getMessage();

@@ -2,27 +2,29 @@
 
 namespace CAMOO\Test\TestCase\File;
 
-use PHPUnit\Framework\TestCase;
-use \CAMOO\File\Json;
+use CAMOO\File\Json;
 use PHPUnit\Framework\Error\Error;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class JsonTest
+ *
  * @author CamooSarl
+ *
  * @covers \CAMOO\File\Json
  */
 class JsonTest extends TestCase
 {
     private $oJson;
 
-    public function setUp() : void
+    public function setUp(): void
     {
-        $this->oJson = new Json;
+        $this->oJson = new Json();
         file_put_contents('/tmp/test_success.json', '{"test": "OK"}');
         file_put_contents('/tmp/test_failure.json', '"test": "OK"');
     }
 
-    public function tearDown() : void
+    public function tearDown(): void
     {
         unlink('/tmp/test_success.json');
         unlink('/tmp/test_failure.json');
@@ -31,7 +33,8 @@ class JsonTest extends TestCase
 
     /**
      * @covers \CAMOO\File\Json::read
-	 * @testWith        ["/tmp/test_success.json"]
+     *
+     * @testWith        ["/tmp/test_success.json"]
      */
     public function testReadSuccess($sFile)
     {
@@ -40,21 +43,22 @@ class JsonTest extends TestCase
 
     /**
      * @covers \CAMOO\File\Json::read
-	 * @testWith        ["/tmp/test_error.json"]
+     *
+     * @testWith        ["/tmp/test_error.json"]
      */
     public function testReadError($sFile)
     {
-		$this->expectException(Error::class);
+        $this->expectException(Error::class);
         $this->oJson->read($sFile);
     }
 
     /**
      * @covers \CAMOO\File\Json::read
-	 * @testWith        ["/tmp/test_failure.json"]
+     *
+     * @testWith        ["/tmp/test_failure.json"]
      */
     public function testReadFailure($sFile)
     {
         $this->assertNull($this->oJson->read($sFile));
     }
-
 }

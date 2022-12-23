@@ -1,15 +1,17 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Template\Extension\Functions;
 
-use Twig\TwigFunction;
+use CAMOO\Exception\Exception;
 use CAMOO\Http\ServerRequest;
 use CAMOO\Interfaces\TemplateFunctionInterface;
-use CAMOO\Exception\Exception;
+use Twig\TwigFunction;
 
 /**
  * Class Html
+ *
  * @author CamooSarl
  */
 final class Html implements TemplateFunctionInterface
@@ -18,6 +20,7 @@ final class Html implements TemplateFunctionInterface
     private $request;
 
     private $css = [];
+
     private $script = [];
 
     public function __construct(ServerRequest $request)
@@ -25,7 +28,7 @@ final class Html implements TemplateFunctionInterface
         $this->request = $request;
     }
 
-    public function getFunctions() : array
+    public function getFunctions(): array
     {
         return [
             new TwigFunction('html_script', [$this, 'addJs']),
@@ -34,7 +37,7 @@ final class Html implements TemplateFunctionInterface
         ];
     }
 
-    public function addJs(string $js) : void
+    public function addJs(string $js): void
     {
         $jsExploded = explode('.', $js);
         $extension = end($jsExploded);
@@ -44,7 +47,7 @@ final class Html implements TemplateFunctionInterface
         $this->script[] = sprintf('<script src="/js/%s"></script>' . "\n", $js);
     }
 
-    public function addCss(string $css) : void
+    public function addCss(string $css): void
     {
         $cssExploded = explode('.', $css);
         $extension = end($cssExploded);
@@ -52,10 +55,10 @@ final class Html implements TemplateFunctionInterface
             $css = $css . '.css';
         }
 
-        $this->css[] = sprintf('<link rel="stylesheet" href="/css/%s">'. "\n", $css);
+        $this->css[] = sprintf('<link rel="stylesheet" href="/css/%s">' . "\n", $css);
     }
 
-    public function fetch(string $item) : string
+    public function fetch(string $item): string
     {
         if (!in_array($item, ['script', 'css'])) {
             throw new Exception(sprintf('Item %s is not allowed !', $item));
@@ -66,6 +69,7 @@ final class Html implements TemplateFunctionInterface
         foreach ($asItems as $value) {
             $htmlOut .= $value;
         }
+
         return $htmlOut;
     }
 }

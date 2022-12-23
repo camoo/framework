@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Exception\Http;
@@ -7,34 +8,29 @@ use CAMOO\Interfaces\ExceptionInterface;
 
 /**
  * Class UnauthorizedException
+ *
  * @author CamooSarl
  */
 final class UnauthorizedException extends BaseHttpException
 {
-
     /**
      * HTTP status code
      *
      * @const int
      */
-    const HTTP_CODE = 401;
+    public const HTTP_CODE = 401;
 
     /**
      * Error code storage;
      *
      * @const string
      */
-    const ERROR = 'Unauthorized';
+    public const ERROR = 'Unauthorized';
 
     /**
      * UnauthorizedException constructor.
      *
-     * @param string|null     $errorDescription
-     * @param array           $errorData
-     * @param string|null     $userTitle
-     * @param null            $userMessage
-     * @param array           $headers
-     * @param ExceptionInterface|null $previous
+     * @param null $userMessage
      */
     public function __construct(
         ?string $errorDescription = null,

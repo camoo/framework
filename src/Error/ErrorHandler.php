@@ -1,19 +1,20 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Error;
 
-use Whoops\Handler\PrettyPageHandler;
-use Whoops\Handler\Handler;
-use CAMOO\Utils\Configure;
-use Whoops\Exception\Inspector;
-use Error;
-use GuzzleHttp\Psr7;
 use CAMOO\Http\ServerRequest;
+use CAMOO\Utils\Configure;
 use CAMOO\Utils\Utility;
+use GuzzleHttp\Psr7;
+use Whoops\Exception\Inspector;
+use Whoops\Handler\Handler;
+use Whoops\Handler\PrettyPageHandler;
 
 /**
  * Class ErrorHandler
+ *
  * @author CamooSarl
  */
 final class ErrorHandler extends PrettyPageHandler
@@ -24,7 +25,7 @@ final class ErrorHandler extends PrettyPageHandler
     /** @var Inspector $inspector */
     private $inspector;
 
-    /** @var null|ServerRequest $request */
+    /** @var ServerRequest|null $request */
     private $request;
 
     public function __construct()
@@ -33,11 +34,6 @@ final class ErrorHandler extends PrettyPageHandler
         if (!$this->isCli()) {
             $this->request = new ServerRequest(Psr7\ServerRequest::fromGlobals());
         }
-    }
-
-    private function isCli() : bool
-    {
-        return Utility::isCli();
     }
 
     public function handle()
@@ -52,13 +48,14 @@ final class ErrorHandler extends PrettyPageHandler
         if ($this->isCli() === true) {
             $logName = 'cli-error.log';
         }
-        error_log($errorTrace, 3, LOGS. $logName);
+        error_log($errorTrace, 3, LOGS . $logName);
 
         if (Configure::read('debug')) {
             parent::handle();
+
             return Handler::QUIT;
         }
-    
+
         if (null !== $this->request) {
             $this->exceptionRenderer = new ExceptionRenderer($exception, $this->request);
             $this->exceptionRenderer->render();
@@ -67,7 +64,7 @@ final class ErrorHandler extends PrettyPageHandler
         return Handler::QUIT;
     }
 
-    protected function _getRequestMessage() : ?string
+    protected function _getRequestMessage(): ?string
     {
         if ($this->isCli()) {
             return null;
@@ -84,5 +81,10 @@ final class ErrorHandler extends PrettyPageHandler
         }
 
         return $message . "\n";
+    }
+
+    private function isCli(): bool
+    {
+        return Utility::isCli();
     }
 }

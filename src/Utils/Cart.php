@@ -1,25 +1,27 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Utils;
 
-use CAMOO\Http\ServerRequest;
-use CAMOO\Cache\Cache;
-use IteratorAggregate;
-use ArrayIterator;
-use Traversable;
 use ArrayAccess;
-use Countable;
+use ArrayIterator;
 use ArrayObject;
+use CAMOO\Cache\Cache;
+use CAMOO\Http\ServerRequest;
+use Countable;
 use InvalidArgumentException;
+use IteratorAggregate;
+use Traversable;
 
 /**
  * Class Cart
+ *
  * @author CamooSarl
  */
 class Cart implements IteratorAggregate, ArrayAccess, Countable
 {
-    /** @var null|int|string $user */
+    /** @var int|string|null $user */
     private $user = null;
 
     /** @var ServerRequest $withRequest */
@@ -28,7 +30,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
     /** @var array $data */
     private $data = [];
 
-    /** @var null|Cart $created */
+    /** @var Cart|null $created */
     private static $created = null;
 
     /** @var string $basketKey */
@@ -40,14 +42,36 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
     /** @var float $total_price */
     private $total_price = 0.00;
 
+    /**
+     * is not allowed to call from outside to prevent from creating multiple instances,
+     * to use the singleton, you have to obtain the instance from AdapterFactory::create() instead
+     */
+    private function __construct()
+    {
+    }
+
+    /** prevent the instance from being cloned (which would create a second instance of it) */
+    private function __clone()
+    {
+    }
+
+    /** Keeps Cart relevant properties during serialization */
+    public function __sleep()
+    {
+        return ['count', 'data', 'total_price', 'user'];
+    }
+
+    public function __get(string $key)
+    {
+        return $this->offsetGet($key);
+    }
+
     public function count()
     {
         return $this->count;
     }
 
-    /**
-     * Gets Cart total price
-     */
+    /** Gets Cart total price */
     public function getTotalPrice(): float
     {
         return $this->total_price;
@@ -58,10 +82,11 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
         self::$withRequest = $withRequest;
         if (!empty(self::$withRequest->getSession()->check('Basket'))) {
             $sObject = Cache::read(self::$withRequest->getSession()->read('Basket'), '_camoo_hosting_conf');
-            self::$created = !($sObject instanceof self) ? new self : $sObject;
+            self::$created = !($sObject instanceof self) ? new self() : $sObject;
         } elseif (self::$created === null) {
-            self::$created = new self;
+            self::$created = new self();
         }
+
         return self::$created;
     }
 
@@ -69,7 +94,6 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
      * Refresh current Cart Session Identifier
      *
      * @param bool $force
-     * @return void
      */
     public function refresh($force = false): void
     {
@@ -90,9 +114,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
         }
     }
 
-    /**
-     * Deletes entire Cart
-     */
+    /** Deletes entire Cart */
     public function delete(): void
     {
         $request = $this->getRequest();
@@ -103,31 +125,21 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
         $this->count = 0;
     }
 
-    /**
-     * @param null|int|string $uid user ID
-     */
+    /** @param int|string|null $uid user ID */
     public function setUserId($uid = null): void
     {
-
         if (null !== $uid && !in_array(gettype($uid), ['string', 'integer'])) {
-            throw new InvalidArgumentException(sprintf('Value of "uid" should be of type %s or %s',
-                'Numeric', 'String'));
+            throw new InvalidArgumentException(sprintf(
+                'Value of "uid" should be of type %s or %s',
+                'Numeric',
+                'String'
+            ));
         }
 
         $this->user = $uid;
     }
 
-    /**
-     * @return null|int|string $uid
-     */
-    protected function getUserId()
-    {
-        return $this->user;
-    }
-
-    /**
-     * Saves current Cart
-     */
+    /** Saves current Cart */
     public function save(): ?bool
     {
         $request = $this->getRequest();
@@ -146,73 +158,21 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
         return Cache::write(self::$basketKey, $this, '_camoo_hosting_conf');
     }
 
-    /**
-     * is not allowed to call from outside to prevent from creating multiple instances,
-     * to use the singleton, you have to obtain the instance from AdapterFactory::create() instead
-     */
-    private function __construct()
-    {
-    }
-
-    /**
-     * prevent the instance from being cloned (which would create a second instance of it)
-     */
-    private function __clone()
-    {
-    }
-
-    /**
-     * Keeps Cart relevant properties during serialization
-     */
-    public function __sleep()
-    {
-        return ['count', 'data', 'total_price', 'user'];
-    }
-
-    /**
-     * @return ServerRequest
-     */
-    private function getRequest(): ServerRequest
-    {
-        return self::$withRequest;
-    }
-
-    /**
-     * @param ServerRequest $request
-     *
-     * @return void
-     */
     public function addRequest(ServerRequest $request): void
     {
         self::$withRequest = $request;
     }
 
-    /**
-     * @return Traversable
-     */
     public function getIterator(): Traversable
     {
         return new ArrayIterator(new ArrayObject($this->data));
     }
 
-    public function __get(string $key)
-    {
-        return $this->offsetGet($key);
-    }
-
-    /**
-     * @param string $key
-     * @return bool
-     */
     public function has(string $key): bool
     {
         return $this->offsetExists($key);
     }
 
-    /**
-     * @param string $key
-     * @return mixed
-     */
     public function get(string $key)
     {
         return $this->offsetGet($key);
@@ -220,16 +180,11 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
 
     /**
      * Adds an Item into Cart
-     *
-     * @param string $key
-     * @param mixed $value
-     * @return void
      */
     public function addItem(string $key, $value): void
     {
         $this->offsetSet($key, $value);
     }
-
 
     public function removeItem(string $key): void
     {
@@ -243,11 +198,11 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
 
     public function offsetGet($key)
     {
-        if ($this->offsetExists($key)):
+        if ($this->offsetExists($key)) {
             return $this->data[$key];
-        else:
-            return null;
-        endif;
+        }
+
+        return null;
     }
 
     public function offsetSet($key, $value)
@@ -318,6 +273,17 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
             }
             $this->save();
         }
+    }
+
+    /** @return int|string|null $uid */
+    protected function getUserId()
+    {
+        return $this->user;
+    }
+
+    private function getRequest(): ServerRequest
+    {
+        return self::$withRequest;
     }
 
     private function isValueMultiDimensional(array $value): bool

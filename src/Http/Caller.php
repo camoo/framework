@@ -1,37 +1,44 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Http;
 
 use CAMOO\Controller\AppController;
+use CAMOO\Event\Event;
+use CAMOO\Event\EventDispatcherTrait;
+use CAMOO\Exception\Exception;
+use CAMOO\Interfaces\ControllerInterface;
+use CAMOO\Utils\Inflector;
 use FastRoute\Dispatcher\GroupCountBased;
 use FastRoute\RouteCollector;
+use function FastRoute\simpleDispatcher;
+use GuzzleHttp\Psr7;
 use Middlewares\FastRoute;
 use Middlewares\RequestHandler;
 use Middlewares\Utils\Dispatcher;
-use GuzzleHttp\Psr7;
-use CAMOO\Interfaces\ControllerInterface;
-use CAMOO\Event\Event;
-use CAMOO\Exception\Exception;
-use CAMOO\Event\EventDispatcherTrait;
-use CAMOO\Utils\Inflector;
 use Psr\Http\Message\ResponseInterface;
-use function FastRoute\simpleDispatcher;
 
 final class Caller
 {
     use EventDispatcherTrait;
 
-    protected $hRequest = [];
     public $controller = '\\App\\Controller\\PagesController';
+
     public $action = 'overview';
+
     public $plugin = null;
+
     public $xargs = [];
+
     public $uri = null;
-    private $controllerName = 'Pages';
+
+    protected $hRequest = [];
 
     /** @var string $sConfigDir */
     protected $sConfigDir;
+
+    private $controllerName = 'Pages';
 
     public function __construct(string $configDir)
     {
@@ -39,30 +46,24 @@ final class Caller
         $this->initialize();
     }
 
-    protected function initialize() : void
-    {
-        $this->bootstrap();
-        $this->route();
-    }
-
-    public function bootstrap() : void
+    public function bootstrap(): void
     {
         require_once $this->sConfigDir . '/bootstrap.php';
     }
 
     /**
-     * @param Psr7\ServerRequest|null $request
      * @return ControllerInterface|AppController
      */
-    public function getController(?Psr7\ServerRequest $request = null) : ControllerInterface
+    public function getController(?Psr7\ServerRequest $request = null): ControllerInterface
     {
         $oController = new $this->controller();
-        $serverRequest =  new ServerRequest($request);
+        $serverRequest = new ServerRequest($request);
         $oController->request = $serverRequest;
         $oController->action = $this->action;
         $oController->controller = $this->controllerName;
         $oController->setResponse(new Response());
         $oController->wakeUpController();
+
         return $oController;
     }
 
@@ -93,6 +94,7 @@ final class Caller
                         get_class($controller)
                     ));
                 }
+
                 return call_user_func_array([$controller, $this->action], $this->xargs);
             });
         });
@@ -105,22 +107,21 @@ final class Caller
         return $dispatcher->dispatch(Psr7\ServerRequest::fromGlobals());
     }
 
-    public function route() : void
+    public function route(): void
     {
-
         $dispatcher = require_once $this->sConfigDir . '/route.php';
         /** @var GroupCountBased $routeDispatcher */
         $routeDispatcher = $dispatcher[0];
-        $this->uri = $uri = (new Psr7\Uri(getEnv('REQUEST_URI')))->getPath();
+        $this->uri = $uri = (new Psr7\Uri(getenv('REQUEST_URI')))->getPath();
 
-        $routeInfo = $routeDispatcher->dispatch(getEnv('REQUEST_METHOD'), $uri);
+        $routeInfo = $routeDispatcher->dispatch(getenv('REQUEST_METHOD'), $uri);
 
         switch ($routeInfo[0]) {
             case \FastRoute\Dispatcher::NOT_FOUND:
                 $action = null;
-                $asUri = explode("/", ltrim($uri, '/'));
+                $asUri = explode('/', ltrim($uri, '/'));
                 if (count($asUri) >= 2) {
-                    list($controller, $action) = explode('/', ltrim($uri, '/'), 2);
+                    [$controller, $action] = explode('/', ltrim($uri, '/'), 2);
                     array_shift($asUri);
                     array_shift($asUri);
                     if (!empty($action)) {
@@ -139,7 +140,7 @@ final class Caller
 
                 if ($controller) {
                     $this->controllerName = ucfirst($controller);
-                    $this->controller = '\\App\\Controller\\' .$this->controllerName.'Controller';
+                    $this->controller = '\\App\\Controller\\' . $this->controllerName . 'Controller';
                 }
 
                 $this->dispatchRequest();
@@ -151,7 +152,7 @@ final class Caller
                 $vars = $routeInfo[2];
                 if (array_key_exists('controller', $handler)) {
                     $this->controllerName = ucfirst($handler['controller']);
-                    $this->controller = '\\App\\Controller\\' .$this->controllerName.'Controller';
+                    $this->controller = '\\App\\Controller\\' . $this->controllerName . 'Controller';
                 }
 
                 if (array_key_exists('action', $handler)) {
@@ -165,5 +166,11 @@ final class Caller
                 $this->dispatchRequest();
                 break;
         }
+    }
+
+    protected function initialize(): void
+    {
+        $this->bootstrap();
+        $this->route();
     }
 }

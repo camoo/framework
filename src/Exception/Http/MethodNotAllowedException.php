@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Exception\Http;
@@ -7,34 +8,29 @@ use CAMOO\Interfaces\ExceptionInterface;
 
 /**
  * Class MethodNotAllowedException
+ *
  * @author CamooSarl
  */
 final class MethodNotAllowedException extends BaseHttpException
 {
-
     /**
      * HTTP status code
      *
      * @const int
      */
-    const HTTP_CODE = 405;
+    public const HTTP_CODE = 405;
 
     /**
      * Error code storage;
      *
      * @const string
      */
-    const ERROR = 'Method Not Allowed';
+    public const ERROR = 'Method Not Allowed';
 
     /**
      * MethodNotAllowedException constructor.
      *
-     * @param string|null     $errorDescription
-     * @param array           $errorData
-     * @param string|null     $userTitle
-     * @param null            $userMessage
-     * @param array           $headers
-     * @param ExceptionInterface|null $previous
+     * @param null $userMessage
      */
     public function __construct(
         ?string $errorDescription = null,

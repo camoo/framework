@@ -1,15 +1,18 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Event;
 
 /**
  * Trait EventDispatcherTrait
+ *
  * @author CamooSarl
  */
 trait EventDispatcherTrait
 {
     protected $_eventClass = Event::class;
+
     protected $_eventManager;
 
     public function getEventManager()

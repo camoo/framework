@@ -1,20 +1,21 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Template\Extension;
 
 /**
  * Class Functions
+ *
  * @author CamooSarl
  */
 class Functions
 {
+    /** @var ServerRequest $request */
+    protected $request;
 
     /** @var TwigHelper */
     private $baseHelper;
-
-    /** @var ServerRequest $request */
-    protected $request;
 
     public function __construct(TwigHelper $baseHelper)
     {
@@ -22,7 +23,7 @@ class Functions
         $this->request = $baseHelper->getRequest();
     }
 
-    public function initialize() : void
+    public function initialize(): void
     {
         //$this->baseHelper->loadFunction('Form');
     }

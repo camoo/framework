@@ -1,10 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Utils;
 
-use Doctrine\Inflector\InflectorFactory;
 use CAMOO\Exception\Exception;
+use Doctrine\Inflector\InflectorFactory;
 
 /**
  * @method static string capitalize(string $word)
@@ -19,9 +20,7 @@ use CAMOO\Exception\Exception;
  */
 class Inflector
 {
-    /**
-     * Inflector should not be Instantiated
-     */
+    /** Inflector should not be Instantiated */
     private function __construct()
     {
     }
@@ -30,8 +29,9 @@ class Inflector
     {
         $inflector = InflectorFactory::create()->build();
         if (!method_exists($inflector, $method)) {
-            throw new Exception(sprintf('Method %s::%s does not exist', get_class(new self), $method));
+            throw new Exception(sprintf('Method %s::%s does not exist', get_class(new self()), $method));
         }
+
         return call_user_func_array([$inflector, $method], $args);
     }
 

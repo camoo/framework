@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Exception\Http;
@@ -7,34 +8,29 @@ use CAMOO\Interfaces\ExceptionInterface;
 
 /**
  * Class NotFoundException
+ *
  * @author CamooSarl
  */
 final class NotFoundException extends BaseHttpException
 {
-
     /**
      * HTTP status code
      *
      * @const int
      */
-    const HTTP_CODE = 404;
+    public const HTTP_CODE = 404;
 
     /**
      * Error code storage;
      *
      * @const string
      */
-    const ERROR = 'Not Found';
+    public const ERROR = 'Not Found';
 
     /**
      * NotFoundException constructor.
      *
-     * @param string|null     $errorDescription
-     * @param array           $errorData
-     * @param string|null     $userTitle
-     * @param null            $userMessage
-     * @param array           $headers
-     * @param ExceptionInterface|null $previous
+     * @param null $userMessage
      */
     public function __construct(
         ?string $errorDescription = null,

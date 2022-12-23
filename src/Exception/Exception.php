@@ -1,10 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Exception;
 
-use RuntimeException as BaseException;
 use CAMOO\Interfaces\ExceptionInterface;
+use RuntimeException as BaseException;
 use Throwable;
 
 class Exception extends BaseException implements ExceptionInterface
@@ -57,39 +58,34 @@ class Exception extends BaseException implements ExceptionInterface
      * Exception constructor.
      *
      * @param string          $errorDescription
-     * @param int             $statusCode
-     * @param array           $errorData
      * @param string          $userTitle
      * @param string          $userMessage
-     * @param array           $httpHeaders
      * @param \Exception|null $previous
      */
     public function __construct(
         ?string $errorDescription = null,
         int $statusCode = 500,
         array $errorData = [],
-        string $userTitle = null,
+        ?string $userTitle = null,
         ?string $userMessage = null,
         array $httpHeaders = [],
         ?Throwable $previous = null
     ) {
         $this->errorDescription = $errorDescription ?? 'Internal Server Error';
-        $this->errorData        = $errorData;
-        $this->userTitle        = $userTitle ?? 'Ooops!!!';
-        $this->userMessage      = $userMessage ?? 'Seems one of our developers unplugged the server again!';
-        $this->httpHeaders      = $httpHeaders;
-        $this->statusCode      = $statusCode;
+        $this->errorData = $errorData;
+        $this->userTitle = $userTitle ?? 'Ooops!!!';
+        $this->userMessage = $userMessage ?? 'Seems one of our developers unplugged the server again!';
+        $this->httpHeaders = $httpHeaders;
+        $this->statusCode = $statusCode;
 
         $originalMessage = $this->errorDescription;
-        $originalCode    = $statusCode;
+        $originalCode = $statusCode;
 
         parent::__construct($originalMessage, $originalCode, $previous);
     }
 
     /**
      * Get the HTTP status code.
-     *
-     * @return int
      */
     public function getStatusCode(): int
     {
@@ -98,10 +94,6 @@ class Exception extends BaseException implements ExceptionInterface
 
     /**
      * Set the HTTP status code.
-     *
-     * @param int $statusCode
-     *
-     * @return Exception
      */
     public function setStatusCode(int $statusCode): Exception
     {
@@ -122,10 +114,6 @@ class Exception extends BaseException implements ExceptionInterface
 
     /**
      * Set the HTTP headers.
-     *
-     * @param array $httpHeaders
-     *
-     * @return Exception
      */
     public function setHttpHeaders(array $httpHeaders): Exception
     {
@@ -136,8 +124,6 @@ class Exception extends BaseException implements ExceptionInterface
 
     /**
      * Get the error description.
-     *
-     * @return string
      */
     public function getErrorDescription(): string
     {
@@ -146,10 +132,6 @@ class Exception extends BaseException implements ExceptionInterface
 
     /**
      * Set the error description.
-     *
-     * @param string $errorDescription
-     *
-     * @return Exception
      */
     public function setErrorDescription(string $errorDescription): Exception
     {
@@ -161,7 +143,7 @@ class Exception extends BaseException implements ExceptionInterface
     /**
      * Get error data.
      *
-     * @return array|null|string
+     * @return array|string|null
      */
     public function getErrorData()
     {
@@ -171,7 +153,7 @@ class Exception extends BaseException implements ExceptionInterface
     /**
      * Set error data.
      *
-     * @param array|null|string $errorData
+     * @param array|string|null $errorData
      *
      * @return Exception
      */
@@ -184,8 +166,6 @@ class Exception extends BaseException implements ExceptionInterface
 
     /**
      * Get user title.
-     *
-     * @return string
      */
     public function getUserTitle(): string
     {
@@ -194,10 +174,6 @@ class Exception extends BaseException implements ExceptionInterface
 
     /**
      * Set user title.
-     *
-     * @param string $userTitle
-     *
-     * @return Exception
      */
     public function setUserTitle(string $userTitle): Exception
     {
@@ -209,7 +185,7 @@ class Exception extends BaseException implements ExceptionInterface
     /**
      * Get user message.
      *
-     * @return array|null|string
+     * @return array|string|null
      */
     public function getUserMessage()
     {
@@ -219,7 +195,7 @@ class Exception extends BaseException implements ExceptionInterface
     /**
      * Set user message.
      *
-     * @param array|null|string $userMessage
+     * @param array|string|null $userMessage
      *
      * @return Exception
      */

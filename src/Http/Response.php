@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Http;
@@ -11,7 +12,6 @@ use GuzzleHttp\Psr7\Response as BaseResponse;
  */
 final class Response extends BaseResponse
 {
-
     /** @var array $headers */
     protected $headers = [];
 
@@ -26,16 +26,15 @@ final class Response extends BaseResponse
 
     /** @var string $statusText HTTP status text */
     protected $statusText;
-    /**
-     * @var float
-     */
+
+    /** @var float */
     private $protocolVersion;
 
     public function __construct(
-        int     $statusCode = 200,
-        array   $headers = [],
+        int $statusCode = 200,
+        array $headers = [],
         ?string $content = null,
-        float   $protocolVersion = 1.1,
+        float $protocolVersion = 1.1,
         ?string $statusText = null
     ) {
         $this->statusCode = $statusCode;
@@ -53,10 +52,13 @@ final class Response extends BaseResponse
         );
     }
 
+    public function __toString(): string
+    {
+        return $this->getContent();
+    }
+
     /**
      * Returns the response body.
-     *
-     * @return string|null
      */
     public function getContent(): ?string
     {
@@ -74,13 +76,12 @@ final class Response extends BaseResponse
             (json_last_error() !== JSON_ERROR_NONE)) {
             return [];
         }
+
         return $json;
     }
 
     /**
      * Returns the error message
-     *
-     * @return string
      */
     public function getError(): string
     {
@@ -88,16 +89,15 @@ final class Response extends BaseResponse
             if (($resp = $this->getJson()) && array_key_exists('error', $resp)) {
                 return $resp['error'];
             }
+
             return 'Unknown Error';
         }
+
         return '';
     }
 
     /**
      * Sets the response body.
-     *
-     * @param string|null $content
-     * @return Response
      */
     public function withStringBody(?string $content): Response
     {
@@ -108,13 +108,13 @@ final class Response extends BaseResponse
             $this->content = null;
             unset($this->headers['content-type'], $this->headers['content-length']);
         }
+
         return $this;
     }
 
     /**
      * Sets header (overwrites existing header).
      *
-     * @param string $name
      * @param string|string[] $values
      */
     public function setHeader(string $name, $values)
@@ -142,9 +142,6 @@ final class Response extends BaseResponse
 
     /**
      * Sets header (appends existing header).
-     *
-     * @param string $name
-     * @param string $value
      */
     public function addHeader(string $name, string $value)
     {
@@ -202,11 +199,7 @@ final class Response extends BaseResponse
     /**
      * Transforms header name to normalized form.
      *
-     * @param string $name
-     *
-     * @return string
      * @example 'HEADER-NAME' -> 'header-name'
-     *
      */
     protected function normalizeHeaderName(string $name): string
     {
@@ -215,13 +208,5 @@ final class Response extends BaseResponse
         }
 
         return str_replace('_', '-', strtolower($name));
-    }
-
-    /**
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return $this->getContent();
     }
 }

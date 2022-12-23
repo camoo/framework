@@ -1,31 +1,36 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Model\Rest;
 
-use CAMOO\Validation\ValidatorLocatorTrait;
+use ArrayAccess;
+use ArrayIterator;
+use ArrayObject;
+use CAMOO\Event\Event;
 use CAMOO\Event\EventDispatcherInterface;
 use CAMOO\Event\EventDispatcherTrait;
 use CAMOO\Event\EventListenerInterface;
-use CAMOO\Event\Event;
-use ArrayObject;
 use CAMOO\Exception\Exception;
-use CAMOO\Interfaces\ValidationInterface;
 use CAMOO\Interfaces\RestInterface;
+use CAMOO\Interfaces\ValidationInterface;
 use CAMOO\Utils\Inflector;
+use CAMOO\Validation\ValidatorLocatorTrait;
 use IteratorAggregate;
-use ArrayIterator;
 use Traversable;
-use ArrayAccess;
 
 /**
  * Class AppRest
+ *
  * @author CamooSarl
  */
 abstract class AppRest implements RestInterface, EventListenerInterface, EventDispatcherInterface, IteratorAggregate, ArrayAccess
 {
     use ValidatorLocatorTrait;
     use EventDispatcherTrait;
+
+    /** @var mixed $output */
+    protected $output;
 
     /** @var array $errors */
     private $errors = [];
@@ -39,42 +44,10 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
     /** @var array $option */
     private $option = [];
 
-    /**@var mixed $output */
-    protected $output;
-
-    abstract public function validationDefault(ValidationInterface $validator) : ValidationInterface;
-
     public function __construct()
     {
         $this->getEventManager()->on($this);
         $this->initialized();
-    }
-
-    /**
-     * Initializes Model Rest
-     *
-     * @return void
-     */
-    public function initialized() : void
-    {
-    }
-
-    /**
-     * @param string $name
-     * @param object $object
-     * @return void
-     */
-    protected function loadRemoteObject(string $name, object $object) : void
-    {
-        $this->{$name} = $object;
-    }
-
-    /**
-     * @return Traversable
-     */
-    public function getIterator() : Traversable
-    {
-        return new ArrayIterator(new ArrayObject($this->data));
     }
 
     public function __get(string $key)
@@ -83,49 +56,47 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
         return $this->offsetGet($key);
     }
 
+    abstract public function validationDefault(ValidationInterface $validator): ValidationInterface;
+
     /**
-     * @param string $key
-     * @return bool
+     * Initializes Model Rest
      */
-    public function has(string $key) : bool
+    public function initialized(): void
+    {
+    }
+
+    public function getIterator(): Traversable
+    {
+        return new ArrayIterator(new ArrayObject($this->data));
+    }
+
+    public function has(string $key): bool
     {
         return $this->offsetExists($key);
     }
 
-    /**
-     * @param string $key
-     * @return mixed
-     */
     public function get(string $key)
     {
         return $this->offsetGet($key);
     }
 
     /**
-     * @param string $key
      * @param string $value
-     * @return void
      */
-    public function set(string $key, $value) : void
+    public function set(string $key, $value): void
     {
         $this->offsetSet($key, $value);
     }
 
-    /**
-     * @return array
-     */
-    public function getErrors() : array
+    public function getErrors(): array
     {
         return $this->errors;
     }
 
     /**
-     * @param array $callable
-     * @param bool $argIsHash
      * @throws Exception
-     * @return mixed
      */
-    public function send(array $callable, bool $argIsHash=true)
+    public function send(array $callable, bool $argIsHash = true)
     {
         if (!$this->valid) {
             throw new Exception('Invalid Data Provided !');
@@ -145,7 +116,7 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
         return $this->output;
     }
 
-    public function newRequest(array $data, bool $validate=true, array $options=[])
+    public function newRequest(array $data, bool $validate = true, array $options = [])
     {
         $default = ['validation' => 'default'];
         $options += $default;
@@ -168,6 +139,7 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
             $this->valid = true;
             $this->data = $data;
         }
+
         return $this;
     }
 
@@ -178,18 +150,20 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
 
     public function offsetGet($key)
     {
-        if ($this->offsetExists($key)):
-            return $this->data[$key]; else:
+        if ($this->offsetExists($key)) {
+            return $this->data[$key];
+        }
+
         return null;
-        endif;
     }
 
     public function offsetSet($key, $value)
     {
-        if ($key):
-            $this->data[$key] = $value; else:
-        $this->data[] = $value;
-        endif;
+        if ($key) {
+            $this->data[$key] = $value;
+        } else {
+            $this->data[] = $value;
+        }
     }
 
     public function offsetUnset($key)
@@ -197,7 +171,7 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
         unset($this->data[$key]);
     }
 
-    public function implementedEvents() : array
+    public function implementedEvents(): array
     {
         return [
             'Rest.beforeSend' => 'beforeSend',
@@ -205,20 +179,16 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
         ];
     }
 
-    /**
-     * @param Event $event
-     * @return void
-     */
-    public function beforeSend(Event $event, \ArrayObject $option) : void
+    public function beforeSend(Event $event, ArrayObject $option): void
     {
     }
 
-    /**
-     * @param Event $event
-     * @param mixed $response
-     * @return void
-     */
-    public function afterSend(Event $event, $response) : void
+    public function afterSend(Event $event, $response): void
     {
+    }
+
+    protected function loadRemoteObject(string $name, object $object): void
+    {
+        $this->{$name} = $object;
     }
 }

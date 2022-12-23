@@ -1,23 +1,23 @@
 <?php
+
 declare(strict_types=1);
 
 require_once CORE_PATH . 'include/function.php';
 require_once CORE_PATH . 'config/constants.php';
 
-
 use Cake\Cache\Cache;
 use Cake\Cache\Engine\FileEngine;
-use Cake\I18n\I18n;
-use Whoops\Run;
-use Whoops\Handler\JsonResponseHandler;
-use Whoops\Handler\PlainTextHandler;
-use CAMOO\Utils\Configure;
-use CAMOO\Utils\Utility;
+use Cake\Core\Configure as CakeConfigure;
 use Cake\Datasource\ConnectionManager;
+use Cake\I18n\I18n;
 use CAMOO\Error\ErrorHandler;
 use CAMOO\Error\ExceptionRenderer;
+use CAMOO\Utils\Configure;
+use CAMOO\Utils\Utility;
+use Whoops\Handler\JsonResponseHandler;
+use Whoops\Handler\PlainTextHandler;
+use Whoops\Run;
 use Whoops\Util\Misc;
-use Cake\Core\Configure as CakeConfigure;
 
 Configure::load(CONFIG . 'app.php', false);
 require_once CORE_PATH . 'include/tools.php';

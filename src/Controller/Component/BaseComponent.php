@@ -1,24 +1,24 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Controller\Component;
 
+use CAMOO\Event\EventListenerInterface;
 use CAMOO\Interfaces\ComponentInterface;
 use CAMOO\Interfaces\ControllerInterface;
 use CAMOO\Utils\ConfigTrait;
-use InvalidArgumentException;
 use CAMOO\Utils\Inflector;
-use CAMOO\Event\EventListenerInterface;
+use InvalidArgumentException;
 
 /**
  * Class BaseComponent
+ *
  * @author CamooSarl
  */
 class BaseComponent implements ComponentInterface, EventListenerInterface
 {
     use ConfigTrait;
-    /** @var ControllerInterface $controller */
-    private $controller;
 
     /**
      * Other Components this component uses.
@@ -34,7 +34,10 @@ class BaseComponent implements ComponentInterface, EventListenerInterface
      */
     protected $_defaultConfig = [];
 
-    public function __construct(?ControllerInterface $controller=null, array $config=[])
+    /** @var ControllerInterface $controller */
+    private $controller;
+
+    public function __construct(?ControllerInterface $controller = null, array $config = [])
     {
         if (null !== $controller) {
             $this->setController($controller);
@@ -45,7 +48,7 @@ class BaseComponent implements ComponentInterface, EventListenerInterface
         if (!empty($this->components)) {
             foreach ($this->components as $component) {
                 $component = Inflector::classify($component);
-                $class = sprintf($component.'%s', 'Component');
+                $class = sprintf($component . '%s', 'Component');
 
                 if (!class_exists($class)) {
                     throw new InvalidArgumentException(sprintf('Class %s does not exist', $component));
@@ -58,27 +61,17 @@ class BaseComponent implements ComponentInterface, EventListenerInterface
         $this->initialize($config);
     }
 
-    public function initialize(array $config=[]) : void
+    public function initialize(array $config = []): void
     {
-    }
-
-    protected function setController(ControllerInterface $controller) : void
-    {
-        $this->controller = $controller;
-    }
-
-    protected function getController() : ControllerInterface
-    {
-        return $this->controller;
     }
 
     public function implementedEvents()
     {
         $eventMap = [
-            'AppController.initialize'     => 'beforeAction',
-            'AppController.beforeRender'   => 'beforeRender',
+            'AppController.initialize' => 'beforeAction',
+            'AppController.beforeRender' => 'beforeRender',
             'AppController.beforeRedirect' => 'beforeRedirect',
-            'AppController.wakeUp'         => 'wakeUp',
+            'AppController.wakeUp' => 'wakeUp',
         ];
         $events = [];
         foreach ($eventMap as $event => $method) {
@@ -88,5 +81,15 @@ class BaseComponent implements ComponentInterface, EventListenerInterface
         }
 
         return $events;
+    }
+
+    protected function setController(ControllerInterface $controller): void
+    {
+        $this->controller = $controller;
+    }
+
+    protected function getController(): ControllerInterface
+    {
+        return $this->controller;
     }
 }

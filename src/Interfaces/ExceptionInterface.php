@@ -6,11 +6,11 @@ use Throwable;
 
 /**
  * Class ExceptionInterface
+ *
  * @author CamooSarl
  */
 interface ExceptionInterface extends Throwable
 {
-
     /**
      * The HTTP status code
      *

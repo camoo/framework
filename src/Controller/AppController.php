@@ -1,27 +1,28 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Controller;
 
 use Cake\ORM\Locator\TableLocator;
-use CAMOO\Exception\Exception;
-use CAMOO\Http\ServerRequest;
-use CAMOO\Utils\Inflector;
-use CAMOO\Http\Response;
+use CAMOO\Controller\Component\ComponentCollection;
 use CAMOO\Event\Event;
 use CAMOO\Event\EventDispatcherInterface;
 use CAMOO\Event\EventDispatcherTrait;
 use CAMOO\Event\EventListenerInterface;
+use CAMOO\Exception\Exception;
+use CAMOO\Http\Response;
+use CAMOO\Http\ServerRequest;
 use CAMOO\Interfaces\ControllerInterface;
-use CAMOO\Template\Extension\TwigHelper;
-use CAMOO\Template\Extension\FunctionCollection;
+use CAMOO\Model\Rest\RestLocatorTrait;
 use CAMOO\Template\Extension\FilterCollection;
+use CAMOO\Template\Extension\Filters\Flash;
+use CAMOO\Template\Extension\FunctionCollection;
 use CAMOO\Template\Extension\Functions\Form;
 use CAMOO\Template\Extension\Functions\Html;
-use CAMOO\Template\Extension\Filters\Flash;
-use CAMOO\Model\Rest\RestLocatorTrait;
-use CAMOO\Controller\Component\ComponentCollection;
+use CAMOO\Template\Extension\TwigHelper;
 use CAMOO\Utils\Configure;
+use CAMOO\Utils\Inflector;
 use JMS\Serializer\SerializerBuilder;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
@@ -31,11 +32,6 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     use EventDispatcherTrait;
     use RestLocatorTrait;
 
-    protected $defaultConfig = [];
-
-    /** @var ComponentCollection $componentCollection */
-    private $componentCollection = null;
-
     /** @var string|null $controller */
     public $controller = null;
 
@@ -43,20 +39,29 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     public $action = null;
 
     public $Flash = null;
-    protected $oTemplate = null;
-    protected $oLayout = null;
-    protected $sTemplate = '%s/%s.tpl';
-    protected $sTemplateDir = 'Template';
 
     /** @var ServerRequest $request */
     public $request = null;
 
+    protected $defaultConfig = [];
+
+    protected $oTemplate = null;
+
+    protected $oLayout = null;
+
+    protected $sTemplate = '%s/%s.tpl';
+
+    protected $sTemplateDir = 'Template';
+
     /** @var Response $response */
     protected $response = null;
 
-    private $http_version = '1.1';
-
     protected $tplData = [];
+
+    /** @var ComponentCollection $componentCollection */
+    private $componentCollection = null;
+
+    private $http_version = '1.1';
 
     public function __construct()
     {
@@ -89,15 +94,15 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         }
 
         if ($this->oLayout === null) {
-            $oTemplateLoader = new FilesystemLoader(APP.$this->sTemplateDir);
-            $this->oLayout = new Environment($oTemplateLoader, ['cache' => TMP.'cache'. DS . 'tpl']);
+            $oTemplateLoader = new FilesystemLoader(APP . $this->sTemplateDir);
+            $this->oLayout = new Environment($oTemplateLoader, ['cache' => TMP . 'cache' . DS . 'tpl']);
             $oFuncCollection = new FunctionCollection();
             $oFilterCollection = new FilterCollection();
             // check has Security Component
             $csrfSessionSegment = null;
             $csrf_Token = null;
             if ($this->hasComponent('Security') === true) {
-                $oSecComponent =& $this->componentCollection['Security'];
+                $oSecComponent = &$this->componentCollection['Security'];
                 $csrf_Token = $oSecComponent->csrf_Token;
                 $csrfSessionSegment = $oSecComponent->csrfSessionSegment;
                 unset($oSecComponent->csrfSessionSegment);
@@ -125,54 +130,36 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
 
     /**
      * Initializes the controller engine
-     *
-     * @return void
      */
-    public function initialize() : void
+    public function initialize(): void
     {
     }
 
-    private function loadActionTemplate() : void
-    {
-        if ($this->oTemplate === null) {
-            $this->oTemplate = $this->oLayout->load(
-                sprintf($this->sTemplate,
-                $this->controller,
-                Inflector::tableize($this->action)
-            ));
-        }
-    }
-
-    public function implementedEvents() : array
+    public function implementedEvents(): array
     {
         return [
-            'AppController.initialize'     => 'beforeAction',
-            'AppController.beforeRender'   => 'beforeRender',
+            'AppController.initialize' => 'beforeAction',
+            'AppController.beforeRender' => 'beforeRender',
             'AppController.beforeRedirect' => 'beforeRedirect',
         ];
     }
 
-    /**
-     * @param Response $response
-     * @return AppController
-     */
     public function setResponse(Response $response): AppController
     {
         $this->response = $response;
 
         $this->tplData[sprintf('%s_active', strtolower($this->controller))] = 'active';
         $this->tplData['page_title'] = ucfirst($this->controller);
+
         return $this;
     }
 
     /**
      * Sets variables to templates
      *
-     * @param string $varName
-     * @param null|int|string|array|object|mixed $value
-     * @return void
+     * @param int|string|array|object|mixed|null $value
      */
-    public function set(string $varName, $value) : void
+    public function set(string $varName, $value): void
     {
         if (empty($varName)) {
             throw new Exception('varName cannot be empty');
@@ -194,9 +181,8 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
 
     /**
      * Renders the template
-     * @return void
      */
-    public function render() : void
+    public function render(): void
     {
         $this->loadActionTemplate();
         $event = $this->dispatchEvent('AppController.beforeRender');
@@ -204,7 +190,6 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
             echo $event->getResult();
             $this->camooExit();
         }
-
 
         $components = $this->getComponentCollection();
         if (!empty($components)) {
@@ -226,7 +211,6 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     }
 
     /**
-     * @param Event $event
      * @return null
      */
     public function beforeRender(Event $event)
@@ -235,7 +219,6 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     }
 
     /**
-     * @param Event $event
      * @return null
      */
     public function beforeAction(Event $event)
@@ -244,7 +227,6 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     }
 
     /**
-     * @param Event $event
      * @return null
      */
     public function beforeRedirect(Event $event)
@@ -252,14 +234,8 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         return null;
     }
 
-    protected function camooExit() : void
-    {
-        exit();
-    }
-
     /**
-     * @param  string $destination URL to redirect to
-     * @param bool $permanent
+     * @param string $destination URL to redirect to
      *
      * @throw Exception
      */
@@ -284,30 +260,47 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
                 }
             }
 
-            if (empty(getEnv('HTTPS')) || getEnv('HTTPS') == 'off') {
+            if (empty(getenv('HTTPS')) || getenv('HTTPS') == 'off') {
                 $protocol = 'http';
             } else {
                 $protocol = 'https';
             }
-            $destination = $protocol . '://' . getEnv('HTTP_HOST') . $destination;
+            $destination = $protocol . '://' . getenv('HTTP_HOST') . $destination;
         }
         if ($permanent) {
-            $code    = 301;
+            $code = 301;
             $message = $code . ' Moved Permanently';
         } else {
-            $code    = 302;
+            $code = 302;
             $message = $code . ' Found';
         }
-        header('HTTP/'.getEnv('SERVER_PROTOCOL').' ' . $message, true, $code);
-        header('Status: '  . $message, true, $code);
+        header('HTTP/' . getenv('SERVER_PROTOCOL') . ' ' . $message, true, $code);
+        header('Status: ' . $message, true, $code);
         header('Location: ' . $destination);
     }
 
-    /**
-     * @param string $sModel
-     * @return void
-     */
-    protected function loadModel(string $sModel) : void
+    public function loadComponent(string $component, array $config = []): void
+    {
+        $component = Inflector::classify($component);
+        $this->componentCollection->add($component, $config);
+    }
+
+    public function getComponentCollection(): ?ComponentCollection
+    {
+        return $this->componentCollection;
+    }
+
+    public function hasComponent(string $name): bool
+    {
+        return !empty($this->componentCollection[$name]);
+    }
+
+    protected function camooExit(): void
+    {
+        exit();
+    }
+
+    protected function loadModel(string $sModel): void
     {
         if (Configure::check('Database') === false) {
             return;
@@ -315,11 +308,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         $this->{$sModel} = (new TableLocator())->get(Inflector::classify($sModel));
     }
 
-    /**
-     * @param string $restModel
-     * @return void
-     */
-    protected function loadRest(string $restModel) : void
+    protected function loadRest(string $restModel): void
     {
         $this->{$restModel} = $this->getRestLocator()->get(Inflector::classify($restModel));
     }
@@ -332,7 +321,6 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     }
 
     /**
-     * @param $model
      * @return void
      */
     protected function showValidateErrors($model)
@@ -346,42 +334,27 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
                     $this->request->Flash->error($sMessage);
                 }
             }
-            if (count($asFields)>0) {
+            if (count($asFields) > 0) {
                 $this->set('errorFields', $asFields);
             }
         }
     }
 
-    /**
-     * @param string $component
-     * @param array $config
-     * @return void
-     */
-    public function loadComponent(string $component, array $config=[]) : void
-    {
-        $component = Inflector::classify($component);
-        $this->componentCollection->add($component, $config);
-    }
-
-    public function getComponentCollection(): ?ComponentCollection
-    {
-        return $this->componentCollection;
-    }
-
-    /**
-     * @param string $name
-     * @return bool
-     */
-    public function hasComponent(string $name) : bool
-    {
-        return !empty($this->componentCollection[$name]);
-    }
-
-    /**
-     * @return null|string
-     */
-    protected function getReferer() : ?string
+    protected function getReferer(): ?string
     {
         return $this->request->getReferer();
+    }
+
+    private function loadActionTemplate(): void
+    {
+        if ($this->oTemplate === null) {
+            $this->oTemplate = $this->oLayout->load(
+                sprintf(
+                    $this->sTemplate,
+                    $this->controller,
+                    Inflector::tableize($this->action)
+                )
+            );
+        }
     }
 }

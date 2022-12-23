@@ -1,31 +1,36 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CAMOO\Controller\Component;
 
-use CAMOO\Http\ServerRequest;
-use CAMOO\Interfaces\ControllerInterface;
 use CAMOO\Event\Event;
-use CAMOO\Http\Session;
-use CAMOO\Http\SessionSegment;
-use CAMOO\Utils\Configure;
 use CAMOO\Exception\Http\BadRequestException;
 use CAMOO\Exception\Http\ForbiddenException;
+use CAMOO\Http\ServerRequest;
+use CAMOO\Http\Session;
+use CAMOO\Http\SessionSegment;
+use CAMOO\Interfaces\ControllerInterface;
+use CAMOO\Utils\Configure;
 use CAMOO\Utils\Security;
 
 /**
  * Class SecurityComponent
+ *
  * @author CamooSarl
  */
 final class SecurityComponent extends BaseComponent
 {
-    /** @var array $_configKeys */
-    private $_configKeys = [
-        'unlockedActions'
-    ];
-
     /** @var SessionSegment $csrfSessionSegment */
     public $csrfSessionSegment = null;
+
+    /** @var string|null $csrf_Token */
+    public $csrf_Token = null;
+
+    /** @var array $_configKeys */
+    private $_configKeys = [
+        'unlockedActions',
+    ];
 
     /** @var string $_csrfSegment */
     private static $_csrfSegment = 'Aura\Session\CsrfToken';
@@ -35,9 +40,6 @@ final class SecurityComponent extends BaseComponent
 
     /** @var array $__sessionRaw */
     private $__sessionRaw = [Session::class, 'create'];
-
-    /** @var null|string $csrf_Token */
-    public $csrf_Token = null;
 
     public function __construct(?ControllerInterface $controller = null, array $config = [])
     {
@@ -50,47 +52,26 @@ final class SecurityComponent extends BaseComponent
         return call_user_func($this->__sessionRaw);
     }
 
-    /**
-     * @param $oSession
-     * @return SessionSegment
-     */
-    private function _getCsrfSegment($oSession): SessionSegment
-    {
-        return new SessionSegment($oSession->segment(self::$_csrfSegment));
-    }
-
     public function initialize(array $config = []): void
     {
     }
 
     /**
-     * @return bool
-     */
-    private function isUnlockedAction(): bool
-    {
-        $controller = $this->getController();
-        if (($config = $controller->Security->getConfig()) && array_key_exists('unlockedActions', $config)) {
-            return in_array($controller->action, $config['unlockedActions']);
-        }
-        return false;
-    }
-
-    /**
-     * @param Event $event
      * @throw BadRequestException
-     * @return void
      */
     public function wakeUp(Event $event): void
     {
-       // $controller = $this->getController();
+        // $controller = $this->getController();
 
         $oSession = $this->__getSessionRaw();
         $oCsrfSegment = $this->_getCsrfSegment($oSession);
 
         ################## CSRF protection
         // @See https://github.com/auraphp/Aura.Session
-        if ($this->isUnlockedAction() === false && in_array($this->request->getMethod(),
-                ['DELETE', 'POST', 'PUT', 'PATCH'])) {
+        if ($this->isUnlockedAction() === false && in_array(
+            $this->request->getMethod(),
+            ['DELETE', 'POST', 'PUT', 'PATCH']
+        )) {
             $csrfCreatedAt = (int)$oCsrfSegment->read('__csrf_created_at');
             $csrfTimeout = Configure::read('Security.csrf_lifetime') ?? 1800;
 
@@ -130,13 +111,26 @@ final class SecurityComponent extends BaseComponent
         ################## CSRF protection END
     }
 
-    /**
-     * @return array
-     */
+    /** @return array */
     public function implementedEvents()
     {
         return [
             'AppController.wakeUp' => 'wakeUp',
         ];
+    }
+
+    private function _getCsrfSegment($oSession): SessionSegment
+    {
+        return new SessionSegment($oSession->segment(self::$_csrfSegment));
+    }
+
+    private function isUnlockedAction(): bool
+    {
+        $controller = $this->getController();
+        if (($config = $controller->Security->getConfig()) && array_key_exists('unlockedActions', $config)) {
+            return in_array($controller->action, $config['unlockedActions']);
+        }
+
+        return false;
     }
 }
