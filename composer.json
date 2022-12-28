@@ -3,7 +3,7 @@
   "description": "CAMOO Framework",
   "type": "library",
   "require": {
-    "php": ">=7.4.0",
+    "php": ">=8.0",
     "vlucas/valitron": "^1.4",
     "guzzlehttp/guzzle": "^6.2",
     "ext-mbstring": "*",
