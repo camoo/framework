@@ -15,7 +15,7 @@
     "symfony/var-dumper": "^4.0",
     "hassankhan/config": "^2.1",
     "symfony/yaml": "^4.0",
-    "symfony/cache": "^4.0",
+    "symfony/cache": "^5.3",
     "doctrine/orm": "^2.6",
     "cakephp/orm": "^3.8",
     "cakephp/i18n": "^3.8",
