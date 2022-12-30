@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace CAMOO\Utils;
 
+use Whoops\Util\Misc;
+
 /**
  * Class Utility
  *
@@ -44,6 +46,6 @@ final class Utility
 
     public static function isCli(): bool
     {
-        return \Whoops\Util\Misc::isCommandLine();
+        return Misc::isCommandLine();
     }
 }

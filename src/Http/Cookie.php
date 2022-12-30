@@ -9,7 +9,7 @@ use Overclokk\Cookie\Cookie as BaseCookie;
 
 class Cookie extends BaseCookie
 {
-    protected static $createInstance = null;
+    protected static ?self $createInstance = null;
 
     /**
      * Init class
@@ -21,12 +21,12 @@ class Cookie extends BaseCookie
         parent::__construct($cookie);
     }
 
-    public function __get($key)
+    public function __get(string $key): ?string
     {
         return $this->get($key);
     }
 
-    public function __set($name, $xValue)
+    public function __set(string $name, mixed $xValue)
     {
         $default = array_merge(['name' => $name, 'value' => ''], Configure::read('Session.cookie'));
         if (!is_array($xValue)) {
@@ -48,10 +48,10 @@ class Cookie extends BaseCookie
 
     public static function create(): ?self
     {
-        if (null === static::$createInstance) {
-            static::$createInstance = new self();
+        if (null === self::$createInstance) {
+            self::$createInstance = new self();
         }
 
-        return static::$createInstance;
+        return self::$createInstance;
     }
 }

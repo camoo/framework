@@ -16,11 +16,9 @@ use CAMOO\Exception\Exception;
  */
 final class Flash
 {
-    /** @var Segment $oFlashSession */
-    private $oFlashSession = null;
+    private ?Segment $oFlashSession = null;
 
-    /** @var string[] $flashTypes */
-    private static $flashTypes = [
+    private static array $flashTypes = [
         'success',
         'info',
         'warning',
@@ -28,13 +26,11 @@ final class Flash
         'default',
     ];
 
-    /** @var SessionSegment $session */
-    private $session;
+    private SessionSegment $session;
 
-    /** @var array $keys */
-    private $keys = [];
+    private array $keys = [];
 
-    public function __construct($oFlashSession = null, ?SessionSegment $session = null)
+    public function __construct(?Segment $oFlashSession = null, ?SessionSegment $session = null)
     {
         if (null !== $oFlashSession) {
             $this->oFlashSession = $oFlashSession;
@@ -45,9 +41,9 @@ final class Flash
         }
     }
 
-    public function __call($name, $xargs)
+    public function __call(string $name, mixed $xargs)
     {
-        if (!in_array($name, array_keys(self::$flashTypes))) {
+        if (!in_array($name, self::$flashTypes, true)) {
             throw new Exception(
                 sprintf('Method %s::%s does not exist', get_class($this), $name)
             );
@@ -62,12 +58,12 @@ final class Flash
         $this->set($xargs[0], ['alert' => $name]);
     }
 
-    public function __get($key)
+    public function __get(string $key): mixed
     {
         return $this->get($key);
     }
 
-    public function __set($key, $value)
+    public function __set(string $key, mixed $value): void
     {
         $this->set($key, $value);
     }
@@ -81,30 +77,30 @@ final class Flash
         $this->session->write('CAMOO.SYS.FLASH', $this->keys);
     }
 
-    public function get(string $key)
+    public function get(string $key): mixed
     {
         $this->session->delete('CAMOO.SYS.FLASH.' . $key);
 
         return $this->oFlashSession->getFlash($key);
     }
 
-    public function setNext($key, $message)
+    public function setNext(string $key, string $message): void
     {
         $this->oFlashSession->setFlash($key, $message);
     }
 
-    public function getNext($key, $alt)
+    public function getNext(string $key, mixed $alt): mixed
     {
         return $this->oFlashSession->getFlashNext($key, $alt);
     }
 
-    public function keep()
+    public function keep(): void
     {
-        return $this->oFlashSession->keepFlash();
+        $this->oFlashSession->keepFlash();
     }
 
-    public function destroy()
+    public function destroy(): void
     {
-        return $this->oFlashSession->clearFlash();
+        $this->oFlashSession->clearFlash();
     }
 }
