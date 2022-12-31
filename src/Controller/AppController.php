@@ -11,7 +11,7 @@ use CAMOO\Event\EventDispatcherInterface;
 use CAMOO\Event\EventDispatcherTrait;
 use CAMOO\Event\EventListenerInterface;
 use CAMOO\Exception\Exception;
-use CAMOO\Http\Response;
+use Camoo\Http\Curl\Domain\Entity\Stream;
 use CAMOO\Http\ServerRequest;
 use CAMOO\Interfaces\ControllerInterface;
 use CAMOO\Model\Rest\RestLocatorTrait;
@@ -23,45 +23,43 @@ use CAMOO\Template\Extension\Functions\Html;
 use CAMOO\Template\Extension\TwigHelper;
 use CAMOO\Utils\Configure;
 use CAMOO\Utils\Inflector;
+use JetBrains\PhpStorm\NoReturn;
 use JMS\Serializer\SerializerBuilder;
+use Psr\Http\Message\ResponseInterface;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
+use Twig\TemplateWrapper;
 
 abstract class AppController implements ControllerInterface, EventListenerInterface, EventDispatcherInterface
 {
     use EventDispatcherTrait;
     use RestLocatorTrait;
 
-    /** @var string|null $controller */
-    public $controller = null;
+    public ?string $controller = null;
 
-    /** @var string $action */
-    public $action = null;
+    public ?string $action = null;
 
     public $Flash = null;
 
-    /** @var ServerRequest $request */
-    public $request = null;
+    public ?ServerRequest $request = null;
 
-    protected $defaultConfig = [];
+    protected array $defaultConfig = [];
 
-    protected $oTemplate = null;
+    protected ?TemplateWrapper $oTemplate = null;
 
-    protected $oLayout = null;
+    protected ?Environment $oLayout = null;
 
-    protected $sTemplate = '%s/%s.tpl';
+    protected string $sTemplate = '%s/%s.tpl';
 
-    protected $sTemplateDir = 'Template';
+    protected string $sTemplateDir = 'Template';
 
-    /** @var Response $response */
-    protected $response = null;
+    protected ?ResponseInterface $response = null;
 
-    protected $tplData = [];
+    protected array $tplData = [];
 
-    /** @var ComponentCollection $componentCollection */
-    private $componentCollection = null;
+    private ?ComponentCollection $componentCollection = null;
 
-    private $http_version = '1.1';
+    private string $http_version = '1.1';
 
     public function __construct()
     {
@@ -75,7 +73,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         $this->initialize();
 
         $event = $this->dispatchEvent('AppController.initialize');
-        if ($event->getResult() instanceof Response) {
+        if ($event->getResult() instanceof ResponseInterface) {
             echo $event->getResult();
             $this->camooExit();
         }
@@ -120,7 +118,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
             $this->oLayout->addExtension($extensions);
         }
 
-        if ($event->getResult() instanceof Response) {
+        if ($event->getResult() instanceof ResponseInterface) {
             echo $event->getResult();
             $this->camooExit();
         }
@@ -128,9 +126,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         return null;
     }
 
-    /**
-     * Initializes the controller engine
-     */
+    /** Initializes the controller engine */
     public function initialize(): void
     {
     }
@@ -144,7 +140,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         ];
     }
 
-    public function setResponse(Response $response): AppController
+    public function setResponse(ResponseInterface $response): AppController
     {
         $this->response = $response;
 
@@ -159,7 +155,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
      *
      * @param int|string|array|object|mixed|null $value
      */
-    public function set(string $varName, $value): void
+    public function set(mixed $varName, mixed $value): void
     {
         if (empty($varName)) {
             throw new Exception('varName cannot be empty');
@@ -179,14 +175,12 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         }
     }
 
-    /**
-     * Renders the template
-     */
+    /** Renders the template */
     public function render(): void
     {
         $this->loadActionTemplate();
         $event = $this->dispatchEvent('AppController.beforeRender');
-        if ($event->getResult() instanceof Response) {
+        if ($event->getResult() instanceof ResponseInterface) {
             echo $event->getResult();
             $this->camooExit();
         }
@@ -204,31 +198,25 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         }
 
         $contents = $this->oTemplate->render($this->tplData);
-        $this->setResponse($this->response->withStringBody($contents));
+        $this->setResponse($this->response->withBody(new Stream($contents)));
 
-        echo $this->response;
+        echo $this->response->getBody();
         $this->camooExit();
     }
 
-    /**
-     * @return null
-     */
+    /** @return null */
     public function beforeRender(Event $event)
     {
         return null;
     }
 
-    /**
-     * @return null
-     */
+    /** @return null */
     public function beforeAction(Event $event)
     {
         return null;
     }
 
-    /**
-     * @return null
-     */
+    /** @return null */
     public function beforeRedirect(Event $event)
     {
         return null;
@@ -292,13 +280,14 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
 
     public function hasComponent(string $name): bool
     {
-        return !empty($this->componentCollection[$name]);
+        return null !== $this->componentCollection && !empty($this->componentCollection[$name]);
     }
 
-    protected function camooExit(): void
-    {
-        exit();
-    }
+    #[NoReturn]
+ protected function camooExit(): void
+ {
+     exit();
+ }
 
     protected function loadModel(string $sModel): void
     {
@@ -347,14 +336,16 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
 
     private function loadActionTemplate(): void
     {
-        if ($this->oTemplate === null) {
-            $this->oTemplate = $this->oLayout->load(
-                sprintf(
-                    $this->sTemplate,
-                    $this->controller,
-                    Inflector::tableize($this->action)
-                )
-            );
+        if ($this->oTemplate !== null) {
+            return;
         }
+
+        $this->oTemplate = $this->oLayout->load(
+            sprintf(
+                $this->sTemplate,
+                $this->controller,
+                Inflector::tableize($this->action)
+            )
+        );
     }
 }

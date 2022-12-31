@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace CAMOO\Error;
 
 use CAMOO\Controller\ErrorController;
-use CAMOO\Http\Response;
+use Camoo\Http\Curl\Infrastructure\Response;
 use CAMOO\Http\ServerRequest;
 use CAMOO\Interfaces\ControllerInterface;
 use CAMOO\Interfaces\HttpExceptionInterface;

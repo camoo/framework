@@ -29,7 +29,8 @@
     "symfony/console": "^5.1",
     "nette/mail": "^v3.0",
     "jms/serializer": "^3.9",
-    "ext-json": "*"
+    "ext-json": "*",
+    "camoo/curl-http-client": "^1.0"
   },
   "minimum-stability": "dev",
   "homepage": "https://camoo.cm",

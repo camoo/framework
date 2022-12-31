@@ -8,6 +8,8 @@ use CAMOO\Controller\AppController;
 use CAMOO\Event\Event;
 use CAMOO\Event\EventDispatcherTrait;
 use CAMOO\Exception\Exception;
+use Camoo\Http\Curl\Domain\Entity\Uri;
+use Camoo\Http\Curl\Infrastructure\Response;
 use CAMOO\Interfaces\ControllerInterface;
 use CAMOO\Utils\Inflector;
 use FastRoute\Dispatcher\GroupCountBased;
@@ -23,22 +25,21 @@ final class Caller
 {
     use EventDispatcherTrait;
 
-    public $controller = '\\App\\Controller\\PagesController';
+    public string $controller = '\\App\\Controller\\PagesController';
 
-    public $action = 'overview';
+    public string $action = 'overview';
 
     public $plugin = null;
 
-    public $xargs = [];
+    public array $xargs = [];
 
-    public $uri = null;
+    public ?string $uri = null;
 
-    protected $hRequest = [];
+    protected array $hRequest = [];
 
-    /** @var string $sConfigDir */
-    protected $sConfigDir;
+    protected string $sConfigDir;
 
-    private $controllerName = 'Pages';
+    private string $controllerName = 'Pages';
 
     public function __construct(string $configDir)
     {
@@ -51,9 +52,7 @@ final class Caller
         require_once $this->sConfigDir . '/bootstrap.php';
     }
 
-    /**
-     * @return ControllerInterface|AppController
-     */
+    /** @return ControllerInterface|AppController */
     public function getController(?Psr7\ServerRequest $request = null): ControllerInterface
     {
         $oController = new $this->controller();
@@ -112,7 +111,7 @@ final class Caller
         $dispatcher = require_once $this->sConfigDir . '/route.php';
         /** @var GroupCountBased $routeDispatcher */
         $routeDispatcher = $dispatcher[0];
-        $this->uri = $uri = (new Psr7\Uri(getenv('REQUEST_URI')))->getPath();
+        $this->uri = $uri = (new Uri(getenv('REQUEST_URI')))->getPath();
 
         $routeInfo = $routeDispatcher->dispatch(getenv('REQUEST_METHOD'), $uri);
 
@@ -132,7 +131,7 @@ final class Caller
                 }
 
                 if (!empty($action)) {
-                    if (strpos($action, '-') !== false) {
+                    if (str_contains($action, '-')) {
                         $action = Inflector::camelize($action);
                     }
                     $this->action = trim($action, '/');
