@@ -849,12 +849,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/camoo/cache.git",
-                "reference": "0e64d71d3792d7e32c426473b9c2fcfe81075431"
+                "reference": "afb19bf6963052e38ca1ed2ed7fa2ea54a5e532e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/camoo/cache/zipball/0e64d71d3792d7e32c426473b9c2fcfe81075431",
-                "reference": "0e64d71d3792d7e32c426473b9c2fcfe81075431",
+                "url": "https://api.github.com/repos/camoo/cache/zipball/afb19bf6963052e38ca1ed2ed7fa2ea54a5e532e",
+                "reference": "afb19bf6963052e38ca1ed2ed7fa2ea54a5e532e",
                 "shasum": ""
             },
             "require": {
@@ -894,7 +894,7 @@
                 "source": "https://github.com/camoo/cache",
                 "wiki": "https://github.com/camoo/cache/wiki"
             },
-            "time": "2023-01-03T11:04:19+00:00"
+            "time": "2023-01-03T11:35:36+00:00"
         },
         {
             "name": "camoo/curl-http-client",
