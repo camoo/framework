@@ -31,7 +31,8 @@
     "jms/serializer": "^3.9",
     "ext-json": "*",
     "camoo/curl-http-client": "^1.0",
-    "camoo/cache": "^2.1"
+    "camoo/cache": "^2.1",
+    "ray/di": "^2.15"
   },
   "minimum-stability": "dev",
   "homepage": "https://camoo.cm",

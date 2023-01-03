@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2ac5d7fa710a0801ec42ceb3074a19bc",
+    "content-hash": "108ed88f0567affd190079ba501ba0b2",
     "packages": [
         {
             "name": "aura/intl",
@@ -2812,6 +2812,209 @@
             "time": "2022-09-12T08:40:16+00:00"
         },
         {
+            "name": "koriym/attributes",
+            "version": "1.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/koriym/Koriym.Attributes.git",
+                "reference": "c64c79d582a935b1eea0675032757a0621a2540e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/koriym/Koriym.Attributes/zipball/c64c79d582a935b1eea0675032757a0621a2540e",
+                "reference": "c64c79d582a935b1eea0675032757a0621a2540e",
+                "shasum": ""
+            },
+            "require": {
+                "doctrine/annotations": "^1.11",
+                "php": "^7.2 || ^8.0"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.4",
+                "ext-pdo": "*",
+                "phpunit/phpunit": "^8.5.24 | ^9.5"
+            },
+            "suggest": {
+                "koriym/param-reader": "An attribute/annotation reader for parameters"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Koriym\\Attributes\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Akihito Koriyama",
+                    "email": "akihito.koriyama@gmail.com"
+                }
+            ],
+            "description": "An annotation/attribute reader",
+            "keywords": [
+                "annotation",
+                "attribute"
+            ],
+            "support": {
+                "issues": "https://github.com/koriym/Koriym.Attributes/issues",
+                "source": "https://github.com/koriym/Koriym.Attributes/tree/1.0.4"
+            },
+            "time": "2022-03-09T07:52:32+00:00"
+        },
+        {
+            "name": "koriym/null-object",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/koriym/Koriym.NullObject.git",
+                "reference": "fd3afc4166aed5691afa685d17c5b2c3caf4603d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/koriym/Koriym.NullObject/zipball/fd3afc4166aed5691afa685d17c5b2c3caf4603d",
+                "reference": "fd3afc4166aed5691afa685d17c5b2c3caf4603d",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2 || ^8.0"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.4",
+                "doctrine/annotations": "^1.11",
+                "phpunit/phpunit": "^9.5"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "autoload.php"
+                ],
+                "psr-4": {
+                    "Koriym\\NullObject\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Akihito Koriyama",
+                    "email": "akihito.koriyama@gmail.com"
+                }
+            ],
+            "description": "Null object generator",
+            "support": {
+                "issues": "https://github.com/koriym/Koriym.NullObject/issues",
+                "source": "https://github.com/koriym/Koriym.NullObject/tree/1.0.1"
+            },
+            "time": "2022-06-09T16:08:55+00:00"
+        },
+        {
+            "name": "koriym/param-reader",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/koriym/Koriym.ParamReader.git",
+                "reference": "ac434dd03f4866bd3a4b96f7d9614b78bb4dd683"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/koriym/Koriym.ParamReader/zipball/ac434dd03f4866bd3a4b96f7d9614b78bb4dd683",
+                "reference": "ac434dd03f4866bd3a4b96f7d9614b78bb4dd683",
+                "shasum": ""
+            },
+            "require": {
+                "doctrine/annotations": "^1.13",
+                "php": "^7.2 || ^8.0"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.4",
+                "phpunit/phpunit": "^8.5.24"
+            },
+            "suggest": {
+                "koriym/attributes": "doctrine/annotation Reader interface in order to read both doctrine/annotation and PHP 8 attributes."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Koriym\\ParamReader\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Akihito Koriyama",
+                    "email": "akihito.koriyama@gmail.com"
+                }
+            ],
+            "description": "An annotation/attribute reader for method parameter",
+            "support": {
+                "issues": "https://github.com/koriym/Koriym.ParamReader/issues",
+                "source": "https://github.com/koriym/Koriym.ParamReader/tree/1.0.0"
+            },
+            "time": "2022-03-07T12:57:35+00:00"
+        },
+        {
+            "name": "koriym/printo",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/koriym/print_o.git",
+                "reference": "d969e4cc738a376d479c2125e7d62be88cfa9dbe"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/koriym/print_o/zipball/d969e4cc738a376d479c2125e7d62be88cfa9dbe",
+                "reference": "d969e4cc738a376d479c2125e7d62be88cfa9dbe",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/print_o.php"
+                ],
+                "psr-4": {
+                    "Koriym\\Printo\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Akihito Koriyama",
+                    "email": "akihito.koriyama@gmail.com",
+                    "homepage": "https://github.com/koriym"
+                }
+            ],
+            "description": "An object graph visualizer.",
+            "homepage": "https://github.com/koriym/print_o",
+            "keywords": [
+                "debug",
+                "var_dump"
+            ],
+            "support": {
+                "issues": "https://github.com/koriym/print_o/issues",
+                "source": "https://github.com/koriym/print_o/tree/develop"
+            },
+            "time": "2015-02-13T19:04:21+00:00"
+        },
+        {
             "name": "middlewares/fast-route",
             "version": "v2.0.1",
             "source": {
@@ -3194,6 +3397,62 @@
                 "source": "https://github.com/nikic/FastRoute/tree/master"
             },
             "time": "2018-02-13T20:26:39+00:00"
+        },
+        {
+            "name": "nikic/php-parser",
+            "version": "v4.15.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nikic/PHP-Parser.git",
+                "reference": "f59bbe44bf7d96f24f3e2b4ddc21cd52c1d2adbc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/f59bbe44bf7d96f24f3e2b4ddc21cd52c1d2adbc",
+                "reference": "f59bbe44bf7d96f24f3e2b4ddc21cd52c1d2adbc",
+                "shasum": ""
+            },
+            "require": {
+                "ext-tokenizer": "*",
+                "php": ">=7.0"
+            },
+            "require-dev": {
+                "ircmaxell/php-yacc": "^0.0.7",
+                "phpunit/phpunit": "^6.5 || ^7.0 || ^8.0 || ^9.0"
+            },
+            "bin": [
+                "bin/php-parse"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.9-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "PhpParser\\": "lib/PhpParser"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Nikita Popov"
+                }
+            ],
+            "description": "A PHP parser written in PHP",
+            "keywords": [
+                "parser",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/nikic/PHP-Parser/issues",
+                "source": "https://github.com/nikic/PHP-Parser/tree/v4.15.2"
+            },
+            "time": "2022-11-12T15:38:23+00:00"
         },
         {
             "name": "nyholm/psr7",
@@ -3981,6 +4240,212 @@
                 "source": "https://github.com/ralouphie/getallheaders/tree/develop"
             },
             "time": "2019-03-08T08:55:37+00:00"
+        },
+        {
+            "name": "ray/aop",
+            "version": "2.13.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ray-di/Ray.Aop.git",
+                "reference": "2c3f563a8b4ff024f08a7314f50832a923e1ff0e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ray-di/Ray.Aop/zipball/2c3f563a8b4ff024f08a7314f50832a923e1ff0e",
+                "reference": "2c3f563a8b4ff024f08a7314f50832a923e1ff0e",
+                "shasum": ""
+            },
+            "require": {
+                "doctrine/annotations": "^1.12",
+                "koriym/attributes": "^1.0.3",
+                "nikic/php-parser": "^v4.12",
+                "php": "^7.2 || ^8.0"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.4.1",
+                "phpunit/phpunit": "^8.5.23 || ^9.5.10"
+            },
+            "suggest": {
+                "ray/di": "A dependency injection framework"
+            },
+            "type": "library",
+            "extra": {
+                "bamarni-bin": {
+                    "forward-command": true,
+                    "bin-links": true
+                }
+            },
+            "autoload": {
+                "files": [
+                    "annotation_loader.php"
+                ],
+                "psr-4": {
+                    "Ray\\Aop\\": [
+                        "src/"
+                    ],
+                    "Ray\\ServiceLocator\\": [
+                        "sl-src/"
+                    ]
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Akihito Koriyama",
+                    "email": "akihito.koriyama@gmail.com"
+                }
+            ],
+            "description": "An aspect oriented framework",
+            "keywords": [
+                "aop"
+            ],
+            "support": {
+                "issues": "https://github.com/ray-di/Ray.Aop/issues",
+                "source": "https://github.com/ray-di/Ray.Aop/tree/2.13.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/koriym",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/ray/aop",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2022-12-12T10:33:37+00:00"
+        },
+        {
+            "name": "ray/compiler",
+            "version": "1.9.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ray-di/Ray.Compiler.git",
+                "reference": "1591fa196c65bddd8ccce23ded4904eb3e375bab"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ray-di/Ray.Compiler/zipball/1591fa196c65bddd8ccce23ded4904eb3e375bab",
+                "reference": "1591fa196c65bddd8ccce23ded4904eb3e375bab",
+                "shasum": ""
+            },
+            "require": {
+                "doctrine/annotations": "^1.12",
+                "doctrine/cache": "^1.10 | ^2.1",
+                "koriym/attributes": "^1.0",
+                "koriym/null-object": "^1.0",
+                "koriym/printo": "^1.0",
+                "nikic/php-parser": "^4.5",
+                "php": "^7.2 || ^8.0",
+                "ray/aop": "^2.10"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.4",
+                "doctrine/cache": "^1.10",
+                "ext-pdo": "*",
+                "phpunit/phpunit": "^8.5.24 || ^9.5",
+                "ray/di": "^2.x-dev"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Ray\\Compiler\\": [
+                        "src"
+                    ]
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Akihito Koriyama",
+                    "email": "akihito.koriyama@gmail.com"
+                }
+            ],
+            "description": "A dependency injection compiler for Ray.Di",
+            "keywords": [
+                "codegen",
+                "di",
+                "src"
+            ],
+            "support": {
+                "issues": "https://github.com/ray-di/Ray.Compiler/issues",
+                "source": "https://github.com/ray-di/Ray.Compiler/tree/1.9.1"
+            },
+            "time": "2022-06-10T17:02:29+00:00"
+        },
+        {
+            "name": "ray/di",
+            "version": "2.15.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ray-di/Ray.Di.git",
+                "reference": "53bb56b09df3e415367cecb61db3edc09c99cead"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ray-di/Ray.Di/zipball/53bb56b09df3e415367cecb61db3edc09c99cead",
+                "reference": "53bb56b09df3e415367cecb61db3edc09c99cead",
+                "shasum": ""
+            },
+            "require": {
+                "doctrine/annotations": "^1.12",
+                "doctrine/cache": "^1.10 | ^2.1",
+                "koriym/attributes": "^1.0.4",
+                "koriym/null-object": "^1.0",
+                "koriym/param-reader": "^1.0",
+                "koriym/printo": "^1.0",
+                "nikic/php-parser": "^4.13",
+                "php": "^7.2 || ^8.0",
+                "ray/aop": "^2.10",
+                "ray/compiler": "^1.7"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.4",
+                "ext-pdo": "*",
+                "phpunit/phpunit": "^8.5.24 || ^9.5"
+            },
+            "type": "library",
+            "extra": {
+                "bamarni-bin": {
+                    "bin-links": true,
+                    "target-directory": "vendor-bin",
+                    "forward-command": false
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Ray\\Di\\": [
+                        "src/di",
+                        "src-deprecated/di"
+                    ]
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Akihito Koriyama",
+                    "email": "akihito.koriyama@gmail.com"
+                }
+            ],
+            "description": "Guice style dependency injection framework",
+            "keywords": [
+                "aop",
+                "di"
+            ],
+            "support": {
+                "issues": "https://github.com/ray-di/Ray.Di/issues",
+                "source": "https://github.com/ray-di/Ray.Di/tree/2.15.0"
+            },
+            "time": "2022-12-06T11:14:22+00:00"
         },
         {
             "name": "squizlabs/php_codesniffer",

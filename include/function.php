@@ -1,5 +1,8 @@
 <?php
 
+use CAMOO\Di\CamooDi;
+use Ray\Di\Name;
+
 if (!function_exists('getEnv')) {
     function getEnv($sStr = null)
     {
@@ -18,5 +21,12 @@ if (!function_exists('array_key_first')) {
         }
 
         return null;
+    }
+}
+
+if (!function_exists('di')) {
+    function di(string $class, string $name = Name::ANY): mixed
+    {
+        return CamooDi::get($class, $name);
     }
 }

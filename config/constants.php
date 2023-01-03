@@ -2,12 +2,12 @@
 /**
  * Basic defines for timing functions.
  */
-define('SECOND', 1);
-define('MINUTE', 60);
-define('HOUR', 3600);
-define('DAY', 86400);
-define('WEEK', 604800);
-define('MONTH', 2592000);
-define('YEAR', 31536000);
+const SECOND = 1;
+const MINUTE = 60;
+const HOUR = 3600;
+const DAY = 86400;
+const WEEK = 604800;
+const MONTH = 2592000;
+const YEAR = 31536000;
 
-define('CAMOO_FMW_VERSION', '1.0.1');
+const CAMOO_FMW_VERSION = '1.0.1';

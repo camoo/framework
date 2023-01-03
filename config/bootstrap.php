@@ -10,10 +10,12 @@ use Cake\Cache\Engine\FileEngine;
 use Cake\Core\Configure as CakeConfigure;
 use Cake\Datasource\ConnectionManager;
 use Cake\I18n\I18n;
+use CAMOO\Di\CamooDi;
 use CAMOO\Error\ErrorHandler;
 use CAMOO\Error\ExceptionRenderer;
 use CAMOO\Utils\Configure;
 use CAMOO\Utils\Utility;
+use Doctrine\Common\Annotations\AnnotationReader;
 use Whoops\Handler\JsonResponseHandler;
 use Whoops\Handler\PlainTextHandler;
 use Whoops\Run;
@@ -28,6 +30,26 @@ $handler->addDataTable('Camoo Framework', ['ErrorHandling' => ExceptionRenderer:
 
 $handler->setApplicationPaths([__FILE__]);
 $run->pushHandler($handler);
+
+$diCache = Configure::read('Cache.camoo_di');
+if (null === $diCache) {
+    Configure::write('Cache.camoo_di', [
+        'prefix' => 'camoo_di_',
+        'path' => CACHE . 'persistent/di/',
+        'serialize' => true,
+        'duration' => '+10 hours',
+    ]);
+}
+
+AnnotationReader::addGlobalIgnoredName('triggers');
+$cached = \Camoo\Cache\Cache::reads('camoo_di.instance', 'camoo_di');
+$instance = $cached ?: CamooDi::create();
+$container = CamooDi::container($instance);
+register_shutdown_function(fn () => !$cached ? \Camoo\Cache\Cache::writes(
+    'camoo_di.instance',
+    $container,
+    'camoo_di'
+) : null);
 
 if (Misc::isAjaxRequest()) {
     $jsonHandler = new JsonResponseHandler();
