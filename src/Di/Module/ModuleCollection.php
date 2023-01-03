@@ -9,9 +9,8 @@ use IteratorAggregate;
 
 final class ModuleCollection implements IteratorAggregate
 {
-    public function __construct(
-        private array $items = []
-    ) {
+    public function __construct(private array $items = [])
+    {
     }
 
     public function add(callable|string $module): self

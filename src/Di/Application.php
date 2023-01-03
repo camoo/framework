@@ -13,8 +13,7 @@ final class Application
 
     public function __construct()
     {
-        $nameSpace = '\\' . Configure::read('App.namespace') . '\\Application';
-        $class = sprintf('%s' . 'Modules' . '%s', $nameSpace, 'Collection');
+        $class = '\\' . Configure::read('App.namespace') . '\\Application';
         if (class_exists($class)) {
             $this->appApplication = $class;
         }
@@ -22,6 +21,9 @@ final class Application
 
     public function modules(ModuleCollection $modules): void
     {
+        if (null === $this->appApplication) {
+            return;
+        }
         $application = new $this->appApplication();
         $application->dependencyInjectionModules($modules);
     }

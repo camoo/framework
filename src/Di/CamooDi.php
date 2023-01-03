@@ -44,7 +44,6 @@ class CamooDi
         $collection = new ModuleCollection($modules);
         $application = new Application();
         $application->modules($collection);
-
         $modules = new DefaultModule($collection);
         $tmpDir = rtrim($diCacheDir, DIRECTORY_SEPARATOR);
         $injector = new Injector($modules, $tmpDir);
@@ -102,9 +101,9 @@ class CamooDi
         $unTargetedBind($container, $method);
 
         $tmpDir = rtrim($diCacheDir, DIRECTORY_SEPARATOR);
-        $cacheFile = $tmpDir . DIRECTORY_SEPARATOR . 'di_camoo_di_instance';
-        if (is_file($cacheFile)) {
-            @unlink($cacheFile);
+
+        if (Cache::checks('camoo_di.instance', 'camoo_di')) {
+            Cache::clears('camoo_di');
         }
 
         $injector = new Injector(self::$modules, $tmpDir);
@@ -114,7 +113,7 @@ class CamooDi
         $compiler->compileContainer();
 
         register_shutdown_function(
-            fn () => Cache::writes('camoo_di.instance', $containerInjector, 'di_container')
+            fn () => Cache::writes('camoo_di.instance', $containerInjector, 'camoo_di')
         );
 
         return $compiler->getInstance($class, $name);
