@@ -106,9 +106,7 @@ class Mailer
         return $this;
     }
 
-    /**
-     * Sets multiple headers
-     */
+    /** Sets multiple headers */
     public function addHeaders(array $headers): void
     {
         foreach ($headers as $name => $value) {

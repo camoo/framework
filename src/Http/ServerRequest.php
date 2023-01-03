@@ -166,9 +166,7 @@ class ServerRequest
         return new SessionSegment($this->session);
     }
 
-    /**
-     * @throw HttpExceptionInterface
-     */
+    /** @throw HttpExceptionInterface */
     public function allowMethod(array $asMethod = []): void
     {
         if (empty($asMethod)) {
@@ -190,9 +188,7 @@ class ServerRequest
         return $this->getEnv('HTTP_REFERER');
     }
 
-    /**
-     * @return mixed|null
-     */
+    /** @return mixed|null */
     public function getEnv(string $param)
     {
         $serverParams = $this->oRequest->getServerParams();

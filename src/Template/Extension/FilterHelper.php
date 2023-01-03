@@ -73,9 +73,7 @@ abstract class FilterHelper implements TemplateFilterInterface, EventListenerInt
     {
     }
 
-    /**
-     * @param callable $callable
-     */
+    /** @param callable $callable */
     protected function add(string $name, $callable = null, array $options = [])
     {
         $this->dispatchEvent('FilterHelper.beforeRender', ['filter' => $name]);

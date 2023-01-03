@@ -30,7 +30,8 @@
     "nette/mail": "^v3.0",
     "jms/serializer": "^3.9",
     "ext-json": "*",
-    "camoo/curl-http-client": "^1.0"
+    "camoo/curl-http-client": "^1.0",
+    "camoo/cache": "^2.0"
   },
   "minimum-stability": "dev",
   "homepage": "https://camoo.cm",

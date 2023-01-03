@@ -35,9 +35,7 @@ class AdapterFactory
     {
     }
 
-    /**
-     * creates instances of Adapter Factory
-     */
+    /** creates instances of Adapter Factory */
     public static function create(): AdapterFactory
     {
         static::$_created = new self();

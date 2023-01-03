@@ -35,9 +35,7 @@ final class RestFactory
     {
     }
 
-    /**
-     * creates instances of Adapter Factory
-     */
+    /** creates instances of Adapter Factory */
     public static function create(): RestFactory
     {
         static::$_created = new self();

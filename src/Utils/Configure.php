@@ -24,9 +24,7 @@ class Configure
         }
     }
 
-    /**
-     * @return mixed value
-     */
+    /** @return mixed value */
     public static function read(string $sKey)
     {
         return static::$_oahConfigs->get($sKey);

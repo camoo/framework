@@ -78,9 +78,7 @@ abstract class FunctionHelper implements TemplateFunctionInterface, EventListene
     {
     }
 
-    /**
-     * @param callable $callable
-     */
+    /** @param callable $callable */
     protected function add(string $name, $callable = null, array $options = [])
     {
         $this->dispatchEvent('FuncHelper.beforeRender', ['function' => $name]);

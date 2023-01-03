@@ -70,9 +70,7 @@ abstract class AppCommand implements CommandInterface
         return $this->_satanise($this->method);
     }
 
-    /**
-     * Configures the current command.
-     */
+    /** Configures the current command. */
     protected function configure(): void
     {
     }

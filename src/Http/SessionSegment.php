@@ -26,9 +26,7 @@ final class SessionSegment
         $this->segment = $segment;
     }
 
-    /**
-     * @return int|string|array|object|mixed $value
-     */
+    /** @return int|string|array|object|mixed $value */
     public function read(string $key)
     {
         $hash = explode('.', $key);
@@ -45,9 +43,7 @@ final class SessionSegment
         return  (new QueryData($dataFiltered))->get(implode('.', $hash));
     }
 
-    /**
-     * @param int|string|array|null $value
-     */
+    /** @param int|string|array|null $value */
     public function write(string $key, $value): void
     {
         if (is_object($value)) {

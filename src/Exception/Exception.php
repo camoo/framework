@@ -84,17 +84,13 @@ class Exception extends BaseException implements ExceptionInterface
         parent::__construct($originalMessage, $originalCode, $previous);
     }
 
-    /**
-     * Get the HTTP status code.
-     */
+    /** Get the HTTP status code. */
     public function getStatusCode(): int
     {
         return $this->statusCode;
     }
 
-    /**
-     * Set the HTTP status code.
-     */
+    /** Set the HTTP status code. */
     public function setStatusCode(int $statusCode): Exception
     {
         $this->statusCode = $statusCode;
@@ -112,9 +108,7 @@ class Exception extends BaseException implements ExceptionInterface
         return $this->httpHeaders;
     }
 
-    /**
-     * Set the HTTP headers.
-     */
+    /** Set the HTTP headers. */
     public function setHttpHeaders(array $httpHeaders): Exception
     {
         $this->httpHeaders = $httpHeaders;
@@ -122,17 +116,13 @@ class Exception extends BaseException implements ExceptionInterface
         return $this;
     }
 
-    /**
-     * Get the error description.
-     */
+    /** Get the error description. */
     public function getErrorDescription(): string
     {
         return $this->errorDescription;
     }
 
-    /**
-     * Set the error description.
-     */
+    /** Set the error description. */
     public function setErrorDescription(string $errorDescription): Exception
     {
         $this->errorDescription = $errorDescription;
@@ -164,17 +154,13 @@ class Exception extends BaseException implements ExceptionInterface
         return $this;
     }
 
-    /**
-     * Get user title.
-     */
+    /** Get user title. */
     public function getUserTitle(): string
     {
         return $this->userTitle;
     }
 
-    /**
-     * Set user title.
-     */
+    /** Set user title. */
     public function setUserTitle(string $userTitle): Exception
     {
         $this->userTitle = $userTitle;

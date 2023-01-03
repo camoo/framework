@@ -7,7 +7,7 @@ namespace CAMOO\Utils;
 use ArrayAccess;
 use ArrayIterator;
 use ArrayObject;
-use CAMOO\Cache\Cache;
+use Camoo\Cache\Cache;
 use CAMOO\Http\ServerRequest;
 use Countable;
 use InvalidArgumentException;
@@ -21,26 +21,20 @@ use Traversable;
  */
 class Cart implements IteratorAggregate, ArrayAccess, Countable
 {
-    /** @var int|string|null $user */
-    private $user = null;
+    private string|int|null $user = null;
 
-    /** @var ServerRequest $withRequest */
-    private static $withRequest;
+    private static ?ServerRequest $withRequest;
 
-    /** @var array $data */
-    private $data = [];
+    private array $data = [];
 
-    /** @var Cart|null $created */
-    private static $created = null;
+    private static ?Cart $created = null;
 
-    /** @var string $basketKey */
-    private static $basketKey = null;
+    private static ?string $basketKey = null;
 
     /** @int $count */
-    private $count = 0;
+    private int $count = 0;
 
-    /** @var float $total_price */
-    private $total_price = 0.00;
+    private float $total_price = 0.00;
 
     /**
      * is not allowed to call from outside to prevent from creating multiple instances,
@@ -56,17 +50,17 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
     }
 
     /** Keeps Cart relevant properties during serialization */
-    public function __sleep()
+    public function __sleep(): array
     {
         return ['count', 'data', 'total_price', 'user'];
     }
 
-    public function __get(string $key)
+    public function __get(string $key): mixed
     {
         return $this->offsetGet($key);
     }
 
-    public function count()
+    public function count(): int
     {
         return $this->count;
     }
@@ -90,12 +84,8 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
         return self::$created;
     }
 
-    /**
-     * Refresh current Cart Session Identifier
-     *
-     * @param bool $force
-     */
-    public function refresh($force = false): void
+    /** Refresh current Cart Session Identifier */
+    public function refresh(bool $force = false): void
     {
         if ($this->count() > 0) {
             $uid = $this->getUserId();
@@ -126,7 +116,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
     }
 
     /** @param int|string|null $uid user ID */
-    public function setUserId($uid = null): void
+    public function setUserId(int|string|null $uid = null): void
     {
         if (null !== $uid && !in_array(gettype($uid), ['string', 'integer'])) {
             throw new InvalidArgumentException(sprintf(
@@ -173,15 +163,13 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
         return $this->offsetExists($key);
     }
 
-    public function get(string $key)
+    public function get(string $key): mixed
     {
         return $this->offsetGet($key);
     }
 
-    /**
-     * Adds an Item into Cart
-     */
-    public function addItem(string $key, $value): void
+    /** Adds an Item into Cart */
+    public function addItem(string $key, mixed $value): void
     {
         $this->offsetSet($key, $value);
     }
@@ -191,12 +179,12 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
         $this->offsetUnset($key);
     }
 
-    public function offsetExists($key)
+    public function offsetExists(mixed $key): bool
     {
         return isset($this->data[$key]);
     }
 
-    public function offsetGet($key)
+    public function offsetGet(mixed $key): mixed
     {
         if ($this->offsetExists($key)) {
             return $this->data[$key];
@@ -205,52 +193,22 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
         return null;
     }
 
-    public function offsetSet($key, $value)
+    public function offsetSet(mixed $key, mixed $value): void
     {
         if (!empty($key)) {
             if (!$this->has($key)) {
-                if (!empty($value)) {
-                    if (is_array($value) && $this->isValueMultiDimensional($value)) {
-                        foreach ($value as $hVal) {
-                            if (array_key_exists('price', $hVal)) {
-                                $this->total_price += (float)$hVal['price'];
-                            }
-
-                            ++$this->count;
-                        }
-                    } else {
-                        ++$this->count;
-                        if (array_key_exists('price', $value)) {
-                            $this->total_price += (float)$value['price'];
-                        }
-                    }
-                }
+                $this->extracted($value);
             }
             $this->data[$key] = $value;
         } else {
             $this->data[] = $value;
 
-            if (!empty($value)) {
-                if (is_array($value) && $this->isValueMultiDimensional($value)) {
-                    foreach ($value as $hVal) {
-                        if (array_key_exists('price', $hVal)) {
-                            $this->total_price += (float)$hVal['price'];
-                        }
-
-                        ++$this->count;
-                    }
-                } else {
-                    ++$this->count;
-                    if (array_key_exists('price', $value)) {
-                        $this->total_price += (float)$value['price'];
-                    }
-                }
-            }
+            $this->extracted($value);
         }
         $this->save();
     }
 
-    public function offsetUnset($key)
+    public function offsetUnset(mixed $key): void
     {
         if ($this->has($key)) {
             $value = $this->data[$key];
@@ -276,12 +234,12 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
     }
 
     /** @return int|string|null $uid */
-    protected function getUserId()
+    protected function getUserId(): int|string|null
     {
         return $this->user;
     }
 
-    private function getRequest(): ServerRequest
+    private function getRequest(): ?ServerRequest
     {
         return self::$withRequest;
     }
@@ -289,5 +247,25 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
     private function isValueMultiDimensional(array $value): bool
     {
         return count($value) !== count($value, COUNT_RECURSIVE);
+    }
+
+    private function extracted(mixed $value): void
+    {
+        if (!empty($value)) {
+            if (is_array($value) && $this->isValueMultiDimensional($value)) {
+                foreach ($value as $hVal) {
+                    if (array_key_exists('price', $hVal)) {
+                        $this->total_price += (float)$hVal['price'];
+                    }
+
+                    ++$this->count;
+                }
+            } else {
+                ++$this->count;
+                if (array_key_exists('price', $value)) {
+                    $this->total_price += (float)$value['price'];
+                }
+            }
+        }
     }
 }

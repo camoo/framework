@@ -29,7 +29,6 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
     use ValidatorLocatorTrait;
     use EventDispatcherTrait;
 
-    /** @var mixed $output */
     protected $output;
 
     /** @var array $errors */
@@ -58,9 +57,7 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
 
     abstract public function validationDefault(ValidationInterface $validator): ValidationInterface;
 
-    /**
-     * Initializes Model Rest
-     */
+    /** Initializes Model Rest */
     public function initialized(): void
     {
     }
@@ -80,9 +77,7 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
         return $this->offsetGet($key);
     }
 
-    /**
-     * @param string $value
-     */
+    /** @param string $value */
     public function set(string $key, $value): void
     {
         $this->offsetSet($key, $value);
@@ -93,9 +88,7 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
         return $this->errors;
     }
 
-    /**
-     * @throws Exception
-     */
+    /** @throws Exception */
     public function send(array $callable, bool $argIsHash = true)
     {
         if (!$this->valid) {

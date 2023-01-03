@@ -56,9 +56,7 @@ final class SecurityComponent extends BaseComponent
     {
     }
 
-    /**
-     * @throw BadRequestException
-     */
+    /** @throw BadRequestException */
     public function wakeUp(Event $event): void
     {
         // $controller = $this->getController();

@@ -34,9 +34,7 @@ final class Flash implements TemplateFilterInterface
         ];
     }
 
-    /**
-     * @return void|none|string
-     */
+    /** @return void|none|string */
     public function display(string $key)
     {
         if ($flash = $this->request->getSession()->read('CAMOO.SYS.FLASH')) {

@@ -39,9 +39,7 @@ final class TwigHelper extends BaseExtension
         return $this->request;
     }
 
-    /**
-     * @param string|object $name
-     */
+    /** @param string|object $name */
     final public function loadFunction($name): void
     {
         if (is_object($name)) {
@@ -66,9 +64,7 @@ final class TwigHelper extends BaseExtension
         $this->functionCollection->add($oClass);
     }
 
-    /**
-     * @param string|object $name
-     */
+    /** @param string|object $name */
     final public function loadFilter($name): void
     {
         if (is_object($name)) {
@@ -94,9 +90,7 @@ final class TwigHelper extends BaseExtension
         $this->filterCollection->add($oClass);
     }
 
-    /**
-     * Initiliazes the TwigHelper engine
-     */
+    /** Initiliazes the TwigHelper engine */
     final public function initialize(): void
     {
         $this->_initFunctions();
