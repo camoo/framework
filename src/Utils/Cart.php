@@ -75,7 +75,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
     {
         self::$withRequest = $withRequest;
         if (!empty(self::$withRequest->getSession()->check('Basket'))) {
-            $sObject = Cache::read(self::$withRequest->getSession()->read('Basket'), '_camoo_hosting_conf');
+            $sObject = Cache::reads(self::$withRequest->getSession()->read('Basket'), '_camoo_hosting_conf');
             self::$created = !($sObject instanceof self) ? new self() : $sObject;
         } elseif (self::$created === null) {
             self::$created = new self();
@@ -110,7 +110,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
         $request = $this->getRequest();
         if (!empty($request->getSession()->check('Basket'))) {
             // DELETE PREVIOUS CACHE
-            Cache::delete($request->getSession()->read('Basket'), '_camoo_hosting_conf');
+            Cache::deletes($request->getSession()->read('Basket'), '_camoo_hosting_conf');
         }
         $this->count = 0;
     }
@@ -135,7 +135,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
         $request = $this->getRequest();
         if (!empty($request->getSession()->check('Basket'))) {
             // DELETE PREVIOUS CACHE
-            Cache::delete($request->getSession()->read('Basket'), '_camoo_hosting_conf');
+            Cache::deletes($request->getSession()->read('Basket'), '_camoo_hosting_conf');
         }
 
         // REFRESH SESSION
@@ -145,7 +145,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
             throw new InvalidArgumentException('Cart Key Session cannot be empty');
         }
 
-        return Cache::write(self::$basketKey, $this, '_camoo_hosting_conf');
+        return Cache::writes(self::$basketKey, $this, '_camoo_hosting_conf');
     }
 
     public function addRequest(ServerRequest $request): void
