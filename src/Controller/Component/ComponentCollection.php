@@ -22,13 +22,11 @@ use Traversable;
  */
 final class ComponentCollection implements Countable, IteratorAggregate, ArrayAccess
 {
-    /** @var array */
-    private $values = [];
+    private array $values = [];
 
-    /** @var int */
-    private $position = 0;
+    private int $position = 0;
 
-    private $controller;
+    private ControllerInterface $controller;
 
     /**
      * This constructor is there in order to be able to create a collection with

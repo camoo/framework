@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace CAMOO\Http;
 
-use CAMOO\Controller\AppController;
+use CAMOO\Di\Routing\Filter\ControllerFactoryFilter;
 use CAMOO\Event\Event;
 use CAMOO\Event\EventDispatcherTrait;
 use CAMOO\Exception\Exception;
@@ -20,6 +20,7 @@ use Middlewares\FastRoute;
 use Middlewares\RequestHandler;
 use Middlewares\Utils\Dispatcher;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 final class Caller
 {
@@ -52,10 +53,10 @@ final class Caller
         require_once $this->sConfigDir . '/bootstrap.php';
     }
 
-    /** @return ControllerInterface|AppController */
-    public function getController(?Psr7\ServerRequest $request = null): ControllerInterface
+    public function getController(?ServerRequestInterface $request = null): ControllerInterface
     {
-        $oController = new $this->controller();
+        $filter = new ControllerFactoryFilter($this->controller);
+        $oController = $filter->getInstance();
         $serverRequest = new ServerRequest($request);
         $oController->request = $serverRequest;
         $oController->action = $this->action;
@@ -68,34 +69,39 @@ final class Caller
 
     public function dispatchRequest(): ResponseInterface
     {
-        $dispatcher = simpleDispatcher(function (RouteCollector $r) {
-            $r->addRoute($_SERVER['REQUEST_METHOD'], $this->uri, function ($request) {
-                $controller = $this->getController($request);
-                $event = new Event('AppController.initialize', $controller);
-                $controller->getEventManager()->dispatch($event);
+        $dispatcher = simpleDispatcher(function (RouteCollector $routeCollector) {
+            $requestType = $_SERVER['REQUEST_METHOD'];
+            $routeCollector->addRoute(
+                $requestType,
+                $this->uri,
+                function (ServerRequestInterface $request) {
+                    $controller = $this->getController($request);
+                    $event = new Event('AppController.initialize', $controller);
+                    $controller->getEventManager()->dispatch($event);
 
-                $components = $controller->getComponentCollection();
-                if (!empty($components)) {
-                    foreach ($components as $component) {
-                        foreach ($component->implementedEvents() as $hook => $func) {
-                            if ($func === 'beforeAction') {
-                                $this->getEventManager()->on($component);
-                                $this->dispatchEvent($hook);
+                    $components = $controller->getComponentCollection();
+                    if (!empty($components)) {
+                        foreach ($components as $component) {
+                            foreach ($component->implementedEvents() as $hook => $func) {
+                                if ($func === 'beforeAction') {
+                                    $this->getEventManager()->on($component);
+                                    $this->dispatchEvent($hook);
+                                }
                             }
                         }
                     }
-                }
 
-                if (!method_exists($controller, $this->action)) {
-                    throw new Exception(sprintf(
-                        'Action %s does not exist in %s',
-                        $this->action,
-                        get_class($controller)
-                    ));
-                }
+                    if (!method_exists($controller, $this->action)) {
+                        throw new Exception(sprintf(
+                            'Action %s does not exist in %s',
+                            $this->action,
+                            get_class($controller)
+                        ));
+                    }
 
-                return call_user_func_array([$controller, $this->action], $this->xargs);
-            });
+                    return call_user_func_array([$controller, $this->action], $this->xargs);
+                }
+            );
         });
 
         $dispatcher = new Dispatcher([

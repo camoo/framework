@@ -6,9 +6,9 @@ namespace CAMOO\Controller;
 
 use Cake\ORM\Locator\TableLocator;
 use CAMOO\Controller\Component\ComponentCollection;
-use CAMOO\Event\Event;
 use CAMOO\Event\EventDispatcherInterface;
 use CAMOO\Event\EventDispatcherTrait;
+use CAMOO\Event\EventInterface;
 use CAMOO\Event\EventListenerInterface;
 use CAMOO\Exception\Exception;
 use Camoo\Http\Curl\Domain\Entity\Stream;
@@ -23,7 +23,7 @@ use CAMOO\Template\Extension\Functions\Html;
 use CAMOO\Template\Extension\TwigHelper;
 use CAMOO\Utils\Configure;
 use CAMOO\Utils\Inflector;
-use JetBrains\PhpStorm\NoReturn;
+use CAMOO\Validation\Adapters\Cake\Validator;
 use JMS\Serializer\SerializerBuilder;
 use Psr\Http\Message\ResponseInterface;
 use Twig\Environment;
@@ -66,7 +66,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         $this->getEventManager()->on($this);
     }
 
-    public function wakeUpController()
+    public function wakeUpController(): void
     {
         $this->loadModel($this->controller);
         $this->componentCollection = new ComponentCollection($this);
@@ -122,8 +122,6 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
             echo $event->getResult();
             $this->camooExit();
         }
-
-        return null;
     }
 
     /** Initializes the controller engine */
@@ -184,7 +182,6 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
             echo $event->getResult();
             $this->camooExit();
         }
-
         $components = $this->getComponentCollection();
         if (!empty($components)) {
             foreach ($components as $value => $component) {
@@ -204,22 +201,16 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         $this->camooExit();
     }
 
-    /** @return null */
-    public function beforeRender(Event $event)
+    public function beforeRender(EventInterface $event): void
     {
-        return null;
     }
 
-    /** @return null */
-    public function beforeAction(Event $event)
+    public function beforeAction(EventInterface $event): void
     {
-        return null;
     }
 
-    /** @return null */
-    public function beforeRedirect(Event $event)
+    public function beforeRedirect(EventInterface $event): void
     {
-        return null;
     }
 
     /**
@@ -283,11 +274,10 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         return null !== $this->componentCollection && !empty($this->componentCollection[$name]);
     }
 
-    #[NoReturn]
- protected function camooExit(): void
- {
-     exit();
- }
+    protected function camooExit(): void
+    {
+        exit();
+    }
 
     protected function loadModel(string $sModel): void
     {
@@ -302,17 +292,14 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         $this->{$restModel} = $this->getRestLocator()->get(Inflector::classify($restModel));
     }
 
-    protected function _jsonResponse(array $data)
+    protected function _jsonResponse(array $data): void
     {
         header('Content-Type: application/json');
         echo json_encode($data);
         $this->camooExit();
     }
 
-    /**
-     * @return void
-     */
-    protected function showValidateErrors($model)
+    protected function showValidateErrors(Validator $model): void
     {
         $ahErrors = $model->getErrors();
         $asFields = [];

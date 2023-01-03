@@ -11,6 +11,6 @@ use Cake\Event\Event as BaseEvent;
  *
  * @author CamooSarl
  */
-class Event extends BaseEvent
+class Event extends BaseEvent implements EventInterface
 {
 }

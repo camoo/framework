@@ -14,8 +14,7 @@ use CAMOO\Interfaces\ValidationInterface;
  */
 class Validator extends BaseValidator implements ValidationInterface
 {
-    /** @var array $xErrors */
-    private $xErrors = [];
+    private array $xErrors = [];
 
     public function __construct()
     {
@@ -25,7 +24,7 @@ class Validator extends BaseValidator implements ValidationInterface
 
     public function isValid(array $data): bool
     {
-        $this->xErrors = $this->errors($data);
+        $this->xErrors = $this->validate($data);
 
         return empty($this->xErrors);
     }

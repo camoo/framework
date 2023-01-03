@@ -11,6 +11,7 @@ use CAMOO\Interfaces\ControllerInterface;
 use CAMOO\Interfaces\HttpExceptionInterface;
 use CAMOO\Utils\Configure;
 use Error;
+use Throwable;
 
 /**
  * Class ExceptionRenderer
@@ -25,27 +26,22 @@ final class ExceptionRenderer
 
     /**
      * The exception being handled.
-     *
-     * @var Error
      */
-    public $error;
+    public Error|Throwable $error;
 
     /**
      * Controller instance.
-     *
-     * @var \CAMOO\Controller\ErrorController
      */
-    public $controller;
+    public ErrorController|ControllerInterface $controller;
 
-    /** @var ServerRequest $request */
-    private $request;
+    private ServerRequest $request;
 
     /**
      * Creates the controller to perform rendering on the error response.
      *
      * @param Error $exception Exception.
      */
-    public function __construct($exception, ServerRequest $request)
+    public function __construct(Throwable $exception, ServerRequest $request)
     {
         $this->request = $request;
         $this->error = $exception;
@@ -53,13 +49,13 @@ final class ExceptionRenderer
     }
 
     /** Renders the response for the exception. */
-    public function render()
+    public function render(): mixed
     {
         $exception = $this->error;
         $controller = $this->controller;
         $code = $exception->getCode() ?? 404;
         $message = $this->_getMessage();
-        if ($code === 0 && md5(static::MSG_NOT_FOUND) === md5($message)) {
+        if ($code === 0 && md5(self::MSG_NOT_FOUND) === md5($message)) {
             $code = 404;
         }
         $controller->set('code', $code);
@@ -70,11 +66,7 @@ final class ExceptionRenderer
         return call_user_func_array([$controller, 'overview'], []);
     }
 
-    /**
-     * Get the controller instance to handle the exception.
-     *
-     * @return \CAMOO\Controller\ErrorController
-     */
+    /** Get the controller instance to handle the exception. */
     protected function _getController(): ControllerInterface
     {
         $oController = new ErrorController();
@@ -102,9 +94,9 @@ final class ExceptionRenderer
             !($exception instanceof HttpExceptionInterface)
         ) {
             if ($code < 500) {
-                $message = static::MSG_NOT_FOUND;
+                $message = self::MSG_NOT_FOUND;
             } else {
-                $message = static::MSG_INTERNAL_ERR;
+                $message = self::MSG_INTERNAL_ERR;
             }
         }
 

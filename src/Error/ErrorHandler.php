@@ -8,7 +8,6 @@ use CAMOO\Http\ServerRequest;
 use CAMOO\Utils\Configure;
 use CAMOO\Utils\Utility;
 use GuzzleHttp\Psr7;
-use Whoops\Exception\Inspector;
 use Whoops\Handler\Handler;
 use Whoops\Handler\PrettyPageHandler;
 
@@ -19,14 +18,7 @@ use Whoops\Handler\PrettyPageHandler;
  */
 final class ErrorHandler extends PrettyPageHandler
 {
-    /** @var ExceptionRenderer $exceptionRenderer */
-    private $exceptionRenderer;
-
-    /** @var Inspector $inspector */
-    private $inspector;
-
-    /** @var ServerRequest|null $request */
-    private $request;
+    private ?ServerRequest $request;
 
     public function __construct()
     {
@@ -38,9 +30,9 @@ final class ErrorHandler extends PrettyPageHandler
 
     public function handle()
     {
-        $this->inspector = $this->getInspector();
-        $exception = $this->inspector->getException();
-        $className = get_class($exception);
+        $inspector = $this->getInspector();
+        $exception = $inspector->getException();
+        //$className = get_class($exception);
         $errorTrace = $exception->getMessage() . "\n";
         $errorTrace .= $exception->getTraceAsString();
         $errorTrace .= $this->_getRequestMessage();
@@ -57,8 +49,8 @@ final class ErrorHandler extends PrettyPageHandler
         }
 
         if (null !== $this->request) {
-            $this->exceptionRenderer = new ExceptionRenderer($exception, $this->request);
-            $this->exceptionRenderer->render();
+            $exceptionRenderer = new ExceptionRenderer($exception, $this->request);
+            $exceptionRenderer->render();
         }
 
         return Handler::QUIT;
