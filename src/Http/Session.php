@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 namespace CAMOO\Http;
 
 use Aura\Session\CsrfToken;
@@ -12,16 +13,16 @@ final class Session
 {
     public const SEG_NAME = Session::class;
 
-    protected static $_create = null;
+    protected static ?self $instance = null;
 
-    protected static $__cookie = null;
+    protected static ?array $cookie = null;
 
-    private $oSession = null;
+    private ?\Aura\Session\Session $oSession = null;
 
     public function __construct()
     {
         if (null === $this->oSession) {
-            $cookies = null !== self::$__cookie ? self::$__cookie : $_COOKIE;
+            $cookies = null !== self::$cookie ? self::$cookie : $_COOKIE;
             $this->oSession = (new SessionFactory())->newInstance($cookies);
             $hCookieParam = Configure::read('Session.cookie');
             $this->oSession->setName(Configure::read('Session.name'));
@@ -29,24 +30,24 @@ final class Session
         }
     }
 
-    public function __get($key)
+    public function __get(string $key): mixed
     {
         return $this->get($key);
     }
 
-    public function __set($key, $value)
+    public function __set(string $key, mixed $value): void
     {
         $this->set($key, $value);
     }
 
     public static function create(?array $cookie = null): Session
     {
-        if (null === self::$_create) {
-            self::$_create = new self();
+        if (null === self::$instance) {
+            self::$instance = new self();
         }
-        self::$__cookie = $cookie;
+        self::$cookie = $cookie;
 
-        return self::$_create;
+        return self::$instance;
     }
 
     public function segment(?string $sSegment = null): Segment
@@ -61,27 +62,27 @@ final class Session
         return $this->oSession->destroy();
     }
 
-    public function clear()
+    public function clear(): void
     {
-        return $this->oSession->clear();
+        $this->oSession->clear();
     }
 
-    public function save()
+    public function save(): void
     {
-        return $this->oSession->commit();
+        $this->oSession->commit();
     }
 
-    public function set($key, $value)
+    public function set(string $key, mixed $value): void
     {
         $this->segment()->set($key, $value);
     }
 
-    public function get($key)
+    public function get(string $key): mixed
     {
         return $this->segment()->get($key);
     }
 
-    public function getFlash($sSegment = null): Segment
+    public function getFlash(?string $sSegment = null): Segment
     {
         $sSegmentName = $sSegment === null ? __NAMESPACE__ . '\\Flash' : $sSegment;
 
@@ -103,7 +104,7 @@ final class Session
         return $this->oSession->getName();
     }
 
-    public function setName($name): string
+    public function setName(string $name): string
     {
         return $this->oSession->setName($name);
     }

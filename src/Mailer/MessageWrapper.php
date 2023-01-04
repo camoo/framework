@@ -49,21 +49,21 @@ final class MessageWrapper extends BaseMessage
 {
     public function __construct(array $headersConfig)
     {
-        static::$defaultHeaders = $headersConfig;
+        self::$defaultHeaders = $headersConfig;
         parent::__construct();
     }
 
     /**
-     * Forward the method call to Message Methodes
+     * Forward the method call to Message Methods
      *
      * @throws MailerException When the function is not valid
      */
-    public function __call(string $function, array $arguments)
+    public function __call(string $name, array $args): mixed
     {
-        if (!method_exists($this, $function)) {
-            throw new MailerException("{$function} is not a valid Message methode");
+        if (!method_exists($this, $name)) {
+            throw new MailerException("{$name} is not a valid Message methode");
         }
 
-        return @call_user_func_array([$this, $function], $arguments);
+        return @call_user_func_array([$this, $name], $args);
     }
 }

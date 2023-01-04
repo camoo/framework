@@ -15,19 +15,14 @@ use CAMOO\Utils\QueryData;
  */
 final class SessionSegment
 {
-    /** @var \Aura\Session\Segment $segment */
-    private $segment;
-
-    public function __construct(?Segment $segment)
+    public function __construct(private ?Segment $segment)
     {
         if (empty($segment)) {
             throw new Exception('Session Segment is missing!');
         }
-        $this->segment = $segment;
     }
 
-    /** @return int|string|array|object|mixed $value */
-    public function read(string $key)
+    public function read(string $key): mixed
     {
         $hash = explode('.', $key);
         $key = array_shift($hash);
@@ -36,20 +31,21 @@ final class SessionSegment
             return $xValue;
         }
         $valueArray = is_array($xValue) ? $xValue : (array)$xValue;
-        $dataFiltered = array_filter($valueArray, function ($val) {
-            return null !== $val;
-        });
+
+        $dataFiltered = array_filter($valueArray, fn (mixed $val) => null !== $val);
 
         return  (new QueryData($dataFiltered))->get(implode('.', $hash));
     }
 
-    /** @param int|string|array|null $value */
-    public function write(string $key, $value): void
+    public function write(string $key, mixed $value): void
     {
         if (is_object($value)) {
-            throw new Exception(sprintf('Invalid Type for %s ! The following Types are allowed %s', '$value', '<int|string|array|null>'));
+            throw new Exception(sprintf(
+                'Invalid Type for %s ! The following Types are allowed %s',
+                '$value',
+                '<int|string|array|null>'
+            ));
         }
-
         $hash = explode('.', $key);
         $key = array_shift($hash);
 
@@ -63,11 +59,8 @@ final class SessionSegment
         $dataFiltered = [];
         if (null !== $xValue) {
             $valueArray = is_array($xValue) ? $xValue : (array)$xValue;
-            $dataFiltered = array_filter($valueArray, function ($val) {
-                return null !== $val;
-            });
+            $dataFiltered = array_filter($valueArray, fn (mixed $val) => null !== $val);
         }
-
         $data = (new QueryData($dataFiltered));
         $data->set(implode('.', $hash), $value);
         $this->segment->set($key, $data->all());
@@ -95,9 +88,8 @@ final class SessionSegment
         }
 
         $valueArray = is_array($xValue) ? $xValue : (array)$xValue;
-        $dataFiltered = array_filter($valueArray, function ($val) {
-            return null !== $val;
-        });
+        $dataFiltered = array_filter($valueArray, fn (mixed $val) => null !== $val);
+
         if (empty($dataFiltered)) {
             return;
         }

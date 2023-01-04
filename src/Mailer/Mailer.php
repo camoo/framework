@@ -54,28 +54,20 @@ use Nette\Mail\SmtpMailer;
  */
 class Mailer
 {
-    /** @var array */
-    protected $defaultHeaders = [
+    protected array $defaultHeaders = [
         'MIME-Version' => '1.0',
         'X-Mailer' => 'CAMOO Framework',
     ];
 
-    /** @var MessageWrapper $mail */
-    private $mail;
+    private MessageWrapper $mail;
 
-    /** @var string $transport */
-    private $transport;
+    private ?string $domain;
 
-    /** @var string|null $domain */
-    private $domain;
-
-    public function __construct(string $transport = 'default')
+    public function __construct(private string $transport = 'default')
     {
         if (Configure::check('SmtpTransport.' . $transport) === false) {
             throw new MailerException(sprintf('Smtp Transport %s can not be found', $transport));
         }
-
-        $this->transport = $transport;
 
         $this->mail = new MessageWrapper($this->defaultHeaders);
     }
@@ -85,7 +77,7 @@ class Mailer
      *
      * Wrap the BaseMessage PHP functions to call as method of Message object.
      */
-    public function __call(string $method, array $arguments)
+    public function __call(string $method, array $arguments): mixed
     {
         return $this->mail->__call($method, $arguments);
     }

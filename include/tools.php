@@ -11,7 +11,7 @@ if (!function_exists('whoops_add_stack_frame')) {
 }
 
 if (!function_exists('throw_http_exception')) {
-    function throw_exception($handler)
+    function throw_exception($handler): void
     {
         whoops_add_stack_frame(function () {
             throw new Exception('Something broke!');
@@ -20,7 +20,7 @@ if (!function_exists('throw_http_exception')) {
 }
 
 if (!function_exists('debug')) {
-    function debug($var)
+    function debug(mixed $var): mixed
     {
         if (!Configure::read('debug')) {
             return $var;

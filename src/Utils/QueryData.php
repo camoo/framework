@@ -18,13 +18,12 @@ class QueryData extends AbstractConfig
         parent::__construct($data);
     }
 
-    public function __get(string $key)
+    public function __get(string $key): mixed
     {
         return $this->get($key);
     }
 
-    /** @return array */
-    protected function getDefaults()
+    protected function getDefaults(): array
     {
         return [];
     }

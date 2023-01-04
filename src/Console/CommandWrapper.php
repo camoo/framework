@@ -19,7 +19,7 @@ class CommandWrapper extends Command
      *
      * @throws ConsoleException When the function is not valid
      */
-    public function __call(string $function, array $arguments)
+    public function __call(string $function, array $arguments): mixed
     {
         if (!method_exists($this, $function)) {
             throw new ConsoleException("{$function} is not a valid Message methode");

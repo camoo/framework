@@ -41,7 +41,7 @@ final class Flash
         }
     }
 
-    public function __call(string $name, mixed $xargs)
+    public function __call(string $name, mixed $xargs): void
     {
         if (!in_array($name, self::$flashTypes, true)) {
             throw new Exception(

@@ -22,25 +22,22 @@ class ServerRequest
         'PATCH',
     ];
 
-    /** @var array $query */
-    public $query = [];
+    public array $query = [];
 
-    /** @var array $data */
-    public $data = [];
+    public array $data = [];
 
-    /** @var array $cookie */
-    public $cookie = [];
+    public array $cookie = [];
 
     /** @var bool $isProxy defines if your app is running under a proxy server */
-    public $isProxy = false;
+    public bool $isProxy = false;
 
     /** @var Flash $Flash */
-    public $Flash = null;
+    public ?Flash $Flash = null;
 
     /** @var BaseServerRequest $oRequest */
-    private $oRequest;
+    private ?BaseServerRequest $oRequest;
 
-    private $session;
+    private SessionSegment $session;
 
     /** @var array $__session */
     private $__session = [Session::class, 'create'];
@@ -82,7 +79,7 @@ class ServerRequest
         );
     }
 
-    private function __getSession()
+    private function __getSession(): mixed
     {
         return call_user_func($this->__session);
     }
@@ -92,12 +89,12 @@ class ServerRequest
         return new Flash($oFlashSession, $sessionSegment);
     }
 
-    private function __getCookie()
+    private function __getCookie(): mixed
     {
         return call_user_func($this->__cookie);
     }
 
-    private function __queryData($xData, $bAll = true)
+    private function __queryData(mixed $xData, bool $bAll = true): QueryData|array|null
     {
         $oxData = new QueryData($xData);
 
@@ -109,17 +106,17 @@ class ServerRequest
         return $this->oRequest->getCookieParams();
     }
 
-    public function getAttribute(string $key)
+    public function getAttribute(string $key): mixed
     {
         return $this->oRequest->getAttribute($key);
     }
 
-    public function getData(?string $key = null)
+    public function getData(?string $key = null): mixed
     {
         return $this->getRequestData('data', $key);
     }
 
-    public function getQuery(?string $key = null)
+    public function getQuery(?string $key = null): mixed
     {
         return $this->getRequestData('query', $key);
     }
@@ -145,9 +142,10 @@ class ServerRequest
     public function is(string $request_method): bool
     {
         if (strtolower($request_method) === 'ajax') {
-            $checkAjax = null !== $this->getEnv('HTTP_X_REQUESTED_WITH') && $this->getEnv('HTTP_X_REQUESTED_WITH') === 'XMLHttpRequest';
+            $checkAjax = null !== $this->getEnv('HTTP_X_REQUESTED_WITH') &&
+                $this->getEnv('HTTP_X_REQUESTED_WITH') === 'XMLHttpRequest';
             // CHECK TO ENSURE REFERRER URL IS ON THIS DOMAIN
-            if ($checkAjax === true && strpos($this->getEnv('HTTP_REFERER'), $this->getEnv('HTTP_HOST')) === false) {
+            if ($checkAjax === true && !str_contains($this->getEnv('HTTP_REFERER'), $this->getEnv('HTTP_HOST'))) {
                 throw new ForbiddenException('Ajax:: Bad Referrer !');
             }
 

@@ -5,31 +5,15 @@ declare(strict_types=1);
 namespace CAMOO\File;
 
 use CAMOO\Exception\Exception;
+use stdClass;
 
 class Json
 {
-    /** @var string $file */
-    private $file;
-
-    /** @var string $json */
-    private $json;
-
-    public function __construct(?string $file = null, ?string $json = null)
+    public function __construct(private ?string $file = null, private ?string $json = null)
     {
-        $this->file = $file;
-        $this->json = $json;
     }
 
-    /**
-     * decode json string
-     *
-     * @param string $sJSON
-     *
-     * @throws Exception
-     *
-     * @return array|object
-     */
-    public function decode(?string $sJSON = null, bool $bAsHash = false)
+    public function decode(?string $sJSON = null, bool $bAsHash = false): array|stdClass
     {
         $json = $sJSON ?? $this->json;
 

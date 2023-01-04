@@ -9,59 +9,51 @@ use Noodlehaus\Parser\Json;
 
 class Configure
 {
-    /** @var array Config */
-    private static $_oahConfigs = null;
+    private static mixed $all = null;
 
     public static function load(string $sPath, bool $bMerge = false): void
     {
-        if (file_exists($sPath)) {
-            $conf = Config::load($sPath);
-            if ($bMerge === true && null !== static::$_oahConfigs) {
-                static::$_oahConfigs->merge($conf);
-            } else {
-                static::$_oahConfigs = $conf;
-            }
+        if (!file_exists($sPath)) {
+            return;
         }
+        $conf = Config::load($sPath);
+        if ($bMerge === true && null !== static::$all) {
+            static::$all->merge($conf);
+
+            return;
+        }
+        static::$all = $conf;
     }
 
     /** @return mixed value */
-    public static function read(string $sKey)
+    public static function read(string $sKey): mixed
     {
-        return static::$_oahConfigs->get($sKey);
+        return static::$all->get($sKey);
     }
 
     public static function check(string $sKey): bool
     {
-        return static::$_oahConfigs->offsetExists($sKey);
+        return static::$all->offsetExists($sKey);
     }
 
-    /** @return mixed value */
-    public static function get()
+    public static function get(): mixed
     {
-        return static::$_oahConfigs->all();
+        return static::$all->all();
     }
 
-    /**
-     * @param string $sKey
-     * @param array  $xValue
-     */
-    public static function write($sKey, $xValue = []): void
+    public static function write(string $sKey, mixed $xValue = []): void
     {
         $hNewConf = [];
         self::addConf($hNewConf, $sKey, $xValue);
         $conf = Config::load(json_encode($hNewConf), new Json(), true);
-        if (null !== static::$_oahConfigs) {
-            static::$_oahConfigs->merge($conf);
+        if (null !== static::$all) {
+            static::$all->merge($conf);
         } else {
-            static::$_oahConfigs = $conf;
+            static::$all = $conf;
         }
     }
 
-    /**
-     * @param array  $hNewConf
-     * @param string $sKey
-     */
-    private static function addConf(&$hNewConf, $sKey, $xValue): void
+    private static function addConf(array &$hNewConf, string $sKey, mixed $xValue): void
     {
         $asKeys = explode('.', $sKey);
         foreach ($asKeys as $key) {

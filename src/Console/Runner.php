@@ -16,10 +16,7 @@ use CAMOO\Utils\Inflector;
  */
 final class Runner
 {
-    /** @var CommandInterface */
-    private $class;
-
-    public function run(array $argv)
+    public function run(array $argv): void
     {
         array_shift($argv);
         $this->execute($argv);
@@ -33,16 +30,16 @@ final class Runner
 
         $class = array_shift($inp);
         $classClassify = sprintf('%s%s', Inflector::classify($class), 'Command');
-        $this->class = $this->loadCommand($classClassify, $inp);
+        $commandClass = $this->loadCommand($classClassify, $inp);
 
-        if ($method = $this->class->getCommandMethod()) {
+        if ($method = $commandClass->getCommandMethod()) {
             $method = Inflector::classify($method);
-            if (!method_exists($this->class, $method)) {
-                throw new ConsoleException(sprintf('Method %s::%s not found!', get_class($this->class), $method));
+            if (!method_exists($commandClass, $method)) {
+                throw new ConsoleException(sprintf('Method %s::%s not found!', get_class($commandClass), $method));
             }
-            call_user_func_array([$this->class, $method], $this->class->getCommandParam());
-        } elseif (method_exists($this->class, 'execute')) {
-            $this->class->execute();
+            call_user_func_array([$commandClass, $method], $commandClass->getCommandParam());
+        } elseif (method_exists($commandClass, 'execute')) {
+            $commandClass->execute();
         }
     }
 

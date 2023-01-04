@@ -19,17 +19,13 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 abstract class AppCommand implements CommandInterface
 {
-    /** @var SymfonyStyle $out */
-    protected $out;
+    protected SymfonyStyle $out;
 
-    /** @var array $param */
-    private $param = [];
+    private array $param = [];
 
-    /** @var string|null $method */
-    private $method = null;
+    private ?string $method = null;
 
-    /** @var CommandWrapper */
-    private $command;
+    private CommandWrapper $command;
 
     public function __construct(string $name, array $argv = [])
     {
@@ -55,19 +51,19 @@ abstract class AppCommand implements CommandInterface
      *
      * Wrap the Symfony Command PHP functions to call as method of Command object.
      */
-    public function __call(string $method, array $arguments)
+    public function __call(string $method, array $arguments): mixed
     {
         return $this->command->__call($method, $arguments);
     }
 
     public function getCommandParam(): array
     {
-        return $this->_satanise($this->param);
+        return $this->satanise($this->param);
     }
 
     public function getCommandMethod(): ?string
     {
-        return $this->_satanise($this->method);
+        return $this->satanise($this->method);
     }
 
     /** Configures the current command. */
@@ -80,7 +76,7 @@ abstract class AppCommand implements CommandInterface
      *
      * @return string|array $xData
      */
-    private function _satanise($xData)
+    private function satanise(mixed $xData): mixed
     {
         if (is_numeric($xData)) {
             return $xData;
@@ -95,12 +91,12 @@ abstract class AppCommand implements CommandInterface
                 return $xData;
             }
 
-            return array_map(function ($data) {
+            return array_map(function (mixed $data) {
                 if (!is_array($data)) {
                     return Security::satanizer($data);
                 }
 
-                return $this->_satanise($data);
+                return $this->satanise($data);
             }, $xData);
         }
 

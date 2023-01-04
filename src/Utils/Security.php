@@ -11,15 +11,15 @@ namespace CAMOO\Utils;
  */
 class Security
 {
-    public static function satanizer(?string $str, bool $keep_newlines = false)
+    public static function satanizer(?string $str, bool $keep_newlines = false): string|array
     {
         $filtered = (string)$str;
         if (!mb_check_encoding($filtered, 'UTF-8')) {
             return '';
         }
-        if (strpos($filtered, '<') !== false) {
-            $callback = function ($match) {
-                if (false === strpos($match[0], '>')) {
+        if (str_contains($filtered, '<')) {
+            $callback = function (mixed $match) {
+                if (!str_contains($match[0], '>')) {
                     return htmlentities($match[0], ENT_QUOTES | ENT_IGNORE, 'UTF-8');
                 }
 

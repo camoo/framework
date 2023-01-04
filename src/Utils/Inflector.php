@@ -25,7 +25,7 @@ class Inflector
     {
     }
 
-    public static function __callStatic(string $method, $args)
+    public static function __callStatic(string $method, array $args): mixed
     {
         $inflector = InflectorFactory::create()->build();
         if (!method_exists($inflector, $method)) {
