@@ -8,6 +8,7 @@ use CAMOO\Event\Event;
 use CAMOO\Event\EventDispatcherInterface;
 use CAMOO\Event\EventDispatcherTrait;
 use CAMOO\Event\EventListenerInterface;
+use CAMOO\Http\ServerRequest;
 use CAMOO\Interfaces\TemplateFilterInterface;
 use CAMOO\Utils\Configure;
 use CAMOO\Utils\Inflector;
@@ -24,13 +25,11 @@ abstract class FilterHelper implements TemplateFilterInterface, EventListenerInt
     use EventDispatcherTrait;
 
     /** @var array $functions Functions to use in a helper */
-    public $filters = [];
+    public array $filters = [];
 
-    /** @var ServerRequest $request */
-    protected $request;
+    protected ServerRequest $request;
 
-    /** @var TwigHelper */
-    private $baseHelper;
+    private TwigHelper $baseHelper;
 
     public function __construct(TwigHelper $baseHelper)
     {
@@ -73,8 +72,7 @@ abstract class FilterHelper implements TemplateFilterInterface, EventListenerInt
     {
     }
 
-    /** @param callable $callable */
-    protected function add(string $name, $callable = null, array $options = [])
+    protected function add(string $name, ?callable $callable = null, array $options = []): TwigFilter
     {
         $this->dispatchEvent('FilterHelper.beforeRender', ['filter' => $name]);
 

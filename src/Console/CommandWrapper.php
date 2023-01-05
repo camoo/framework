@@ -12,10 +12,10 @@ use Symfony\Component\Console\Command\Command;
  *
  * @author CamooSarl
  */
-class CommandWrapper extends Command
+final class CommandWrapper extends Command
 {
     /**
-     * Forward the method call to Symfony Command Methodes
+     * Forward the method call to Symfony Command Methods
      *
      * @throws ConsoleException When the function is not valid
      */

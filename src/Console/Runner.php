@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CAMOO\Console;
 
+use CAMOO\Command\Command;
 use CAMOO\Exception\ConsoleException;
 use CAMOO\Interfaces\CommandInterface;
 use CAMOO\Utils\Configure;
@@ -16,10 +17,14 @@ use CAMOO\Utils\Inflector;
  */
 final class Runner
 {
-    public function run(array $argv): void
+    public function __construct(private array $argv)
     {
-        array_shift($argv);
-        $this->execute($argv);
+    }
+
+    public function run(): void
+    {
+        array_shift($this->argv);
+        $this->execute($this->argv);
     }
 
     private function execute(array $inp): void
@@ -33,11 +38,11 @@ final class Runner
         $commandClass = $this->loadCommand($classClassify, $inp);
 
         if ($method = $commandClass->getCommandMethod()) {
-            $method = Inflector::classify($method);
+            $method = Inflector::camelize($method);
             if (!method_exists($commandClass, $method)) {
                 throw new ConsoleException(sprintf('Method %s::%s not found!', get_class($commandClass), $method));
             }
-            call_user_func_array([$commandClass, $method], $commandClass->getCommandParam());
+            call_user_func_array([$commandClass, $method], array_values($commandClass->getCommandParam()));
         } elseif (method_exists($commandClass, 'execute')) {
             $commandClass->execute();
         }
@@ -58,6 +63,13 @@ final class Runner
             }
         }
 
-        return new $class($name, $inp);
+        /** @var CommandInterface|Command $command */
+        $command = di($class);
+
+        if (!$command->isEnabled()) {
+            throw new ConsoleException(sprintf('Command %s not is disabled!', $class));
+        }
+
+        return $command->initialize($name, $inp);
     }
 }

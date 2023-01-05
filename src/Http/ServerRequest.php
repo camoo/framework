@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CAMOO\Http;
 
+use Aura\Session\Segment;
 use CAMOO\Exception\Exception;
 use CAMOO\Exception\Http\ForbiddenException;
 use CAMOO\Exception\Http\MethodNotAllowedException;
@@ -26,27 +27,22 @@ class ServerRequest
 
     public array $data = [];
 
-    public array $cookie = [];
+    public ?Cookie $cookie;
 
     /** @var bool $isProxy defines if your app is running under a proxy server */
     public bool $isProxy = false;
 
-    /** @var Flash $Flash */
     public ?Flash $Flash = null;
 
-    /** @var BaseServerRequest $oRequest */
     private ?BaseServerRequest $oRequest;
 
-    private SessionSegment $session;
+    private Segment $session;
 
-    /** @var array $__session */
-    private $__session = [Session::class, 'create'];
+    private array $__session = [Session::class, 'create'];
 
-    /** @var array $__cookie */
-    private $__cookie = [Cookie::class, 'create'];
+    private array $__cookie = [Cookie::class, 'create'];
 
-    /** @var array $_queryDataMaps */
-    private $_queryDataMaps = [
+    private array $queryDataMaps = [
         'query' => 'getQueryParams',
         'data' => 'getParsedBody',
     ];
@@ -57,39 +53,42 @@ class ServerRequest
         $this->invoker();
     }
 
-    public function __call($name, $xargs)
+    public function __call(string $name, array $xargs): mixed
     {
-        if (mb_substr($name, 0, 3) === 'get' && in_array(mb_strtolower(mb_substr($name, 3)), array_keys($this->_queryDataMaps))) {
-            $xData = $this->__queryData($this->oRequest->{$this->_queryDataMaps[mb_strtolower(mb_substr($name, 3))]}());
-            $xData = $this->_satanize($xData);
+        if (mb_substr($name, 0, 3) === 'get' && in_array(
+            mb_strtolower(mb_substr($name, 3)),
+            array_keys($this->queryDataMaps)
+        )) {
+            $xData = $this->__queryData($this->oRequest->{$this->queryDataMaps[mb_strtolower(mb_substr($name, 3))]}());
+            $xData = $this->satanise($xData);
 
             return empty($xargs) ? $xData : (new QueryData($xData))->get($xargs[0]);
-        } elseif (in_array($name, array_keys($this->_queryDataMaps))) {
+        } elseif (in_array($name, array_keys($this->queryDataMaps))) {
             if (empty($xargs) || count($xargs) > 1 || !preg_match('/\S/', $xargs[0])) {
                 throw new Exception(
                     sprintf('Method %s::%s does not exist', get_class($this), $name)
                 );
             }
-            $xData = $this->__queryData($this->oRequest->{$this->_queryDataMaps[$name]}(), false)->get($xargs[0]);
+            $xData = $this->__queryData($this->oRequest->{$this->queryDataMaps[$name]}(), false)->get($xargs[0]);
 
-            return $this->_satanize($xData);
+            return $this->satanise($xData);
         }
         throw new Exception(
             sprintf('Method %s::%s does not exist', get_class($this), $name)
         );
     }
 
-    private function __getSession(): mixed
+    private function __getSession(): Session
     {
         return call_user_func($this->__session);
     }
 
-    private function __getFlash($oFlashSession, $sessionSegment): Flash
+    private function __getFlash(?Segment $oFlashSession, ?SessionSegment $sessionSegment): Flash
     {
         return new Flash($oFlashSession, $sessionSegment);
     }
 
-    private function __getCookie(): mixed
+    private function __getCookie(): Cookie
     {
         return call_user_func($this->__cookie);
     }
@@ -187,7 +186,7 @@ class ServerRequest
     }
 
     /** @return mixed|null */
-    public function getEnv(string $param)
+    public function getEnv(string $param): mixed
     {
         $serverParams = $this->oRequest->getServerParams();
 
@@ -199,60 +198,52 @@ class ServerRequest
         return $this->oRequest->getRequestTarget();
     }
 
-    private function getRequestData(string $type, ?string $key = null)
+    private function getRequestData(string $type, ?string $key = null): mixed
     {
         if ($key === null) {
-            $xData = $this->__queryData($this->oRequest->{$this->_queryDataMaps[$type]}());
+            $xData = $this->__queryData($this->oRequest->{$this->queryDataMaps[$type]}());
         } else {
-            $xData = $this->__queryData($this->oRequest->{$this->_queryDataMaps[$type]}(), false)->get($key);
+            $xData = $this->__queryData($this->oRequest->{$this->queryDataMaps[$type]}(), false)->get($key);
         }
 
-        return $this->_satanize($xData);
+        return $this->satanise($xData);
     }
 
-    private function invoker()
+    private function invoker(): void
     {
         $oSession = $this->__getSession();
 
-        /** @var SessionSegment */
         $this->session = $oSession->segment(Session::SEG_NAME);
 
         if (!empty($this->oRequest)) {
-            $this->query = $this->_satanize($this->__queryData($this->oRequest->getQueryParams()));
-            $this->data = $this->_satanize($this->__queryData($this->oRequest->getParsedBody()));
+            $this->query = $this->satanise($this->__queryData($this->oRequest->getQueryParams()));
+            $this->data = $this->satanise($this->__queryData($this->oRequest->getParsedBody()));
         }
 
         $this->cookie = $this->__getCookie();
         $this->Flash = $this->__getFlash($oSession->getFlash(), $this->getSession());
     }
 
-    /** @param string|array $xData */
-    private function _satanize($xData)
+    private function satanise(mixed $xData): mixed
     {
         if (is_numeric($xData)) {
             return $xData;
         }
-
         if (is_object($xData)) {
             throw new Exception('Invalid Data type! Only string|Array are allowed');
         }
-
         if (is_array($xData)) {
             if (array_key_exists('__csrf_Token', $xData)) {
                 unset($xData['__csrf_Token']);
             }
-
             if (count($xData) === 0) {
                 return $xData;
             }
 
-            return array_map(function ($data) {
-                if (!is_array($data)) {
-                    return Security::satanizer($data);
-                }
-
-                return $this->_satanize($data);
-            }, $xData);
+            return array_map(
+                fn (mixed $data) => is_array($data) ? $this->satanise($data) : Security::satanizer($data),
+                $xData
+            );
         }
 
         return Security::satanizer($xData);

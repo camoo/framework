@@ -8,6 +8,7 @@ use CAMOO\Console\CommandWrapper;
 use CAMOO\Interfaces\CommandInterface;
 use CAMOO\Utils\Security;
 use InvalidArgumentException;
+use Symfony\Component\Console\Command\Command as BaseCommand;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -17,8 +18,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  *
  * @author CamooSarl
  */
-abstract class AppCommand implements CommandInterface
+abstract class Command implements CommandInterface
 {
+    public const SUCCESS = BaseCommand::SUCCESS;
+
+    public const FAILURE = BaseCommand::FAILURE;
+
     protected SymfonyStyle $out;
 
     private array $param = [];
@@ -27,7 +32,22 @@ abstract class AppCommand implements CommandInterface
 
     private CommandWrapper $command;
 
-    public function __construct(string $name, array $argv = [])
+    /**
+     * Call an internal method or a Symfony Command method handled by the wrapper.
+     *
+     * Wrap the Symfony Command PHP functions to call as method of Command object.
+     */
+    public function __call(string $method, array $arguments): mixed
+    {
+        return $this->command->__call($method, $arguments);
+    }
+
+    public function isEnabled(): bool
+    {
+        return true;
+    }
+
+    final public function initialize(string $name, array $argv = []): self
     {
         $inp = array_merge([$name], $argv);
         $this->command = new CommandWrapper($name);
@@ -44,16 +64,8 @@ abstract class AppCommand implements CommandInterface
             $this->method = array_shift($arguments);
             $this->param = $arguments;
         }
-    }
 
-    /**
-     * Call an internal method or a Symfony Command method handled by the wrapper.
-     *
-     * Wrap the Symfony Command PHP functions to call as method of Command object.
-     */
-    public function __call(string $method, array $arguments): mixed
-    {
-        return $this->command->__call($method, $arguments);
+        return $this;
     }
 
     public function getCommandParam(): array
@@ -91,13 +103,10 @@ abstract class AppCommand implements CommandInterface
                 return $xData;
             }
 
-            return array_map(function (mixed $data) {
-                if (!is_array($data)) {
-                    return Security::satanizer($data);
-                }
-
-                return $this->satanise($data);
-            }, $xData);
+            return array_map(
+                fn (mixed $data) => is_array($data) ? $this->satanise($data) : Security::satanizer($data),
+                $xData
+            );
         }
 
         return Security::satanizer($xData);
