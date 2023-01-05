@@ -78,7 +78,7 @@ final class Flash implements TemplateFilterInterface
 
     private function buildAlert(string $alert, string $message): string
     {
-        $custom = sprintf('%sTemplate/Layouts/Alerts/%s.ctpl', APP, $alert);
+        $custom = sprintf('%sTemplate/Layouts/Alerts/%s.tpl', APP, $alert);
         if (is_file($custom) && ($content = file_get_contents($custom))) {
             return str_replace('#message#', htmlspecialchars($message, ENT_QUOTES, 'UTF-8'), $content);
         }

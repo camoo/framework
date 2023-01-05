@@ -49,7 +49,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
 
     protected ?Environment $oLayout = null;
 
-    protected string $sTemplate = '%s/%s.tpl';
+    protected string $sTemplate = '%s/%s.twig';
 
     protected string $sTemplateDir = 'Template';
 
