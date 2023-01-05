@@ -12,9 +12,9 @@ use CAMOO\Event\EventDispatcherInterface;
 use CAMOO\Event\EventDispatcherTrait;
 use CAMOO\Event\EventListenerInterface;
 use CAMOO\Exception\Exception;
+use Camoo\Inflector\Inflector;
 use CAMOO\Interfaces\RestInterface;
 use CAMOO\Interfaces\ValidationInterface;
-use CAMOO\Utils\Inflector;
 use CAMOO\Validation\ValidatorLocatorTrait;
 use IteratorAggregate;
 use Traversable;
@@ -29,19 +29,15 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
     use ValidatorLocatorTrait;
     use EventDispatcherTrait;
 
-    protected $output;
+    protected mixed $output;
 
-    /** @var array $errors */
-    private $errors = [];
+    private array $errors = [];
 
-    /** @var bool $valid */
-    private $valid = false;
+    private bool $valid = false;
 
-    /** @var array $data */
-    private $data = [];
+    private array $data = [];
 
-    /** @var array $option */
-    private $option = [];
+    private array $option = [];
 
     public function __construct()
     {
@@ -49,9 +45,8 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
         $this->initialized();
     }
 
-    public function __get(string $key)
+    public function __get(string $key): mixed
     {
-        //$caller = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT)[1];
         return $this->offsetGet($key);
     }
 
@@ -72,13 +67,13 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
         return $this->offsetExists($key);
     }
 
-    public function get(string $key)
+    public function get(string $key): mixed
     {
         return $this->offsetGet($key);
     }
 
     /** @param string $value */
-    public function set(string $key, $value): void
+    public function set(string $key, mixed $value): void
     {
         $this->offsetSet($key, $value);
     }
@@ -89,7 +84,7 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
     }
 
     /** @throws Exception */
-    public function send(array $callable, bool $argIsHash = true)
+    public function send(array $callable, bool $argIsHash = true): mixed
     {
         if (!$this->valid) {
             throw new Exception('Invalid Data Provided !');
@@ -99,7 +94,7 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
         $object = $event->getSubject();
         $args = $argIsHash === true ? [$object->data] : $object->data;
 
-        if (is_array($callable) && !empty($callable) && preg_match('/^::/', $callable[0])) {
+        if (!empty($callable) && str_starts_with($callable[0], '::')) {
             $remoteObject = str_replace('::', '', $callable[0]);
             $callable[0] = $this->{$remoteObject};
         }
@@ -109,7 +104,7 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
         return $this->output;
     }
 
-    public function newRequest(array $data, bool $validate = true, array $options = [])
+    public function newRequest(array $data, bool $validate = true, array $options = []): self
     {
         $default = ['validation' => 'default'];
         $options += $default;
@@ -117,7 +112,11 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
             $suffix = Inflector::classify($options['validation']);
             $validationMethod = 'Validation' . $suffix;
             if (empty($options['validation']) || !method_exists($this, $validationMethod)) {
-                throw new Exception(sprintf('Validation method %s not found in %s', $validationMethod, get_class($this)));
+                throw new Exception(sprintf(
+                    'Validation method %s not found in %s',
+                    $validationMethod,
+                    get_class($this)
+                ));
             }
             $validator = $this->{$validationMethod}($this->getValidatorLocator()->get());
             $this->valid = $validator->isValid($data);
@@ -136,12 +135,12 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
         return $this;
     }
 
-    public function offsetExists($key)
+    public function offsetExists(mixed $key): bool
     {
         return isset($this->data[$key]);
     }
 
-    public function offsetGet($key)
+    public function offsetGet(mixed $key): mixed
     {
         if ($this->offsetExists($key)) {
             return $this->data[$key];
@@ -150,7 +149,7 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
         return null;
     }
 
-    public function offsetSet($key, $value)
+    public function offsetSet(mixed $key, mixed $value): void
     {
         if ($key) {
             $this->data[$key] = $value;
@@ -159,7 +158,7 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
         }
     }
 
-    public function offsetUnset($key)
+    public function offsetUnset(mixed $key): void
     {
         unset($this->data[$key]);
     }

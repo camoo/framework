@@ -9,9 +9,9 @@ use CAMOO\Event\EventDispatcherInterface;
 use CAMOO\Event\EventDispatcherTrait;
 use CAMOO\Event\EventListenerInterface;
 use CAMOO\Http\ServerRequest;
+use Camoo\Inflector\Inflector;
 use CAMOO\Interfaces\TemplateFunctionInterface;
 use CAMOO\Utils\Configure;
-use CAMOO\Utils\Inflector;
 use InvalidArgumentException;
 use Twig\TwigFunction;
 

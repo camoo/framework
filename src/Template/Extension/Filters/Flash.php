@@ -15,6 +15,14 @@ use Twig\TwigFilter;
  */
 final class Flash implements TemplateFilterInterface
 {
+    private const INFO = 'info';
+
+    private const SUCCESS = 'success';
+
+    private const ERROR = 'error';
+
+    private const WARNING = 'warning';
+
     private ?\CAMOO\Http\Flash $flash;
 
     private ServerRequest $request;
@@ -40,48 +48,32 @@ final class Flash implements TemplateFilterInterface
         }
         $asFlash = [];
         $message = $this->flash->get($key);
-        if (null === $message) {
+        if (empty($message)) {
             return null;
         }
         foreach ($flash as $keyContainer => $alert) {
             if (null === $alert) {
                 continue;
             }
-            if ($key === $keyContainer) {
-                if (method_exists($this, $alert)) {
-                    $asFlash[] = $this->{$alert}($this->flash->get($key));
-                } else {
-                    $asFlash[] = $this->default($this->flash->get($key));
-                }
+            if ($key !== $keyContainer) {
+                continue;
             }
+
+            $asFlash[] = $this->showMessageByType($alert, $this->flash->get($key));
         }
 
-        return count($asFlash) > 0 ? implode('', $asFlash) : null;
+        return !empty($asFlash) ? implode('', $asFlash) : null;
     }
 
-    private function success(string $message): string
+    private function showMessageByType(string $type, string $message): string
     {
-        return $this->buildAlert('success', $message);
-    }
-
-    private function info(string $message): string
-    {
-        return $this->buildAlert('info', $message);
-    }
-
-    private function warning(string $message): string
-    {
-        return $this->buildAlert('warning', $message);
-    }
-
-    private function error(string $message): string
-    {
-        return $this->buildAlert('danger', $message);
-    }
-
-    private function default(string $message): string
-    {
-        return $this->buildAlert('secondary', $message);
+        return match ($type) {
+            self::INFO => $this->buildAlert(self::INFO, $message),
+            self::SUCCESS => $this->buildAlert(self::SUCCESS, $message),
+            self::ERROR => $this->buildAlert('danger', $message),
+            self::WARNING => $this->buildAlert(self::WARNING, $message),
+            default => $this->buildAlert('secondary', $message)
+        };
     }
 
     private function buildAlert(string $alert, string $message): string

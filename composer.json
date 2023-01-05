@@ -5,8 +5,8 @@
   "require": {
     "php": ">=8.0",
     "vlucas/valitron": "^1.4",
-    "guzzlehttp/guzzle": "^6.2",
     "ext-mbstring": "*",
+    "ext-json": "*",
     "middlewares/request-handler": "^v2.0.0",
     "middlewares/fast-route": "^v2.0.0",
     "nikic/fast-route": "^v1.3.0",
@@ -29,10 +29,11 @@
     "symfony/console": "^5.1",
     "nette/mail": "^v3.0",
     "jms/serializer": "^3.9",
-    "ext-json": "*",
     "camoo/curl-http-client": "^1.0",
     "camoo/cache": "^2.1",
-    "ray/di": "^2.15"
+    "camoo/inflector": "^1.1",
+    "ray/di": "^2.15",
+    "guzzlehttp/guzzle": "^7.5"
   },
   "minimum-stability": "dev",
   "homepage": "https://camoo.cm",

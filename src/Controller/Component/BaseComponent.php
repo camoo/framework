@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace CAMOO\Controller\Component;
 
 use CAMOO\Event\EventListenerInterface;
+use Camoo\Inflector\Inflector;
 use CAMOO\Interfaces\ComponentInterface;
 use CAMOO\Interfaces\ControllerInterface;
 use CAMOO\Utils\ConfigTrait;
-use CAMOO\Utils\Inflector;
 use InvalidArgumentException;
 
 /**
@@ -22,20 +22,15 @@ class BaseComponent implements ComponentInterface, EventListenerInterface
 
     /**
      * Other Components this component uses.
-     *
-     * @var array
      */
-    public $components = [];
+    public array $components = [];
 
     /**
      * Default config
-     *
-     * @var array
      */
-    protected $_defaultConfig = [];
+    protected array $_defaultConfig = [];
 
-    /** @var ControllerInterface $controller */
-    private $controller;
+    private ControllerInterface $controller;
 
     public function __construct(?ControllerInterface $controller = null, array $config = [])
     {

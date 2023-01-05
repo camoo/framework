@@ -6,9 +6,9 @@ namespace CAMOO\Console;
 
 use CAMOO\Command\Command;
 use CAMOO\Exception\ConsoleException;
+use Camoo\Inflector\Inflector;
 use CAMOO\Interfaces\CommandInterface;
 use CAMOO\Utils\Configure;
-use CAMOO\Utils\Inflector;
 
 /**
  * Class Runner

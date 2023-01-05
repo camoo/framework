@@ -9,9 +9,9 @@ use CAMOO\Event\EventDispatcherInterface;
 use CAMOO\Event\EventDispatcherTrait;
 use CAMOO\Event\EventListenerInterface;
 use CAMOO\Http\ServerRequest;
+use Camoo\Inflector\Inflector;
 use CAMOO\Interfaces\TemplateFilterInterface;
 use CAMOO\Utils\Configure;
-use CAMOO\Utils\Inflector;
 use InvalidArgumentException;
 use Twig\TwigFilter;
 
@@ -24,18 +24,14 @@ abstract class FilterHelper implements TemplateFilterInterface, EventListenerInt
 {
     use EventDispatcherTrait;
 
-    /** @var array $functions Functions to use in a helper */
     public array $filters = [];
 
     protected ServerRequest $request;
 
-    private TwigHelper $baseHelper;
-
-    public function __construct(TwigHelper $baseHelper)
+    public function __construct(private TwigHelper $baseHelper)
     {
         $this->getEventManager()->on($this);
-        $this->baseHelper = $baseHelper;
-        $this->request = $baseHelper->getRequest();
+        $this->request = $this->baseHelper->getRequest();
 
         if (!empty($this->filters)) {
             foreach ($this->filters as $filter) {

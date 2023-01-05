@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace CAMOO\Console;
 
-use CAMOO\Utils\Inflector;
+use Camoo\Inflector\Inflector;
 use Composer\InstalledVersions;
 use DirectoryIterator;
 use Symfony\Component\Console\Input\ArgvInput;
