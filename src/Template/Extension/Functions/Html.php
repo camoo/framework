@@ -16,16 +16,12 @@ use Twig\TwigFunction;
  */
 final class Html implements TemplateFunctionInterface
 {
-    /** @var ServerRequest $request */
-    private $request;
+    private array $css = [];
 
-    private $css = [];
+    private array $script = [];
 
-    private $script = [];
-
-    public function __construct(ServerRequest $request)
+    public function __construct(private ServerRequest $request)
     {
-        $this->request = $request;
     }
 
     public function getFunctions(): array
@@ -64,12 +60,8 @@ final class Html implements TemplateFunctionInterface
             throw new Exception(sprintf('Item %s is not allowed !', $item));
         }
 
-        $htmlOut = '';
         $asItems = $this->{$item};
-        foreach ($asItems as $value) {
-            $htmlOut .= $value;
-        }
 
-        return $htmlOut;
+        return implode('', $asItems);
     }
 }

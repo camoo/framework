@@ -112,10 +112,11 @@ final class TwigHelper extends BaseExtension
         $asNameSpace = explode('\\', $namespace);
         array_shift($asNameSpace);
         $appFuncClass = '\\' . Configure::read('App.namespace') . '\\' . implode('\\', $asNameSpace);
-        if (class_exists($appFuncClass)) {
-            $oAppFuncClass = new $appFuncClass($this);
-            $oAppFuncClass->initialize();
+        if (!class_exists($appFuncClass)) {
+            return;
         }
+        $oAppFuncClass = new $appFuncClass($this);
+        $oAppFuncClass->initialize();
     }
 
     private function initializeFilters(): void
@@ -126,10 +127,12 @@ final class TwigHelper extends BaseExtension
         $asNameSpace = explode('\\', $namespace);
         array_shift($asNameSpace);
         $appFuncClass = '\\' . Configure::read('App.namespace') . '\\' . implode('\\', $asNameSpace);
-        if (class_exists($appFuncClass)) {
-            $oAppFuncClass = new $appFuncClass($this);
-            $oAppFuncClass->initialize();
+
+        if (!class_exists($appFuncClass)) {
+            return;
         }
+        $filters = new $appFuncClass($this);
+        $filters->initialize();
     }
 
     private function getAppExtension(string $namespace, string $name): string

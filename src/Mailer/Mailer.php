@@ -61,7 +61,7 @@ class Mailer
 
     private MessageWrapper $mail;
 
-    private ?string $domain;
+    private ?string $domain = null;
 
     public function __construct(private string $transport = 'default')
     {

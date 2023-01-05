@@ -17,23 +17,13 @@ use Twig\TwigFunction;
  */
 final class Form implements TemplateFunctionInterface
 {
-    /** @var ServerRequest $request */
-    private $request;
+    private array $hiddenValue = [];
 
-    /** @var string|null $token */
-    private $token;
-
-    /** @var SessionSegment $csrfSessionSegment */
-    private $csrfSessionSegment = null;
-
-    /** @var array */
-    private $hiddenValue = [];
-
-    public function __construct(ServerRequest $request, ?SessionSegment $csrfSessionSegment, ?string $token = null)
-    {
-        $this->request = $request;
-        $this->csrfSessionSegment = $csrfSessionSegment;
-        $this->token = $token;
+    public function __construct(
+        private ServerRequest $request,
+        private ?SessionSegment $csrfSessionSegment,
+        private ?string $token = null
+    ) {
     }
 
     public function getFunctions(): array
@@ -45,11 +35,11 @@ final class Form implements TemplateFunctionInterface
         ];
     }
 
-    public function formStart(?string $name = null, $options = [])
+    public function formStart(?string $name = null, array $options = []): string
     {
         $token = $this->token;
-        $name = $name ?? uniqid('form', false);
-        $default = ['id' => $name, 'method' => 'POST', 'action' => ''];
+        $name = $name ?? uniqid('form');
+        $default = ['id' => $name, 'method' => 'POST', 'action' => $this->request->getRequestTarget()];
         if (array_key_exists('url', $options)) {
             $options['action'] = $options['url'];
             unset($options['url']);
@@ -57,15 +47,15 @@ final class Form implements TemplateFunctionInterface
         $options += $default;
         $inputToken = $token !== null ? ' <input type="hidden" name="__csrf_Token" value="' . $token . '" />' : '';
 
-        return sprintf('<form name="%s"%s>' . "\n" . '%s', $name, $this->_buildAttr($options), $inputToken);
+        return sprintf('<form name="%s"%s>' . "\n" . '%s', $name, $this->buildAttribute($options), $inputToken);
     }
 
-    public function formEnd()
+    public function formEnd(): string
     {
         return '</form>';
     }
 
-    public function input(string $name, array $options = [], $template = null)
+    public function input(string $name, array $options = []): string
     {
         $default = ['id' => $name, 'type' => 'text', 'value' => ''];
         $options += $default;
@@ -74,14 +64,23 @@ final class Form implements TemplateFunctionInterface
             unset($options['type']);
             unset($options['value']);
 
-            return sprintf('<textarea name="%s"%s>%s</textarea>', $name, rtrim($this->_buildAttr($options)), htmlspecialchars($value, ENT_QUOTES, 'UTF-8'));
+            return sprintf(
+                '<textarea name="%s"%s>%s</textarea>',
+                $name,
+                rtrim($this->buildAttribute($options)),
+                htmlspecialchars($value, ENT_QUOTES, 'UTF-8')
+            );
         }
 
         if (array_key_exists('type', $options) && strtolower($options['type']) === 'submit') {
             $value = $options['value'];
             unset($options['value']);
 
-            return sprintf('<button %s>%s</button>', rtrim($this->_buildAttr($options)), htmlspecialchars($value, ENT_QUOTES, 'UTF-8'));
+            return sprintf(
+                '<button %s>%s</button>',
+                rtrim($this->buildAttribute($options)),
+                htmlspecialchars($value, ENT_QUOTES, 'UTF-8')
+            );
         }
 
         if (empty($options['value'])) {
@@ -98,15 +97,13 @@ final class Form implements TemplateFunctionInterface
 
         if (array_key_exists('type', $options) && strtolower($options['type']) === 'hidden') {
             $this->hiddenValue[$name] = md5(Security::satanizer((string)$options['value']));
-            if ($this->csrfSessionSegment) {
-                $this->csrfSessionSegment->write('__csrf_checksum', $this->hiddenValue);
-            }
+            $this->csrfSessionSegment?->write('__csrf_checksum', $this->hiddenValue);
         }
 
-        return sprintf('<input name="%s"%s />', $name, rtrim($this->_buildAttr($options)));
+        return sprintf('<input name="%s"%s />', $name, rtrim($this->buildAttribute($options)));
     }
 
-    private function _buildAttr(array $options)
+    private function buildAttribute(array $options): string
     {
         $attributes = ' ';
         foreach ($options as $attr => $option) {
