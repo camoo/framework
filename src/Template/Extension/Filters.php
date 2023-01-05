@@ -22,7 +22,6 @@ class Filters
 
     public function initialize(): void
     {
-        //$this->baseHelper->loadFilter('Foo');
     }
 
     public function load(string $name): void

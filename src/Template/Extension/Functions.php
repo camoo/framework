@@ -22,7 +22,6 @@ class Functions
 
     public function initialize(): void
     {
-        //$this->baseHelper->loadFunction('Form');
     }
 
     public function load(string $name): void

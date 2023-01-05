@@ -39,18 +39,17 @@ final class TwigHelper extends BaseExtension
             return;
         }
 
-        $namespace = __NAMESPACE__ . '\Functions\\';
-        $class = $namespace . $name;
+        if (class_exists($name)) {
+            $oClass = new $name($this);
+            $this->functionCollection->add($oClass);
 
-        if (!class_exists($class)) {
-            $asNameSpace = explode('\\', $namespace);
-            array_shift($asNameSpace);
-            $nameSpace = '\\' . Configure::read('App.namespace') . '\\' . implode('\\', $asNameSpace);
-            $class = $nameSpace . $name;
-            if (!class_exists($class)) {
-                throw new Exception(sprintf('Class %s not found !', $class));
-            }
+            return;
         }
+
+        $namespace = __NAMESPACE__ . '\Functions\\';
+
+        $class = $this->getAppExtension($namespace, $name);
+
         $oClass = new $class($this);
         $this->functionCollection->add($oClass);
     }
@@ -63,19 +62,16 @@ final class TwigHelper extends BaseExtension
 
             return;
         }
+        if (class_exists($name)) {
+            $oClass = new $name($this);
+            $this->filterCollection->add($oClass);
 
-        $namespace = __NAMESPACE__ . '\Filters\\';
-        $class = $namespace . $name;
-
-        if (!class_exists($class)) {
-            $asNameSpace = explode('\\', $namespace);
-            array_shift($asNameSpace);
-            $nameSpace = '\\' . Configure::read('App.namespace') . '\\' . implode('\\', $asNameSpace);
-            $class = $nameSpace . $name;
-            if (!class_exists($class)) {
-                throw new Exception(sprintf('Class %s not found !', $class));
-            }
+            return;
         }
+        $namespace = __NAMESPACE__ . '\Filters\\';
+
+        $class = $this->getAppExtension($namespace, $name);
+
         $oClass = new $class($this);
 
         $this->filterCollection->add($oClass);
@@ -134,5 +130,23 @@ final class TwigHelper extends BaseExtension
             $oAppFuncClass = new $appFuncClass($this);
             $oAppFuncClass->initialize();
         }
+    }
+
+    private function getAppExtension(string $namespace, string $name): string
+    {
+        $class = $namespace . $name;
+        if (class_exists($class)) {
+            return $class;
+        }
+
+        $asNameSpace = explode('\\', $namespace);
+        array_shift($asNameSpace);
+        $nameSpace = '\\' . Configure::read('App.namespace') . '\\' . implode('\\', $asNameSpace);
+        $class = $nameSpace . $name;
+        if (!class_exists($class)) {
+            throw new Exception(sprintf('Class %s not found !', $class));
+        }
+
+        return $class;
     }
 }
