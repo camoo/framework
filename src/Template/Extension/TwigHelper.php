@@ -18,20 +18,11 @@ use Twig\Extension\AbstractExtension as BaseExtension;
  */
 final class TwigHelper extends BaseExtension
 {
-    /** @var ServerRequest $request */
-    private $request;
-
-    /** @var FunctionCollection $functionCollection */
-    private $functionCollection;
-
-    /** @var FilterCollection $filterCollection */
-    private $filterCollection;
-
-    public function __construct(ServerRequest $request, FunctionCollection $function, FilterCollection $filter)
-    {
-        $this->request = $request;
-        $this->functionCollection = $function;
-        $this->filterCollection = $filter;
+    public function __construct(
+        private ServerRequest $request,
+        private FunctionCollection $functionCollection,
+        private FilterCollection $filterCollection
+    ) {
     }
 
     final public function getRequest(): ServerRequest
@@ -40,7 +31,7 @@ final class TwigHelper extends BaseExtension
     }
 
     /** @param string|object $name */
-    final public function loadFunction($name): void
+    final public function loadFunction(mixed $name): void
     {
         if (is_object($name)) {
             $this->functionCollection->add($name);
@@ -65,7 +56,7 @@ final class TwigHelper extends BaseExtension
     }
 
     /** @param string|object $name */
-    final public function loadFilter($name): void
+    final public function loadFilter(mixed $name): void
     {
         if (is_object($name)) {
             $this->filterCollection->add($name);
@@ -90,11 +81,11 @@ final class TwigHelper extends BaseExtension
         $this->filterCollection->add($oClass);
     }
 
-    /** Initiliazes the TwigHelper engine */
+    /** Initializes the TwigHelper engine */
     final public function initialize(): void
     {
-        $this->_initFunctions();
-        $this->_initFiters();
+        $this->initializeFunctions();
+        $this->initializeFilters();
     }
 
     public function getFunctions()
@@ -117,7 +108,7 @@ final class TwigHelper extends BaseExtension
         return $ahFilters;
     }
 
-    private function _initFunctions(): void
+    private function initializeFunctions(): void
     {
         $baseFunction = new BaseFunction($this);
         $baseFunction->initialize();
@@ -131,7 +122,7 @@ final class TwigHelper extends BaseExtension
         }
     }
 
-    private function _initFiters(): void
+    private function initializeFilters(): void
     {
         $baseFunction = new BaseFilter($this);
         $baseFunction->initialize();

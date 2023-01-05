@@ -17,11 +17,9 @@ use Iterator;
  */
 final class FilterCollection implements Countable, Iterator, ArrayAccess
 {
-    /** @var array */
-    private $values = [];
+    private array $values = [];
 
-    /** @var int */
-    private $position = 0;
+    private int $position = 0;
 
     /**
      * This constructor is there in order to be able to create a collection with
@@ -43,7 +41,7 @@ final class FilterCollection implements Countable, Iterator, ArrayAccess
      * Implementation of method declared in \Countable.
      * Provides support for count()
      */
-    public function count()
+    public function count(): int
     {
         return count($this->values);
     }
@@ -52,7 +50,7 @@ final class FilterCollection implements Countable, Iterator, ArrayAccess
      * Implementation of method declared in \Iterator
      * Resets the internal cursor to the beginning of the array
      */
-    public function rewind()
+    public function rewind(): void
     {
         $this->position = 0;
     }
@@ -61,7 +59,7 @@ final class FilterCollection implements Countable, Iterator, ArrayAccess
      * Implementation of method declared in \Iterator
      * Used to get the current key (as for instance in a foreach()-structure
      */
-    public function key()
+    public function key(): mixed
     {
         return $this->position;
     }
@@ -70,7 +68,7 @@ final class FilterCollection implements Countable, Iterator, ArrayAccess
      * Implementation of method declared in \Iterator
      * Used to get the value at the current cursor position
      */
-    public function current()
+    public function current(): mixed
     {
         return $this->values[$this->position];
     }
@@ -79,7 +77,7 @@ final class FilterCollection implements Countable, Iterator, ArrayAccess
      * Implementation of method declared in \Iterator
      * Used to move the cursor to the next position
      */
-    public function next()
+    public function next(): void
     {
         $this->position++;
     }
@@ -88,7 +86,7 @@ final class FilterCollection implements Countable, Iterator, ArrayAccess
      * Implementation of method declared in \Iterator
      * Checks if the current cursor position is valid
      */
-    public function valid()
+    public function valid(): bool
     {
         return isset($this->values[$this->position]);
     }
@@ -97,7 +95,7 @@ final class FilterCollection implements Countable, Iterator, ArrayAccess
      * Implementation of method declared in \ArrayAccess
      * Used to be able to use functions like isset()
      */
-    public function offsetExists($offset)
+    public function offsetExists(mixed $offset): bool
     {
         return isset($this->values[$offset]);
     }
@@ -106,7 +104,7 @@ final class FilterCollection implements Countable, Iterator, ArrayAccess
      * Implementation of method declared in \ArrayAccess
      * Used for direct access array-like ($collection[$offset]);
      */
-    public function offsetGet($offset)
+    public function offsetGet(mixed $offset): mixed
     {
         return $this->values[$offset];
     }
@@ -117,7 +115,7 @@ final class FilterCollection implements Countable, Iterator, ArrayAccess
      *
      * @param mixed|null $offset
      */
-    public function offsetSet($offset = null, $value)
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         if (!($value instanceof TemplateFilterInterface)) {
             throw new InvalidArgumentException(sprintf('Offset must be an instance of %s', 'TemplateFilterInterface'));
@@ -126,7 +124,7 @@ final class FilterCollection implements Countable, Iterator, ArrayAccess
         if (empty($offset)) {
             $asFilters = $value->getFilters();
             foreach ($asFilters as $sFilter) {
-                array_push($this->values, $sFilter);
+                $this->values[] = $sFilter;
             }
         } else {
             $this->values[$offset] = $value;
@@ -137,7 +135,7 @@ final class FilterCollection implements Countable, Iterator, ArrayAccess
      * Implementation of method declared in \ArrayAccess
      * Used for unset()
      */
-    public function offsetUnset($offset)
+    public function offsetUnset(mixed $offset): void
     {
         unset($this->values[$offset]);
     }

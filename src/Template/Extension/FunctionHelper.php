@@ -8,6 +8,7 @@ use CAMOO\Event\Event;
 use CAMOO\Event\EventDispatcherInterface;
 use CAMOO\Event\EventDispatcherTrait;
 use CAMOO\Event\EventListenerInterface;
+use CAMOO\Http\ServerRequest;
 use CAMOO\Interfaces\TemplateFunctionInterface;
 use CAMOO\Utils\Configure;
 use CAMOO\Utils\Inflector;
@@ -24,19 +25,14 @@ abstract class FunctionHelper implements TemplateFunctionInterface, EventListene
     use EventDispatcherTrait;
 
     /** @var array $functions Functions to use in a helper */
-    public $functions = [];
+    public array $functions = [];
 
-    /** @var ServerRequest $request */
-    protected $request;
+    protected ServerRequest $request;
 
-    /** @var TwigHelper */
-    private $baseHelper;
-
-    public function __construct(TwigHelper $baseHelper)
+    public function __construct(private TwigHelper $baseHelper)
     {
         $this->getEventManager()->on($this);
-        $this->baseHelper = $baseHelper;
-        $this->request = $baseHelper->getRequest();
+        $this->request = $this->baseHelper->getRequest();
         $this->initialize();
 
         if (!empty($this->functions)) {

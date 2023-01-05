@@ -15,11 +15,9 @@ use Twig\TwigFilter;
  */
 final class Flash implements TemplateFilterInterface
 {
-    /** @var \CAMOO\Http\Flash $flash */
-    private $flash;
+    private ?\CAMOO\Http\Flash $flash;
 
-    /** @var ServerRequest $request */
-    private $request;
+    private ServerRequest $request;
 
     public function __construct(ServerRequest $request)
     {
@@ -34,32 +32,31 @@ final class Flash implements TemplateFilterInterface
         ];
     }
 
-    /** @return void|none|string */
-    public function display(string $key)
+    public function display(string $key): ?string
     {
-        if ($flash = $this->request->getSession()->read('CAMOO.SYS.FLASH')) {
-            $asFlash = [];
-            $message = $this->flash->get($key);
-            if (null === $message) {
-                return null;
+        $flash = $this->request->getSession()->read('CAMOO.SYS.FLASH');
+        if (empty($flash)) {
+            return null;
+        }
+        $asFlash = [];
+        $message = $this->flash->get($key);
+        if (null === $message) {
+            return null;
+        }
+        foreach ($flash as $keyContainer => $alert) {
+            if (null === $alert) {
+                continue;
             }
-            foreach ($flash as $keyContainer => $alert) {
-                if (null === $alert) {
-                    continue;
+            if ($key === $keyContainer) {
+                if (method_exists($this, $alert)) {
+                    $asFlash[] = $this->{$alert}($this->flash->get($key));
+                } else {
+                    $asFlash[] = $this->default($this->flash->get($key));
                 }
-                if ($key === $keyContainer) {
-                    if (method_exists($this, $alert)) {
-                        $asFlash[] = $this->{$alert}($this->flash->get($key));
-                    } else {
-                        $asFlash[] = $this->default($this->flash->get($key));
-                    }
-                }
-            }
-
-            if (count($asFlash) > 0) {
-                return implode('', $asFlash);
             }
         }
+
+        return count($asFlash) > 0 ? implode('', $asFlash) : null;
     }
 
     private function success(string $message): string
@@ -95,6 +92,8 @@ final class Flash implements TemplateFilterInterface
         }
 
         return '<div class="alert alert-' . $alert . ' alert-dismissible">
-  <button type="button" class="close" data-dismiss="alert">&times;</button>' . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . '</div>';
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>' .
+                        htmlspecialchars($message, ENT_QUOTES, 'UTF-8') .
+            '</div>';
     }
 }

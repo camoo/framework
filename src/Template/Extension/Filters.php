@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace CAMOO\Template\Extension;
 
+use CAMOO\Http\ServerRequest;
+
 /**
  * Class Filters
  *
@@ -11,16 +13,11 @@ namespace CAMOO\Template\Extension;
  */
 class Filters
 {
-    /** @var ServerRequest $request */
-    protected $request;
+    protected ServerRequest $request;
 
-    /** @var TwigHelper */
-    private $baseHelper;
-
-    public function __construct(TwigHelper $baseHelper)
+    public function __construct(private TwigHelper $baseHelper)
     {
-        $this->baseHelper = $baseHelper;
-        $this->request = $baseHelper->getRequest();
+        $this->request = $this->baseHelper->getRequest();
     }
 
     public function initialize(): void
@@ -28,7 +25,7 @@ class Filters
         //$this->baseHelper->loadFilter('Foo');
     }
 
-    public function load(string $name)
+    public function load(string $name): void
     {
         $this->baseHelper->loadFilter($name);
     }
