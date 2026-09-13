@@ -1,0 +1,9 @@
+parameters:
+    level: 0
+    bootstrapFiles:
+        - include/function.php
+    excludePaths:
+        - src/Command/TinkerCommand.php
+    paths:
+        - src
+    tmpDir: /tmp/phpstan

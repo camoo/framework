@@ -108,10 +108,12 @@ class ServerRequestTest extends TestCase
     public function testProxyIpResolution(): void
     {
         $guzzle = new GuzzleRequest('GET', '/', [], null, '1.1', [
+            'REMOTE_ADDR' => '192.0.2.1',
             'HTTP_X_FORWARDED_FOR' => '10.0.0.1, 10.0.0.2',
         ]);
         $req = new ServerRequest($guzzle);
         $req->isProxy = true;
+        $req->trustedProxies = ['192.0.2.1'];
         $this->assertSame('10.0.0.2', $req->getRemoteIp());
 
         $guzzleClient = new GuzzleRequest('GET', '/', [], null, '1.1', [
@@ -119,7 +121,7 @@ class ServerRequestTest extends TestCase
         ]);
         $reqClient = new ServerRequest($guzzleClient);
         $reqClient->isProxy = true;
-        $this->assertSame('10.0.0.5', $reqClient->getRemoteIp());
+        $this->assertSame('', $reqClient->getRemoteIp());
     }
 
     public function testNullServerRequest(): void

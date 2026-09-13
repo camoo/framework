@@ -49,10 +49,8 @@ class CamooDi
         $modules = new DefaultModule($collection);
         $tmpDir = rtrim($diCacheDir, DIRECTORY_SEPARATOR);
         $injector = new Injector($modules, $tmpDir);
-        if (!self::$instance instanceof InjectorInterface) {
-            static::container($injector);
-            self::$modules = $modules;
-        }
+        static::container($injector);
+        self::$modules = $modules;
 
         return $injector;
     }

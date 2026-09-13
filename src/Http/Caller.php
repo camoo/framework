@@ -21,6 +21,7 @@ use Middlewares\RequestHandler;
 use Middlewares\Utils\Dispatcher;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
 
 final class Caller
 {
@@ -41,6 +42,9 @@ final class Caller
     private string $controllerName = 'Pages';
 
     private ?ResponseInterface $response = null;
+
+    /** @var list<MiddlewareInterface> */
+    private array $middlewares = [];
 
     public function __construct(protected string $sConfigDir)
     {
@@ -119,12 +123,19 @@ final class Caller
             );
         });
 
-        $dispatcher = new Dispatcher([
+        $dispatcher = new Dispatcher(array_merge($this->middlewares, [
             new FastRoute($dispatcher),
             new RequestHandler(),
-        ]);
+        ]));
 
         return $dispatcher->dispatch(Psr7\ServerRequest::fromGlobals());
+    }
+
+    public function addMiddleware(MiddlewareInterface $middleware): self
+    {
+        $this->middlewares[] = $middleware;
+
+        return $this;
     }
 
     public function route(): ResponseInterface

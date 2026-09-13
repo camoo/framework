@@ -7,7 +7,6 @@ namespace CAMOO\Test\TestCase\Di;
 use CAMOO\Controller\ErrorController;
 use CAMOO\Di\Annotation\Assisted;
 use CAMOO\Di\Application as DiApplication;
-use CAMOO\Di\Cache\CacheAdapter;
 use CAMOO\Di\CamooDi;
 use CAMOO\Di\Container;
 use CAMOO\Di\Interceptor\AssistedInterceptor;
@@ -50,7 +49,6 @@ class Application
 
 #[CoversClass(CamooDi::class)]
 #[CoversClass(Container::class)]
-#[CoversClass(CacheAdapter::class)]
 #[CoversClass(AssistedInterceptor::class)]
 #[CoversClass(AssistedModule::class)]
 #[CoversClass(DefaultModule::class)]
@@ -117,36 +115,6 @@ class DiFullTest extends TestCase
         $container = di();
         $service = $container->getInstance(SampleService::class);
         $this->assertInstanceOf(SampleService::class, $service);
-    }
-
-    public function testCacheAdapterAllMethods(): void
-    {
-        $adapter = new CacheAdapter('_camoo_hosting_conf');
-        $this->assertInstanceOf(CacheAdapter::class, $adapter);
-
-        $refMethod = new \ReflectionMethod($adapter, 'doSave');
-        $refMethod->setAccessible(true);
-        $refMethod->invoke($adapter, 'test_key', 'test_val');
-
-        $refFetch = new \ReflectionMethod($adapter, 'doFetch');
-        $refFetch->setAccessible(true);
-        $this->assertSame('test_val', $refFetch->invoke($adapter, 'test_key'));
-
-        $refContains = new \ReflectionMethod($adapter, 'doContains');
-        $refContains->setAccessible(true);
-        $this->assertTrue($refContains->invoke($adapter, 'test_key'));
-
-        $refDelete = new \ReflectionMethod($adapter, 'doDelete');
-        $refDelete->setAccessible(true);
-        $refDelete->invoke($adapter, 'test_key');
-
-        $refFlush = new \ReflectionMethod($adapter, 'doFlush');
-        $refFlush->setAccessible(true);
-        $refFlush->invoke($adapter);
-
-        $refStats = new \ReflectionMethod($adapter, 'doGetStats');
-        $refStats->setAccessible(true);
-        $this->assertNull($refStats->invoke($adapter));
     }
 
     public function testControllerFactoryFilter(): void

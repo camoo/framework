@@ -7,6 +7,7 @@ namespace CAMOO\Http;
 use Aura\Session\Segment;
 use CAMOO\Exception\Exception;
 use CAMOO\Exception\Http\MethodNotAllowedException;
+use CAMOO\Utils\Configure;
 use CAMOO\Utils\QueryData;
 use CAMOO\Utils\Security;
 use GuzzleHttp\Psr7\ServerRequest as BaseServerRequest;
@@ -33,6 +34,9 @@ class ServerRequest
     /** @var bool $isProxy defines if your app is running under a proxy server */
     public bool $isProxy = false;
 
+    /** @var list<string> Addresses of proxies trusted to set forwarding headers. */
+    public array $trustedProxies = [];
+
     public ?Flash $Flash = null;
 
     private Segment $session;
@@ -48,6 +52,13 @@ class ServerRequest
 
     public function __construct(private readonly ?BaseServerRequest $oRequest = null)
     {
+        $trustedProxies = Configure::read('App.trusted_proxies');
+        if (is_array($trustedProxies)) {
+            $this->trustedProxies = array_values(array_filter(
+                $trustedProxies,
+                static fn (mixed $proxy): bool => is_string($proxy) && filter_var($proxy, FILTER_VALIDATE_IP) !== false,
+            ));
+        }
         $this->invoker();
     }
 
@@ -127,16 +138,23 @@ class ServerRequest
 
     public function getRemoteIp(): string
     {
-        if ($this->isProxy && $this->getEnv('HTTP_X_FORWARDED_FOR')) {
-            $addresses = explode(',', $this->getEnv('HTTP_X_FORWARDED_FOR'));
-            $clientIp = end($addresses);
-        } elseif ($this->isProxy && $this->getEnv('HTTP_CLIENT_IP')) {
-            $clientIp = $this->getEnv('HTTP_CLIENT_IP');
-        } else {
-            $clientIp = $this->getEnv('REMOTE_ADDR');
+        $remoteAddress = trim((string)$this->getEnv('REMOTE_ADDR'));
+        if (!$this->isProxy || !in_array($remoteAddress, $this->trustedProxies, true)) {
+            return $remoteAddress;
         }
 
-        return trim($clientIp);
+        $addresses = array_values(array_filter(
+            array_map('trim', explode(',', (string)$this->getEnv('HTTP_X_FORWARDED_FOR'))),
+            static fn (string $address): bool => filter_var($address, FILTER_VALIDATE_IP) !== false,
+        ));
+        $addresses[] = $remoteAddress;
+        for ($index = count($addresses) - 1; $index >= 0; $index--) {
+            if (!in_array($addresses[$index], $this->trustedProxies, true)) {
+                return $addresses[$index];
+            }
+        }
+
+        return $remoteAddress;
     }
 
     /**

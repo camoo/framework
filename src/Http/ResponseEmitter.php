@@ -13,7 +13,23 @@ final class ResponseEmitter
     {
         http_response_code($response->getStatusCode());
 
-        foreach ($response->getHeaders() as $name => $values) {
+        $headers = $response->getHeaders();
+        $defaults = [
+            'X-Content-Type-Options' => 'nosniff',
+            'X-Frame-Options' => 'SAMEORIGIN',
+            'Referrer-Policy' => 'strict-origin-when-cross-origin',
+            'Content-Security-Policy' => "default-src 'self'; base-uri 'self'; frame-ancestors 'self'",
+        ];
+        if (isset($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) !== 'off') {
+            $defaults['Strict-Transport-Security'] = 'max-age=31536000';
+        }
+        foreach ($defaults as $name => $value) {
+            if (!array_key_exists($name, $headers)) {
+                $headers[$name] = [$value];
+            }
+        }
+
+        foreach ($headers as $name => $values) {
             foreach ($values as $value) {
                 header(sprintf('%s: %s', $name, $value), false);
             }

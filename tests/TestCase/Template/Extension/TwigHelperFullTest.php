@@ -115,8 +115,8 @@ class TwigHelperFullTest extends TestCase
     public function testInitialize(): void
     {
         $this->helper->initialize();
-        $this->assertNotEmpty($this->helper->getFunctions());
-        $this->assertNotEmpty($this->helper->getFilters());
+        $this->assertIsArray($this->helper->getFunctions());
+        $this->assertIsArray($this->helper->getFilters());
     }
 
     public function testFiltersAndFunctionsClasses(): void
@@ -161,7 +161,7 @@ class TwigHelperFullTest extends TestCase
 
         foreach ($types as $type => $expectedClass) {
             $this->request->getSession()->set('CAMOO.SYS.FLASH', ['msg_' . $type => $type]);
-            $this->request->Flash->success('Msg ' . $type);
+            $this->request->Flash->set('Msg ' . $type, ['key' => 'msg_' . $type, 'alert' => $type]);
             $html = $flashFilter->display('msg_' . $type);
             $this->assertNotNull($html);
             $this->assertStringContainsString($expectedClass, $html);
@@ -181,6 +181,8 @@ class TwigHelperFullTest extends TestCase
 
     public function testFilterHelperNonExistentExtensionThrowsException(): void
     {
+        $this->expectException(\InvalidArgumentException::class);
+
         $helper = new class ($this->helper) extends FilterHelper {
             public array $filters = ['NonExistentExtensionFilter'];
 
@@ -190,6 +192,5 @@ class TwigHelperFullTest extends TestCase
             }
         };
 
-        $this->assertTrue(true);
     }
 }

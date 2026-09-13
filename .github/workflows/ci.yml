@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build PHP 8.4 image
+        run: docker compose build app
+      - name: Install locked dependencies
+        run: docker compose run --rm app composer install --no-interaction --prefer-dist
+      - name: Check formatting
+        run: docker compose run --rm app composer format:check
+      - name: Static analysis
+        run: docker compose run --rm app vendor/bin/phpstan analyse --no-progress
+      - name: Dependency security audit
+        run: docker compose run --rm app composer audit --locked --abandoned=ignore
+      - name: PHPUnit
+        run: docker compose run --rm app composer test

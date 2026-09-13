@@ -126,7 +126,11 @@ class Mailer
             }
             $smtpMailer->send($this->mail);
         } catch (SmtpException $exception) {
-            throw new MailerException($exception->getMessage(), $exception->getCode(), $exception->getPrevious());
+            throw new MailerException(
+                $exception->getMessage(),
+                $exception->getCode(),
+                previous: $exception->getPrevious(),
+            );
         }
     }
 }

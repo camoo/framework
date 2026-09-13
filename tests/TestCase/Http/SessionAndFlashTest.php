@@ -76,6 +76,15 @@ class SessionAndFlashTest extends TestCase
         $sessionSegment->clear();
     }
 
+    public function testSessionCookieDefaultsIncludeSameSite(): void
+    {
+        Configure::write('Session.cookie', []);
+        $session = new Session();
+
+        self::assertSame('Lax', ini_get('session.cookie_samesite'));
+        self::assertTrue($session->getCookieParams()['httponly']);
+    }
+
     public function testSessionSegmentNullConstructorThrowsException(): void
     {
         $this->expectException(Exception::class);

@@ -28,11 +28,24 @@ final class Session
             if (!is_array($hCookieParam)) {
                 $hCookieParam = [];
             }
+            $isHttps = isset($_SERVER['HTTPS'])
+                && strtolower((string)$_SERVER['HTTPS']) !== ''
+                && strtolower((string)$_SERVER['HTTPS']) !== 'off';
+            $trustedProxies = Configure::read('App.trusted_proxies');
+            if (!$isHttps && is_array($trustedProxies)) {
+                $remoteAddress = trim((string)($_SERVER['REMOTE_ADDR'] ?? ''));
+                $forwardedProto = strtolower(trim(explode(',', (string)($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''))[0]));
+                $isHttps = $forwardedProto === 'https' && in_array($remoteAddress, $trustedProxies, true);
+            }
+            $sameSite = $hCookieParam['samesite'] ?? 'Lax';
+            if (!is_string($sameSite) || !in_array(strtolower($sameSite), ['lax', 'strict', 'none'], true)) {
+                $sameSite = 'Lax';
+            }
+            ini_set('session.cookie_samesite', $sameSite);
             $hCookieParam += [
-                'secure' => isset($_SERVER['HTTPS'])
-                    && strtolower((string)$_SERVER['HTTPS']) !== ''
-                    && strtolower((string)$_SERVER['HTTPS']) !== 'off',
+                'secure' => $isHttps,
                 'httponly' => true,
+                'samesite' => $sameSite,
             ];
             $sessionName = Configure::read('Session.name') ?? 'CAMOOSESS';
             $this->oSession->setName($sessionName);
@@ -105,6 +118,12 @@ final class Session
     public function getId(): string
     {
         return $this->oSession->getId();
+    }
+
+    /** @return array<string, mixed> */
+    public function getCookieParams(): array
+    {
+        return $this->oSession->getCookieParams();
     }
 
     public function getName(): string

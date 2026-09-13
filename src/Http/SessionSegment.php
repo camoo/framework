@@ -66,6 +66,11 @@ final readonly class SessionSegment
         $this->segment->set($key, $data->all());
     }
 
+    public function set(string $key, mixed $value): void
+    {
+        $this->write($key, $value);
+    }
+
     public function check(string $key): bool
     {
         return null !== $this->read($key);

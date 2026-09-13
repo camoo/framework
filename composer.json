@@ -33,7 +33,6 @@
     "camoo/inflector": "^1.1",
     "ray/di": "^2.15",
     "guzzlehttp/guzzle": "^7.5",
-    "doctrine/cache": "^2.0",
     "ray/compiler": "^1.16",
     "camoo/config": "^1.0",
     "camoo/config-interop": "^0.1.0"

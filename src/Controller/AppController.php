@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CAMOO\Controller;
 
+use Cake\Datasource\ConnectionManager;
 use Cake\ORM\Locator\TableLocator;
 use CAMOO\Controller\Component\ComponentCollection;
 use CAMOO\Event\EventDispatcherInterface;
@@ -325,7 +326,8 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
 
     protected function loadModel(string $sModel): void
     {
-        if (Configure::check('Database') === false) {
+        $database = Configure::read('Database.default');
+        if (!is_array($database) || $database === [] || ConnectionManager::getConfig('default') === null) {
             return;
         }
         $this->loadedModels[$sModel] = new TableLocator()->get(Inflector::classify($sModel));
