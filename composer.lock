@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "abf0251a6c59723452386abb07af491f",
+    "content-hash": "909f34c907a207f0278d5fc61c53324a",
     "packages": [
         {
             "name": "aura/session",
@@ -828,6 +828,127 @@
                 "wiki": "https://github.com/camoo/cache/wiki"
             },
             "time": "2024-04-23T13:29:38+00:00"
+        },
+        {
+            "name": "camoo/config",
+            "version": "1.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/camoo/config.git",
+                "reference": "ce927777d08fbb73e56ff70dc01c58ba8fb1905e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/camoo/config/zipball/ce927777d08fbb73e56ff70dc01c58ba8fb1905e",
+                "reference": "ce927777d08fbb73e56ff70dc01c58ba8fb1905e",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "ext-libxml": "*",
+                "ext-simplexml": "*",
+                "php": ">=8.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9",
+                "symfony/yaml": "^6.3"
+            },
+            "suggest": {
+                "symfony/yaml": "^6.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Camoo\\Config\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Hassan Khan",
+                    "homepage": "http://hassankhan.me/",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Camoo Sarl",
+                    "email": "config@camoo.sarl",
+                    "homepage": "https://www.camoo.cm/",
+                    "role": "Company"
+                }
+            ],
+            "description": "Lightweight configuration file loader that supports PHP, INI, XML, JSON, and YAML files",
+            "homepage": "http://hassankhan.me/config/",
+            "keywords": [
+                "config",
+                "configuration",
+                "ini",
+                "json",
+                "microphp",
+                "unframework",
+                "xml",
+                "yaml",
+                "yml"
+            ],
+            "support": {
+                "source": "https://github.com/camoo/config/tree/1.0.3"
+            },
+            "time": "2024-03-03T16:33:19+00:00"
+        },
+        {
+            "name": "camoo/config-interop",
+            "version": "0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/camoo/config-interop.git",
+                "reference": "99d3a709cb6597b24ced6e59bf742a824a040145"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/camoo/config-interop/zipball/99d3a709cb6597b24ced6e59bf742a824a040145",
+                "reference": "99d3a709cb6597b24ced6e59bf742a824a040145",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.2"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.12",
+                "phpstan/phpstan-strict-rules": "^1.6",
+                "phpunit/phpunit": "^11.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "ConfigInterop\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Camoo SARL",
+                    "homepage": "https://www.camoo.cm/"
+                }
+            ],
+            "description": "Common interface for immutable configuration access and interoperability.",
+            "homepage": "https://github.com/camoo/config-interop",
+            "keywords": [
+                "config",
+                "configuration",
+                "immutable",
+                "interoperability",
+                "psr"
+            ],
+            "support": {
+                "issues": "https://github.com/camoo/config-interop/issues",
+                "source": "https://github.com/camoo/config-interop/tree/0.1.0"
+            },
+            "time": "2026-05-11T10:38:42+00:00"
         },
         {
             "name": "camoo/curl-http-client",
@@ -2303,68 +2424,6 @@
                 }
             ],
             "time": "2026-08-24T09:13:11+00:00"
-        },
-        {
-            "name": "hassankhan/config",
-            "version": "3.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/hassankhan/config.git",
-                "reference": "cf63da451c4d226df983017932b9cef1b6d49db5"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/hassankhan/config/zipball/cf63da451c4d226df983017932b9cef1b6d49db5",
-                "reference": "cf63da451c4d226df983017932b9cef1b6d49db5",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.4"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^9.5",
-                "scrutinizer/ocular": "^1.9",
-                "squizlabs/php_codesniffer": "^3.6",
-                "symfony/yaml": "^5.4"
-            },
-            "suggest": {
-                "symfony/yaml": "^5.4"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Noodlehaus\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Hassan Khan",
-                    "homepage": "http://hassankhan.me/",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Lightweight configuration file loader that supports PHP, INI, XML, JSON, and YAML files",
-            "homepage": "http://hassankhan.me/config/",
-            "keywords": [
-                "config",
-                "configuration",
-                "ini",
-                "json",
-                "microphp",
-                "unframework",
-                "xml",
-                "yaml",
-                "yml"
-            ],
-            "support": {
-                "issues": "https://github.com/hassankhan/config/issues",
-                "source": "https://github.com/hassankhan/config/tree/3.2.0"
-            },
-            "time": "2024-12-09T16:20:44+00:00"
         },
         {
             "name": "http-interop/http-factory-discovery",
