@@ -116,9 +116,11 @@ final class Caller
         $dispatcher = require_once $this->sConfigDir . '/route.php';
         /** @var GroupCountBased $routeDispatcher */
         $routeDispatcher = $dispatcher[0];
-        $this->uri = $uri = new Uri(getenv('REQUEST_URI'))->getPath();
+        $requestUri = $_SERVER['REQUEST_URI'] ?? getenv('REQUEST_URI') ?: '/';
+        $requestMethod = $_SERVER['REQUEST_METHOD'] ?? getenv('REQUEST_METHOD') ?: 'GET';
+        $this->uri = $uri = new Uri($requestUri)->getPath();
 
-        $routeInfo = $routeDispatcher->dispatch(getenv('REQUEST_METHOD'), $uri);
+        $routeInfo = $routeDispatcher->dispatch($requestMethod, $uri);
 
         switch ($routeInfo[0]) {
             case \FastRoute\Dispatcher::NOT_FOUND:

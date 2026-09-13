@@ -124,9 +124,11 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
 
         if ($this->oLayout === null) {
             $oTemplateLoader = new FilesystemLoader(APP . $this->sTemplateDir);
+            $isDevelopment = getenv('APP_ENV') === 'development';
             $this->oLayout = new Environment($oTemplateLoader, [
                 'autoescape' => 'html',
-                'cache' => TMP . 'cache' . DS . 'tpl',
+                'cache' => $isDevelopment ? false : TMP . 'cache' . DS . 'tpl',
+                'auto_reload' => $isDevelopment,
             ]);
             $oFuncCollection = new FunctionCollection();
             $oFilterCollection = new FilterCollection();
