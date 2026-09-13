@@ -46,8 +46,10 @@ final class Caller
     /** @var list<MiddlewareInterface> */
     private array $middlewares = [];
 
-    public function __construct(protected string $sConfigDir)
+    /** @param list<MiddlewareInterface> $middlewares */
+    public function __construct(protected string $sConfigDir, array $middlewares = [])
     {
+        $this->middlewares = $middlewares;
         $this->initialize();
     }
 

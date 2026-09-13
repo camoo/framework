@@ -42,4 +42,17 @@ final class AuthenticationMiddlewareTest extends TestCase
 
         self::assertSame(200, $middleware->process(new ServerRequest('GET', '/'), $handler)->getStatusCode());
     }
+
+    public function testOptionalAuthenticationAllowsAnonymousRequest(): void
+    {
+        $middleware = new AuthenticationMiddleware(static fn (): mixed => null, new Response(401), required: false);
+        $handler = new class () implements RequestHandlerInterface {
+            public function handle(ServerRequestInterface $request): Response
+            {
+                return new Response($request->getAttribute('identity') === null ? 200 : 500);
+            }
+        };
+
+        self::assertSame(200, $middleware->process(new ServerRequest('GET', '/'), $handler)->getStatusCode());
+    }
 }

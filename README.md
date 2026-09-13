@@ -57,15 +57,16 @@ use CAMOO\Http\Middleware\AuthenticationMiddleware;
 use CAMOO\Http\Middleware\AuthorizationMiddleware;
 use Camoo\Http\Curl\Infrastructure\Response;
 
-$caller = new Caller(CONFIG);
-$caller->addMiddleware(new AuthenticationMiddleware(
+$caller = new Caller(CONFIG, [
+    new AuthenticationMiddleware(
     static fn ($request) => $userRepository->fromRequest($request),
     new Response(statusCode: 401),
-));
-$caller->addMiddleware(new AuthorizationMiddleware(
+    ),
+    new AuthorizationMiddleware(
     static fn ($request) => $policy->allows($request->getAttribute('identity'), $request),
     new Response(statusCode: 403),
-));
+    ),
+]);
 
 $response = $caller->route();
 ```

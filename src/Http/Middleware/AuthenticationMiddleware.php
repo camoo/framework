@@ -17,16 +17,21 @@ final readonly class AuthenticationMiddleware implements MiddlewareInterface
         private mixed $authenticate,
         private ResponseInterface $unauthorizedResponse,
         private string $identityAttribute = 'identity',
+        private bool $required = true,
     ) {
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $identity = ($this->authenticate)($request);
-        if ($identity === null) {
+        if ($identity === null && $this->required) {
             return $this->unauthorizedResponse;
         }
 
-        return $handler->handle($request->withAttribute($this->identityAttribute, $identity));
+        if ($identity !== null) {
+            $request = $request->withAttribute($this->identityAttribute, $identity);
+        }
+
+        return $handler->handle($request);
     }
 }
