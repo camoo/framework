@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CAMOO\Error;
 
 use CAMOO\Controller\ErrorController;
+use Camoo\Http\Curl\Domain\Entity\Stream;
 use Camoo\Http\Curl\Infrastructure\Response;
 use CAMOO\Http\ServerRequest;
 use CAMOO\Interfaces\ControllerInterface;
@@ -63,7 +64,7 @@ final class ExceptionRenderer
         $oController->request = $this->request;
         $oController->action = 'overview';
         $oController->controller = 'Error';
-        $oController->setResponse(new Response());
+        $oController->setResponse(new Response(body: new Stream('')));
         $oController->wakeUpController();
 
         return $oController;

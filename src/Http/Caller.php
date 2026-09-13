@@ -8,6 +8,7 @@ use CAMOO\Controller\AppController;
 use CAMOO\Di\Routing\Filter\ControllerFactoryFilter;
 use CAMOO\Event\EventDispatcherTrait;
 use CAMOO\Exception\Exception;
+use Camoo\Http\Curl\Domain\Entity\Stream;
 use Camoo\Http\Curl\Domain\Entity\Uri;
 use Camoo\Http\Curl\Infrastructure\Response;
 use FastRoute\Dispatcher\GroupCountBased;
@@ -78,7 +79,7 @@ final class Caller
         $oController->request = $serverRequest;
         $oController->action = $this->action;
         $oController->controller = $this->controllerName;
-        $oController->setResponse(new Response());
+        $oController->setResponse(new Response(body: new Stream('')));
         return $oController;
     }
 
@@ -153,9 +154,9 @@ final class Caller
 
         switch ($routeInfo[0]) {
             case \FastRoute\Dispatcher::NOT_FOUND:
-                return $this->response = new Response(statusCode: 404);
+                return $this->response = new Response(body: new Stream(''), statusCode: 404);
             case \FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
-                return $this->response = new Response(statusCode: 405);
+                return $this->response = new Response(body: new Stream(''), statusCode: 405);
             case \FastRoute\Dispatcher::FOUND:
                 $handler = $routeInfo[1];
                 $vars = $routeInfo[2];
@@ -175,7 +176,7 @@ final class Caller
                 return $this->response = $this->dispatchRequest();
         }
 
-        return $this->response = new Response(statusCode: 404);
+        return $this->response = new Response(body: new Stream(''), statusCode: 404);
     }
 
     protected function initialize(): ResponseInterface
