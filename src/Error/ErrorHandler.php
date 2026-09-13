@@ -25,6 +25,8 @@ final class ErrorHandler extends PrettyPageHandler
         parent::__construct();
         if (!$this->isCli()) {
             $this->request = new ServerRequest(Psr7\ServerRequest::fromGlobals());
+            $this->addResourcePath(dirname(__DIR__, 2) . '/resources');
+            $this->addCustomJs('js/camoo-error-actions.js');
         }
     }
 
