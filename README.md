@@ -45,3 +45,31 @@ php bin/camoo tinker
 
 The `tinker` command is optional and is not installed as a production
 dependency. It starts PsySH after the application's normal CLI bootstrap.
+
+## Authentication and authorization middleware
+
+Applications provide identity and permission logic, while the framework
+enforces the request pipeline:
+
+```php
+use CAMOO\Http\Caller;
+use CAMOO\Http\Middleware\AuthenticationMiddleware;
+use CAMOO\Http\Middleware\AuthorizationMiddleware;
+use Camoo\Http\Curl\Infrastructure\Response;
+
+$caller = new Caller(CONFIG);
+$caller->addMiddleware(new AuthenticationMiddleware(
+    static fn ($request) => $userRepository->fromRequest($request),
+    new Response(statusCode: 401),
+));
+$caller->addMiddleware(new AuthorizationMiddleware(
+    static fn ($request) => $policy->allows($request->getAttribute('identity'), $request),
+    new Response(statusCode: 403),
+));
+
+$response = $caller->route();
+```
+
+The authentication middleware stores the resolved identity as the `identity`
+request attribute. Successful login flows should call `Session::regenerateId()`
+before issuing the authenticated response.
