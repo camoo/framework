@@ -25,6 +25,7 @@ use CAMOO\Template\Extension\TwigHelper;
 use CAMOO\Utils\Configure;
 use CAMOO\Validation\Adapters\Cake\Validator;
 use JMS\Serializer\SerializerBuilder;
+use LogicException;
 use Psr\Http\Message\ResponseInterface;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
@@ -97,7 +98,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         $this->attributes[$name] = $value;
     }
 
-    public function wakeUpController(): void
+    public function wakeUpController(): ?ResponseInterface
     {
         $this->loadModel($this->controller);
         $this->componentCollection = new ComponentCollection($this);
@@ -105,11 +106,13 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
 
         $event = $this->dispatchEvent('AppController.initialize');
         if ($event->getResult() instanceof ResponseInterface) {
-            echo $event->getResult();
-            $this->camooExit();
+            return $event->getResult();
         }
 
         $event = $this->dispatchEvent('AppController.wakeUp');
+        if ($event->getResult() instanceof ResponseInterface) {
+            return $event->getResult();
+        }
         $components = $this->getComponentCollection();
         if (!empty($components)) {
             foreach ($components as $value => $component) {
@@ -154,10 +157,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
             $this->oLayout->addExtension($extensions);
         }
 
-        if ($event->getResult() instanceof ResponseInterface) {
-            echo $event->getResult();
-            $this->camooExit();
-        }
+        return null;
     }
 
     /** Initializes the controller engine */
@@ -199,8 +199,9 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
             $type = 'json';
             $serializer = SerializerBuilder::create()->build();
             $content = $serializer->serialize($value, $type);
-            echo $content;
-            exit;
+            $this->setResponseBody($content, 'application/json');
+
+            return;
         }
         if (!is_array($varName)) {
             $this->tplData[$varName] = $value;
@@ -210,13 +211,12 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     }
 
     /** Renders the template */
-    public function render(): void
+    public function render(): ResponseInterface
     {
         $this->loadActionTemplate();
         $event = $this->dispatchEvent('AppController.beforeRender');
         if ($event->getResult() instanceof ResponseInterface) {
-            echo $event->getResult();
-            $this->camooExit();
+            return $event->getResult();
         }
         $components = $this->getComponentCollection();
         if (!empty($components)) {
@@ -231,10 +231,11 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         }
 
         $contents = $this->oTemplate->render($this->tplData);
-        $this->setResponse($this->response->withBody(new Stream($contents)));
+        if ($this->response === null) {
+            throw new LogicException('A response must be set before rendering.');
+        }
 
-        echo $this->response->getBody();
-        $this->camooExit();
+        return $this->response = $this->response->withBody(new Stream($contents));
     }
 
     public function beforeRender(EventInterface $event): void
@@ -311,11 +312,6 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         return null !== $this->componentCollection && !empty($this->componentCollection[$name]);
     }
 
-    protected function camooExit(): void
-    {
-        exit();
-    }
-
     protected function loadModel(string $sModel): void
     {
         if (Configure::check('Database') === false) {
@@ -329,11 +325,28 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         $this->loadedRests[$restModel] = $this->getRestLocator()->get(Inflector::classify($restModel));
     }
 
+    protected function jsonResponse(array $data): void
+    {
+        $this->setResponseBody(json_encode($data, JSON_THROW_ON_ERROR), 'application/json');
+    }
+
+    /**
+     * @deprecated Use jsonResponse() instead.
+     */
     protected function _jsonResponse(array $data): void
     {
-        header('Content-Type: application/json');
-        echo json_encode($data);
-        $this->camooExit();
+        $this->jsonResponse($data);
+    }
+
+    private function setResponseBody(string $body, string $contentType): void
+    {
+        if ($this->response === null) {
+            throw new LogicException('A response must be set before writing a response body.');
+        }
+
+        $this->response = $this->response
+            ->withHeader('Content-Type', $contentType)
+            ->withBody(new Stream($body));
     }
 
     protected function showValidateErrors(Validator $model): void
