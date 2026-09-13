@@ -28,17 +28,17 @@ class Configure
     /** @return mixed value */
     public static function read(string $sKey): mixed
     {
-        return static::$all->get($sKey);
+        return static::$all?->get($sKey);
     }
 
     public static function check(string $sKey): bool
     {
-        return static::$all->offsetExists($sKey);
+        return static::$all?->offsetExists($sKey) ?? false;
     }
 
     public static function get(): mixed
     {
-        return static::$all->all();
+        return static::$all?->all() ?? [];
     }
 
     public static function write(string $sKey, mixed $xValue = []): void

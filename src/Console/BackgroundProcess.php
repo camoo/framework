@@ -10,7 +10,7 @@ final class BackgroundProcess
 {
     private int $pid = 0;
 
-    public function __construct(private ?string $command = null)
+    public function __construct(private readonly ?string $command = null)
     {
     }
 
@@ -74,8 +74,8 @@ final class BackgroundProcess
                     '%s %s %s 2>&1 & echo $!',
                     $this->getCommand(),
                     ($bAppend) ? '>>' : '>',
-                    $sOutputFile
-                )
+                    $sOutputFile,
+                ),
             );
             $this->setPid($pid);
 

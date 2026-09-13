@@ -12,7 +12,7 @@ namespace CAMOO\Validation;
 trait ValidatorLocatorTrait
 {
     /** @var array $__adapterFactory */
-    private $__adapterFactory = [AdapterFactory::class, 'create'];
+    private array $__adapterFactory = [AdapterFactory::class, 'create'];
 
     /**
      * gets adapter factory

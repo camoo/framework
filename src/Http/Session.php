@@ -11,7 +11,7 @@ use CAMOO\Utils\Configure;
 
 final class Session
 {
-    public const SEG_NAME = Session::class;
+    public const string SEG_NAME = Session::class;
 
     protected static ?self $instance = null;
 
@@ -22,10 +22,11 @@ final class Session
     public function __construct()
     {
         if (null === $this->oSession) {
-            $cookies = null !== self::$cookie ? self::$cookie : $_COOKIE;
-            $this->oSession = (new SessionFactory())->newInstance($cookies);
-            $hCookieParam = Configure::read('Session.cookie');
-            $this->oSession->setName(Configure::read('Session.name'));
+            $cookies = self::$cookie ?? $_COOKIE;
+            $this->oSession = new SessionFactory()->newInstance($cookies);
+            $hCookieParam = Configure::read('Session.cookie') ?? [];
+            $sessionName = Configure::read('Session.name') ?? 'CAMOOSESS';
+            $this->oSession->setName($sessionName);
             $this->oSession->setCookieParams($hCookieParam);
         }
     }
@@ -42,9 +43,7 @@ final class Session
 
     public static function create(?array $cookie = null): Session
     {
-        if (null === self::$instance) {
-            self::$instance = new self();
-        }
+        self::$instance ??= new self();
         self::$cookie = $cookie;
 
         return self::$instance;
@@ -52,7 +51,7 @@ final class Session
 
     public function segment(?string $sSegment = null): Segment
     {
-        $sSegmentName = $sSegment === null ? __NAMESPACE__ : $sSegment;
+        $sSegmentName = $sSegment ?? __NAMESPACE__;
 
         return $this->oSession->getSegment($sSegmentName);
     }
@@ -84,7 +83,7 @@ final class Session
 
     public function getFlash(?string $sSegment = null): Segment
     {
-        $sSegmentName = $sSegment === null ? __NAMESPACE__ . '\\Flash' : $sSegment;
+        $sSegmentName = $sSegment ?? __NAMESPACE__ . '\\Flash';
 
         return $this->oSession->getSegment($sSegmentName);
     }
@@ -104,9 +103,9 @@ final class Session
         return $this->oSession->getName();
     }
 
-    public function setName(string $name): string
+    public function setName(string $name): void
     {
-        return $this->oSession->setName($name);
+        $this->oSession->setName($name);
     }
 
     /**
@@ -116,7 +115,7 @@ final class Session
      *
      * @see session_save_path()
      */
-    public function setSavePath(string $path): string
+    public function setSavePath(string $path): string|false
     {
         return $this->oSession->setSavePath($path);
     }

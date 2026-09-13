@@ -20,25 +20,25 @@ final class Form implements TemplateFunctionInterface
     private array $hiddenValue = [];
 
     public function __construct(
-        private ServerRequest $request,
-        private ?SessionSegment $csrfSessionSegment,
-        private ?string $token = null
+        private readonly ServerRequest $request,
+        private readonly ?SessionSegment $csrfSessionSegment,
+        private readonly ?string $token = null,
     ) {
     }
 
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('form_start', [$this, 'formStart'], ['is_safe' => ['html']]),
-            new TwigFunction('form_end', [$this, 'formEnd'], ['is_safe' => ['html']]),
-            new TwigFunction('form_input', [$this, 'input'], ['is_safe' => ['html']]),
+            new TwigFunction('form_start', $this->formStart(...), ['is_safe' => ['html']]),
+            new TwigFunction('form_end', $this->formEnd(...), ['is_safe' => ['html']]),
+            new TwigFunction('form_input', $this->input(...), ['is_safe' => ['html']]),
         ];
     }
 
     public function formStart(?string $name = null, array $options = []): string
     {
         $token = $this->token;
-        $name = $name ?? uniqid('form');
+        $name ??= uniqid('form');
         $default = ['id' => $name, 'method' => 'POST', 'action' => $this->request->getRequestTarget()];
         if (array_key_exists('url', $options)) {
             $options['action'] = $options['url'];
@@ -68,7 +68,7 @@ final class Form implements TemplateFunctionInterface
                 '<textarea name="%s"%s>%s</textarea>',
                 $name,
                 rtrim($this->buildAttribute($options)),
-                htmlspecialchars($value, ENT_QUOTES, 'UTF-8')
+                htmlspecialchars($value, ENT_QUOTES, 'UTF-8'),
             );
         }
 
@@ -79,7 +79,7 @@ final class Form implements TemplateFunctionInterface
             return sprintf(
                 '<button %s>%s</button>',
                 rtrim($this->buildAttribute($options)),
-                htmlspecialchars($value, ENT_QUOTES, 'UTF-8')
+                htmlspecialchars($value, ENT_QUOTES, 'UTF-8'),
             );
         }
 

@@ -31,8 +31,9 @@ class AdapterFactory
     }
 
     /** prevent from being unserialized (which would create a second instance of it) */
-    private function __wakeup()
+    public function __wakeup(): void
     {
+        throw new \LogicException('AdapterFactory cannot be unserialized.');
     }
 
     /** creates instances of Adapter Factory */
@@ -50,11 +51,9 @@ class AdapterFactory
      */
     public function get(?string $object = null, ?string $adapter = null): ValidationInterface
     {
-        if (null === $adapter) {
-            $adapter = ValidationInterface::DEFAULT_LIB;
-        }
+        $adapter ??= ValidationInterface::DEFAULT_LIB;
 
-        $object = $object ?? 'Validator';
+        $object ??= 'Validator';
         $sAdapterClass = __NAMESPACE__ . '\\Adapters\\' . $adapter . '\\' . $object;
         if (!$this->classExists($sAdapterClass)) {
             throw new Exception(sprintf('Adapter Class %s cannot be foud', $sAdapterClass));

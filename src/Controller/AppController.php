@@ -61,9 +61,40 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
 
     private string $http_version = '1.1';
 
+    /** @var array<string, object> */
+    private array $loadedModels = [];
+
+    /** @var array<string, object> */
+    private array $loadedRests = [];
+
+    /** @var array<string, mixed> */
+    private array $attributes = [];
+
     public function __construct()
     {
         $this->getEventManager()->on($this);
+    }
+
+    public function __get(string $name): mixed
+    {
+        if (isset($this->loadedModels[$name])) {
+            return $this->loadedModels[$name];
+        }
+
+        if (isset($this->loadedRests[$name])) {
+            return $this->loadedRests[$name];
+        }
+
+        if ($this->componentCollection !== null && $this->componentCollection->offsetExists($name)) {
+            return $this->componentCollection->offsetGet($name);
+        }
+
+        return $this->attributes[$name] ?? null;
+    }
+
+    public function __set(string $name, mixed $value): void
+    {
+        $this->attributes[$name] = $value;
     }
 
     public function wakeUpController(): void
@@ -153,7 +184,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
      *
      * @param int|string|array|object|mixed|null $value
      */
-    public function set(mixed $varName, mixed $value): void
+    public function set(mixed $varName, mixed $value = null): void
     {
         if (empty($varName)) {
             throw new Exception('varName cannot be empty');
@@ -224,7 +255,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
             throw new Exception('destination cannot be empty');
         }
 
-        if (mb_strpos($destination, '://') === false) {
+        if (!str_contains($destination, '://')) {
             $this->dispatchEvent('AppController.beforeRedirect');
 
             $components = $this->getComponentCollection();
@@ -261,6 +292,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     public function loadComponent(string $component, array $config = []): void
     {
         $component = Inflector::classify($component);
+        $this->componentCollection ??= new ComponentCollection($this);
         $this->componentCollection->add($component, $config);
     }
 
@@ -284,12 +316,12 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         if (Configure::check('Database') === false) {
             return;
         }
-        $this->{$sModel} = (new TableLocator())->get(Inflector::classify($sModel));
+        $this->loadedModels[$sModel] = new TableLocator()->get(Inflector::classify($sModel));
     }
 
     protected function loadRest(string $restModel): void
     {
-        $this->{$restModel} = $this->getRestLocator()->get(Inflector::classify($restModel));
+        $this->loadedRests[$restModel] = $this->getRestLocator()->get(Inflector::classify($restModel));
     }
 
     protected function _jsonResponse(array $data): void
@@ -331,8 +363,8 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
             sprintf(
                 $this->sTemplate,
                 $this->controller,
-                Inflector::tableize($this->action)
-            )
+                Inflector::tableize($this->action),
+            ),
         );
     }
 }

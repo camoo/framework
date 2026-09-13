@@ -17,18 +17,14 @@ trait EventDispatcherTrait
 
     public function getEventManager()
     {
-        if ($this->_eventManager === null) {
-            $this->_eventManager = new EventManager();
-        }
+        $this->_eventManager ??= new EventManager();
 
         return $this->_eventManager;
     }
 
-    public function dispatchEvent($name, $data = null, $subject = null)
+    public function dispatchEvent($name, $data = [], $subject = null)
     {
-        if ($subject === null) {
-            $subject = $this;
-        }
+        $subject ??= $this;
 
         $event = new $this->_eventClass($name, $subject, $data);
         $this->getEventManager()->dispatch($event);

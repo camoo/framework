@@ -29,6 +29,9 @@ abstract class FunctionHelper implements TemplateFunctionInterface, EventListene
 
     protected ServerRequest $request;
 
+    /** @var array<string, object> */
+    private array $loadedFunctions = [];
+
     public function __construct(private TwigHelper $baseHelper)
     {
         $this->getEventManager()->on($this);
@@ -52,12 +55,17 @@ abstract class FunctionHelper implements TemplateFunctionInterface, EventListene
                     }
                 }
 
-                $this->{$function} = new $class($baseHelper);
+                $this->loadedFunctions[$function] = new $class($baseHelper);
             }
         }
     }
 
     abstract public function getFunctions(): array;
+
+    public function __get(string $name): mixed
+    {
+        return $this->loadedFunctions[$name] ?? null;
+    }
 
     public function initialize(): void
     {

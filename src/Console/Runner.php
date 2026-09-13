@@ -40,7 +40,7 @@ final class Runner
         if ($method = $commandClass->getCommandMethod()) {
             $method = Inflector::camelize($method);
             if (!method_exists($commandClass, $method)) {
-                throw new ConsoleException(sprintf('Method %s::%s not found!', get_class($commandClass), $method));
+                throw new ConsoleException(sprintf('Method %s::%s not found!', $commandClass::class, $method));
             }
             call_user_func_array([$commandClass, $method], array_values($commandClass->getCommandParam()));
         } elseif (method_exists($commandClass, 'execute')) {

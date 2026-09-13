@@ -32,6 +32,9 @@ class BaseComponent implements ComponentInterface, EventListenerInterface
 
     private ControllerInterface $controller;
 
+    /** @var array<string, ComponentInterface> */
+    private array $loadedComponents = [];
+
     public function __construct(?ControllerInterface $controller = null, array $config = [])
     {
         if (null !== $controller) {
@@ -50,7 +53,7 @@ class BaseComponent implements ComponentInterface, EventListenerInterface
                 }
             }
             $controller->loadComponent($component);
-            $this->{$component} = $controller->{$component};
+            $this->loadedComponents[$component] = $controller->{$component};
         }
 
         $this->initialize($config);
@@ -60,7 +63,12 @@ class BaseComponent implements ComponentInterface, EventListenerInterface
     {
     }
 
-    public function implementedEvents()
+    public function __get(string $name): mixed
+    {
+        return $this->loadedComponents[$name] ?? null;
+    }
+
+    public function implementedEvents(): array
     {
         $eventMap = [
             'AppController.initialize' => 'beforeAction',

@@ -18,14 +18,14 @@ final class ForbiddenException extends BaseHttpException
      *
      * @const int
      */
-    public const HTTP_CODE = 403;
+    public const int HTTP_CODE = 403;
 
     /**
      * Error code storage;
      *
      * @const string
      */
-    public const ERROR = 'Access Denied';
+    public const string ERROR = 'Access Denied';
 
     /**
      * ForbiddenException constructor.
@@ -38,9 +38,9 @@ final class ForbiddenException extends BaseHttpException
         ?string $userTitle = null,
         ?string $userMessage = null,
         array $headers = [],
-        ?ExceptionInterface $previous = null
+        ?ExceptionInterface $previous = null,
     ) {
-        $errorDescription = $errorDescription ?? static::ERROR;
+        $errorDescription ??= static::ERROR;
 
         parent::__construct($errorDescription, static::HTTP_CODE, $errorData, $userTitle, $userMessage, $headers, $previous);
     }

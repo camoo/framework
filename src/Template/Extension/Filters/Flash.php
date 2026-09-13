@@ -13,30 +13,27 @@ use Twig\TwigFilter;
  *
  * @author CamooSarl
  */
-final class Flash implements TemplateFilterInterface
+final readonly class Flash implements TemplateFilterInterface
 {
-    private const INFO = 'info';
+    private const string INFO = 'info';
 
-    private const SUCCESS = 'success';
+    private const string SUCCESS = 'success';
 
-    private const ERROR = 'error';
+    private const string ERROR = 'error';
 
-    private const WARNING = 'warning';
+    private const string WARNING = 'warning';
 
     private ?\CAMOO\Http\Flash $flash;
 
-    private ServerRequest $request;
-
-    public function __construct(ServerRequest $request)
+    public function __construct(private ServerRequest $request)
     {
-        $this->request = $request;
         $this->flash = $this->request->Flash;
     }
 
     public function getFilters(): array
     {
         return [
-            new TwigFilter('show_flash', [$this, 'display'], ['is_safe' => ['html']]),
+            new TwigFilter('show_flash', $this->display(...), ['is_safe' => ['html']]),
         ];
     }
 

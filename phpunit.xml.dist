@@ -1,27 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit
-	colors="true"
-	processIsolation="false"
-	stopOnFailure="false"
-	bootstrap="./tests/bootstrap.php"
-	backupGlobals="true"
-	>
-	<php>
-		<ini name="memory_limit" value="-1"/>
-		<ini name="apc.enable_cli" value="1"/>
-		<const name="TMP" value="/tmp/"/>
-	</php>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd"
+         colors="true"
+         processIsolation="false"
+         stopOnFailure="false"
+         bootstrap="./tests/bootstrap.php"
+         backupGlobals="true"
+>
+    <php>
+        <ini name="memory_limit" value="-1"/>
+        <ini name="apc.enable_cli" value="1"/>
+        <const name="TMP" value="/tmp/"/>
+    </php>
 
-    <!-- Add any additional test suites you want to run here -->
     <testsuites>
         <testsuite name="Camoo FrameWork Test Suite">
             <directory>./tests/TestCase</directory>
         </testsuite>
     </testsuites>
 
-	<filter>
-		<whitelist>
-			<directory suffix=".php">./src/</directory>
-		</whitelist>
-	</filter>
+    <source>
+        <include>
+            <directory suffix=".php">./src</directory>
+        </include>
+    </source>
+
 </phpunit>

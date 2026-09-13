@@ -69,7 +69,7 @@ class Exception extends BaseException implements ExceptionInterface
         ?string $userTitle = null,
         ?string $userMessage = null,
         array $httpHeaders = [],
-        ?Throwable $previous = null
+        ?Throwable $previous = null,
     ) {
         $this->errorDescription = $errorDescription ?? 'Internal Server Error';
         $this->errorData = $errorData;

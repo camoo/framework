@@ -6,6 +6,7 @@ namespace CAMOO\Di;
 
 use function class_exists;
 use function in_array;
+
 use Ray\Di\Argument;
 use Ray\Di\Bind;
 use Ray\Di\Container;
@@ -17,6 +18,9 @@ final class UnTargetedBind
 {
     public function __invoke(Container $container, ?ReflectionMethod $method = null): void
     {
+        if ($method === null) {
+            return;
+        }
         $parameters = $method->getParameters();
         foreach ($parameters as $parameter) {
             $this->addConcreteClass($container, $parameter);
@@ -40,7 +44,7 @@ final class UnTargetedBind
         return $type instanceof ReflectionNamedType && !in_array(
             $type->getName(),
             Argument::UNBOUND_TYPE,
-            true
+            true,
         ) ? $type->getName() : '';
     }
 }

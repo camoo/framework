@@ -42,15 +42,13 @@ class Cookie extends BaseCookie
             $default['path'],
             $default['domain'],
             $default['secure'],
-            $default['httponly']
+            $default['httponly'],
         );
     }
 
     public static function create(): ?self
     {
-        if (null === self::$createInstance) {
-            self::$createInstance = new self();
-        }
+        self::$createInstance ??= new self();
 
         return self::$createInstance;
     }

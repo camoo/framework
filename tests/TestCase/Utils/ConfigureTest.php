@@ -1,17 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CAMOO\Test\TestCase\Utils;
 
 use CAMOO\Utils\Configure;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Depends;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Class ConfigureTest
- *
- * @author CamooSarl
- *
- * @covers \CAMOO\Utils\Configure
- */
+#[CoversClass(Configure::class)]
 class ConfigureTest extends TestCase
 {
     public function setUp(): void
@@ -26,77 +27,48 @@ class ConfigureTest extends TestCase
         unlink('/tmp/test_configure2.php');
     }
 
-    /**
-     * @covers \CAMOO\Utils\Configure::load
-     *
-     * @testWith        ["/tmp/test_configure1.php"]
-     */
+    #[TestWith(['/tmp/test_configure1.php'])]
     public function testInstance($path)
     {
         $this->assertNull(Configure::load($path));
     }
 
-    /**
-     * @covers \CAMOO\Utils\Configure::read
-     *
-     * @depends testInstance
-     */
+    #[Depends('testInstance')]
     public function testRead()
     {
         $this->assertNull(Configure::read('test.test'));
         $this->assertIsArray(Configure::read('Config'));
     }
 
-    /**
-     * @covers \CAMOO\Utils\Configure::check
-     *
-     * @depends testInstance
-     */
+    #[Depends('testInstance')]
     public function testCheck()
     {
         $this->assertTrue(Configure::check('Config'));
         $this->assertFalse(Configure::check('epepep'));
     }
 
-    /**
-     * @covers \CAMOO\Utils\Configure::get
-     *
-     * @depends testInstance
-     */
+    #[Depends('testInstance')]
     public function testGet()
     {
         $this->assertIsArray(Configure::get());
     }
 
-    /**
-     * @covers \CAMOO\Utils\Configure::load
-     *
-     * @testWith        ["/tmp/test_configure2.php"]
-     */
+    #[TestWith(['/tmp/test_configure2.php'])]
     public function testMerge($path2)
     {
         Configure::load($path2, true);
         $this->assertArrayHasKey('Plugin', Configure::get());
     }
 
-    /**
-     * @covers \CAMOO\Utils\Configure::write
-     *
-     * @dataProvider writeProvider
-     */
+    #[DataProvider('writeProvider')]
     public function testWriteMerge($key, $data)
     {
         Configure::write($key, $data);
         $this->assertArrayHasKey('Config', Configure::get());
     }
 
-    /**
-     * @covers \CAMOO\Utils\Configure::write
-     *
-     * @dataProvider writeProvider
-     *
-     * @runInSeparateProcess
-     */
+    #[DataProvider('writeProvider')]
+    #[RunInSeparateProcess]
     public function testWriteNoMerge($key, $data)
     {
         Configure::load('/hjhj/tetet.php');
@@ -104,7 +76,7 @@ class ConfigureTest extends TestCase
         $this->assertArrayHasKey('Config', Configure::get());
     }
 
-    public function writeProvider()
+    public static function writeProvider()
     {
         return [
             ['Config.version', '1.2'],

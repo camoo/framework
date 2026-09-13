@@ -15,7 +15,7 @@ class Filters
 {
     protected ServerRequest $request;
 
-    public function __construct(private TwigHelper $baseHelper)
+    public function __construct(private readonly TwigHelper $baseHelper)
     {
         $this->request = $this->baseHelper->getRequest();
     }

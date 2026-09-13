@@ -14,8 +14,7 @@ use CAMOO\Utils\Configure;
  */
 final class RestFactory
 {
-    /** @var RestFactory $_created */
-    private static $_created = null;
+    private static ?RestFactory $_created = null;
 
     /**
      * is not allowed to call from outside to prevent from creating multiple instances,
@@ -31,8 +30,9 @@ final class RestFactory
     }
 
     /** prevent from being unserialized (which would create a second instance of it) */
-    private function __wakeup()
+    public function __wakeup(): void
     {
+        throw new \LogicException('RestFactory cannot be unserialized.');
     }
 
     /** creates instances of Adapter Factory */
@@ -48,7 +48,7 @@ final class RestFactory
      *
      * @return AppRest
      */
-    public function get(string $name)
+    public function get(string $name): AppRest
     {
         $namespace = __NAMESPACE__ . '\\';
         $asNameSpace = explode('\\', $namespace);
@@ -67,7 +67,7 @@ final class RestFactory
      *
      * @return bool
      */
-    protected function classExists($name)
+    protected function classExists(string $name): bool
     {
         return class_exists($name);
     }

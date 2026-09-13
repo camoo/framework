@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CAMOO\Model;
 
 use CAMOO\Utils\Configure;
@@ -30,8 +32,10 @@ class AppModel
     {
         if ($this->conn === null) {
             $connectionParams = Configure::read('Database.' . $this->db);
-            $connectionParams['driver'] = $this->driver;
-            $connectionParams['user'] = $connectionParams['username'];
+            $connectionParams['driver'] ??= $this->driver;
+            if (isset($connectionParams['username']) && !isset($connectionParams['user'])) {
+                $connectionParams['user'] = $connectionParams['username'];
+            }
             $this->conn = DriverManager::getConnection($connectionParams, new Configuration());
         }
 
@@ -57,6 +61,11 @@ class AppModel
      */
     public function queryBuilder(): QueryBuilder
     {
-        return $this->conn->createQueryBuilder();
+        return $this->getConnection()->createQueryBuilder();
+    }
+
+    public function getQueryBuilder(): QueryBuilder
+    {
+        return $this->queryBuilder();
     }
 }

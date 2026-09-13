@@ -59,8 +59,11 @@ final class ComponentCollection implements Countable, IteratorAggregate, ArrayAc
 
         $oComponent = new $class($this->controller, $config);
 
-        /** @var ComponentInterface */
-        $this->controller->{$component} = $oComponent;
+        // Keep compatibility with controllers that declare component properties.
+        if (property_exists($this->controller, $component)) {
+            $this->controller->{$component} = $oComponent;
+        }
+
         $this->offsetSet($component, $oComponent);
     }
 
@@ -142,7 +145,7 @@ final class ComponentCollection implements Countable, IteratorAggregate, ArrayAc
      *
      * @param mixed|null $offset
      */
-    public function offsetSet($offset = null, $value)
+    public function offsetSet($offset = null, $value = null)
     {
         if (!($value instanceof ComponentInterface)) {
             throw new InvalidArgumentException(sprintf('Offset must be an instance of %s', 'ComponentInterface'));

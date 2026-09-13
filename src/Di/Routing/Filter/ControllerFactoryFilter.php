@@ -16,9 +16,9 @@ use CAMOO\Interfaces\ControllerInterface;
  */
 class ControllerFactoryFilter
 {
-    private ControllerInterface $instance;
+    private readonly ControllerInterface $instance;
 
-    public function __construct(private string $controller)
+    public function __construct(private readonly string $controller)
     {
         $this->instance = CamooDi::get($this->controller);
     }

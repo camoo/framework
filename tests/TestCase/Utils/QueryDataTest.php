@@ -1,17 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CAMOO\Test\TestCase\Utils;
 
 use CAMOO\Utils\QueryData;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Class QueryDataTest
- *
- * @author CamooSarl
- *
- * @covers \CAMOO\Utils\QueryData
- */
+#[CoversClass(QueryData::class)]
 class QueryDataTest extends TestCase
 {
     public function testInstance()
