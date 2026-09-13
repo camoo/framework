@@ -37,6 +37,13 @@ class FormTest extends TestCase
         $this->assertSame('</form>', $end);
     }
 
+    public function testFormStartAlwaysContainsCsrfToken(): void
+    {
+        $form = new Form(new ServerRequest());
+
+        self::assertStringContainsString('name="__csrf_Token"', $form->formStart());
+    }
+
     public function testInputTypes(): void
     {
         $text = $this->form->input('username', ['value' => 'john']);

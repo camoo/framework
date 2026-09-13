@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CAMOO\Template\Extension\Functions;
 
 use CAMOO\Http\ServerRequest;
+use CAMOO\Http\Session;
 use CAMOO\Http\SessionSegment;
 use CAMOO\Interfaces\TemplateFunctionInterface;
 use CAMOO\Utils\Security;
@@ -19,11 +20,20 @@ final class Form implements TemplateFunctionInterface
 {
     private array $hiddenValue = [];
 
+    private readonly SessionSegment $csrfSessionSegment;
+
+    private readonly string $token;
+
     public function __construct(
         private readonly ServerRequest $request,
-        private readonly ?SessionSegment $csrfSessionSegment,
-        private readonly ?string $token = null,
+        ?SessionSegment $csrfSessionSegment = null,
+        ?string $token = null,
     ) {
+        $session = Session::create();
+        $this->csrfSessionSegment = $csrfSessionSegment ?? new SessionSegment(
+            $session->segment(\Aura\Session\CsrfToken::class),
+        );
+        $this->token = $token ?? $session->getCsrfToken()->getValue();
     }
 
     public function getFunctions(): array
@@ -37,7 +47,6 @@ final class Form implements TemplateFunctionInterface
 
     public function formStart(?string $name = null, array $options = []): string
     {
-        $token = $this->token;
         $name ??= uniqid('form');
         $default = ['id' => $name, 'method' => 'POST', 'action' => $this->request->getRequestTarget()];
         if (array_key_exists('url', $options)) {
@@ -45,9 +54,8 @@ final class Form implements TemplateFunctionInterface
             unset($options['url']);
         }
         $options += $default;
-        $inputToken = $token !== null
-            ? ' <input type="hidden" name="__csrf_Token" value="' . $this->escape((string)$token) . '" />'
-            : '';
+        $inputToken = ' <input type="hidden" name="__csrf_Token" value="' .
+            $this->escape($this->token) . '" />';
 
         return sprintf(
             '<form name="%s"%s>' . "\n" . '%s',
@@ -105,7 +113,7 @@ final class Form implements TemplateFunctionInterface
 
         if ($type === 'hidden') {
             $this->hiddenValue[$name] = hash('sha256', Security::satanizer((string)($options['value'] ?? '')));
-            $this->csrfSessionSegment?->write('__csrf_checksum', $this->hiddenValue);
+            $this->csrfSessionSegment->write('__csrf_checksum', $this->hiddenValue);
         }
 
         if (array_key_exists('value', $options) && $options['value'] === '') {
