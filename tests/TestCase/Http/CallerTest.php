@@ -6,14 +6,15 @@ namespace CAMOO\Test\TestCase\Http;
 
 use CAMOO\Controller\AppController;
 use CAMOO\Http\Caller;
+use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 class TestCallerController extends AppController
 {
-    public function overview(): string
+    public function overview(): Response
     {
-        return 'Overview Result';
+        return new Response(200, [], 'Overview Result');
     }
 
     protected function camooExit(): void

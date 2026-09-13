@@ -73,7 +73,7 @@ if (Configure::check('Database') === true) {
 
 CakeConfigure::write('App.paths.locales', [Configure::read('App.paths.locales')]);
 
-Cache::setConfig('_cake_core_', [
+Cache::setConfig('_cake_translations_', [
     'className' => FileEngine::class,
     'prefix' => 'camoo_core_',
     'path' => CACHE . 'persistent/',
@@ -88,4 +88,4 @@ Cache::setConfig('_cake_model_', [
     'serialize' => true,
     'duration' => '+10 minutes',
 ]);
-I18n::setLocale('fr_CM');
+I18n::setLocale((string)(Configure::read('App.defaultLanguage') ?: 'fr_CM'));

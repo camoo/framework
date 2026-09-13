@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace CAMOO\Controller;
 
+use Psr\Http\Message\ResponseInterface;
+
 /**
  * Class ErrorController
  *
@@ -16,8 +18,8 @@ class ErrorController extends AppController
         parent::initialize();
     }
 
-    public function overview()
+    public function overview(): ResponseInterface
     {
-        $this->render();
+        return $this->render();
     }
 }

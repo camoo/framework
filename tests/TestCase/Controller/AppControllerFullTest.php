@@ -9,6 +9,7 @@ use CAMOO\Controller\Component\BaseComponent;
 use CAMOO\Controller\Component\ComponentCollection;
 use CAMOO\Controller\Component\SecurityComponent;
 use CAMOO\Event\Event;
+use CAMOO\Event\EventInterface;
 use CAMOO\Exception\Exception;
 use CAMOO\Exception\Http\BadRequestException;
 use CAMOO\Http\ServerRequest;
@@ -51,6 +52,14 @@ class DummyComponent extends BaseComponent
 {
 }
 
+class EarlyResponseController extends AppController
+{
+    public function beforeAction(EventInterface $event): void
+    {
+        $event->setResult(new Response(204));
+    }
+}
+
 #[CoversClass(AppController::class)]
 #[CoversClass(SecurityComponent::class)]
 #[CoversClass(ComponentCollection::class)]
@@ -76,6 +85,20 @@ class AppControllerFullTest extends TestCase
         $this->controller->wakeUpController();
         $this->assertInstanceOf(ComponentCollection::class, $this->controller->getComponentCollection());
         $this->assertFalse($this->controller->hasComponent('Security'));
+    }
+
+    public function testWakeUpControllerReturnsEventResponse(): void
+    {
+        $controller = new EarlyResponseController();
+        $controller->controller = 'Pages';
+        $controller->action = 'index';
+        $controller->request = new ServerRequest(new GuzzleRequest('GET', '/pages/index'));
+        $controller->setResponse(new Response());
+
+        $response = $controller->wakeUpController();
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertSame(204, $response->getStatusCode());
     }
 
     public function testLoadComponent(): void
@@ -155,23 +178,23 @@ class AppControllerFullTest extends TestCase
 
     public function testSetSerialize(): void
     {
-        ob_start();
         $this->controller->set('_serialize', ['status' => 'ok']);
-        $output = ob_get_clean();
 
-        $this->assertStringContainsString('"status":"ok"', $output);
+        $response = $this->getResponse();
+        $this->assertSame('application/json', $response->getHeaderLine('Content-Type'));
+        $this->assertStringContainsString('"status":"ok"', (string)$response->getBody());
     }
 
     public function testJsonResponse(): void
     {
-        $refMethod = new \ReflectionMethod($this->controller, '_jsonResponse');
+        $refMethod = new \ReflectionMethod($this->controller, 'jsonResponse');
         $refMethod->setAccessible(true);
 
-        ob_start();
         $refMethod->invoke($this->controller, ['result' => 'success']);
-        $output = ob_get_clean();
 
-        $this->assertStringContainsString('"result":"success"', $output);
+        $response = $this->getResponse();
+        $this->assertSame('application/json', $response->getHeaderLine('Content-Type'));
+        $this->assertStringContainsString('"result":"success"', (string)$response->getBody());
     }
 
     public function testRedirect(): void
@@ -241,5 +264,12 @@ class AppControllerFullTest extends TestCase
         $component->shutdown(new Event('test'));
         $component->beforeRedirect(new Event('test'));
         $this->assertTrue(true);
+    }
+
+    private function getResponse(): \Psr\Http\Message\ResponseInterface
+    {
+        $property = new \ReflectionProperty($this->controller, 'response');
+
+        return $property->getValue($this->controller);
     }
 }

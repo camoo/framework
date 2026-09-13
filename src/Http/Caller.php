@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace CAMOO\Http;
 
+use CAMOO\Controller\AppController;
 use CAMOO\Di\Routing\Filter\ControllerFactoryFilter;
-use CAMOO\Event\Event;
 use CAMOO\Event\EventDispatcherTrait;
 use CAMOO\Exception\Exception;
 use Camoo\Http\Curl\Domain\Entity\Uri;
 use Camoo\Http\Curl\Infrastructure\Response;
 use Camoo\Inflector\Inflector;
-use CAMOO\Interfaces\ControllerInterface;
 use FastRoute\Dispatcher\GroupCountBased;
 use FastRoute\RouteCollector;
 
@@ -42,6 +41,8 @@ final class Caller
 
     private string $controllerName = 'Pages';
 
+    private ?ResponseInterface $response = null;
+
     public function __construct(protected string $sConfigDir)
     {
         $this->initialize();
@@ -52,31 +53,43 @@ final class Caller
         require_once $this->sConfigDir . '/bootstrap.php';
     }
 
-    public function getController(?ServerRequestInterface $request = null): ControllerInterface
+    public function getResponse(): ResponseInterface
+    {
+        if ($this->response === null) {
+            throw new Exception('No response has been dispatched.');
+        }
+
+        return $this->response;
+    }
+
+    public function getController(?ServerRequestInterface $request = null): AppController
     {
         $filter = new ControllerFactoryFilter($this->controller);
         $oController = $filter->getInstance();
+        if (!$oController instanceof AppController) {
+            throw new Exception(sprintf('%s must extend %s.', $oController::class, AppController::class));
+        }
         $serverRequest = new ServerRequest($request);
         $oController->request = $serverRequest;
         $oController->action = $this->action;
         $oController->controller = $this->controllerName;
         $oController->setResponse(new Response());
-        $oController->wakeUpController();
-
         return $oController;
     }
 
     public function dispatchRequest(): ResponseInterface
     {
         $dispatcher = simpleDispatcher(function (RouteCollector $routeCollector) {
-            $requestType = $_SERVER['REQUEST_METHOD'];
+            $requestType = $_SERVER['REQUEST_METHOD'] ?? getenv('REQUEST_METHOD') ?: 'GET';
             $routeCollector->addRoute(
                 $requestType,
                 $this->uri,
                 function (ServerRequestInterface $request) {
                     $controller = $this->getController($request);
-                    $event = new Event('AppController.initialize', $controller);
-                    $controller->getEventManager()->dispatch($event);
+                    $response = $controller->wakeUpController();
+                    if ($response instanceof ResponseInterface) {
+                        return $response;
+                    }
 
                     $components = $controller->getComponentCollection();
                     if (!empty($components)) {
@@ -98,7 +111,11 @@ final class Caller
                         ));
                     }
 
-                    return call_user_func_array([$controller, $this->action], $this->xargs);
+                    $result = call_user_func_array([$controller, $this->action], $this->xargs);
+
+                    return $result instanceof ResponseInterface ? $result : throw new Exception(
+                        sprintf('Action %s must return a PSR-7 response.', $this->action),
+                    );
                 },
             );
         });
@@ -111,14 +128,16 @@ final class Caller
         return $dispatcher->dispatch(Psr7\ServerRequest::fromGlobals());
     }
 
-    public function route(): void
+    public function route(): ResponseInterface
     {
         $dispatcher = require_once $this->sConfigDir . '/route.php';
         /** @var GroupCountBased $routeDispatcher */
         $routeDispatcher = $dispatcher[0];
-        $this->uri = $uri = new Uri(getenv('REQUEST_URI'))->getPath();
+        $requestUri = $_SERVER['REQUEST_URI'] ?? getenv('REQUEST_URI') ?: '/';
+        $requestMethod = $_SERVER['REQUEST_METHOD'] ?? getenv('REQUEST_METHOD') ?: 'GET';
+        $this->uri = $uri = new Uri($requestUri)->getPath();
 
-        $routeInfo = $routeDispatcher->dispatch(getenv('REQUEST_METHOD'), $uri);
+        $routeInfo = $routeDispatcher->dispatch($requestMethod, $uri);
 
         switch ($routeInfo[0]) {
             case \FastRoute\Dispatcher::NOT_FOUND:
@@ -147,10 +166,9 @@ final class Caller
                     $this->controller = '\\App\\Controller\\' . $this->controllerName . 'Controller';
                 }
 
-                $this->dispatchRequest();
-                break;
+                return $this->response = $this->dispatchRequest();
             case \FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
-                break;
+                return $this->response = new Response(statusCode: 405);
             case \FastRoute\Dispatcher::FOUND:
                 $handler = $routeInfo[1];
                 $vars = $routeInfo[2];
@@ -167,14 +185,16 @@ final class Caller
                     $this->xargs = $vars;
                 }
 
-                $this->dispatchRequest();
-                break;
+                return $this->response = $this->dispatchRequest();
         }
+
+        return $this->response = new Response(statusCode: 404);
     }
 
-    protected function initialize(): void
+    protected function initialize(): ResponseInterface
     {
         $this->bootstrap();
-        $this->route();
+
+        return $this->route();
     }
 }

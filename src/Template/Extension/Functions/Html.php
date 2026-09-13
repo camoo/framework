@@ -29,7 +29,7 @@ final class Html implements TemplateFunctionInterface
         return [
             new TwigFunction('html_script', $this->addJs(...)),
             new TwigFunction('html_css', $this->addCss(...)),
-            new TwigFunction('html_fetch', $this->addCss(...), ['is_safe' => ['html']]),
+            new TwigFunction('html_fetch', $this->fetch(...), ['is_safe' => ['html']]),
         ];
     }
 

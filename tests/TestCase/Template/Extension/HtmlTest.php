@@ -42,6 +42,15 @@ class HtmlTest extends TestCase
         $this->assertStringContainsString('/css/custom.css', $css);
     }
 
+    public function testFetchFunctionReturnsQueuedAssets(): void
+    {
+        $functions = $this->html->getFunctions();
+        $fetch = $functions[2]->getCallable();
+        $this->html->addCss('layout');
+
+        self::assertSame("<link rel=\"stylesheet\" href=\"/css/layout.css\">\n", $fetch('css'));
+    }
+
     public function testFetchInvalidThrowsException(): void
     {
         $this->expectException(Exception::class);

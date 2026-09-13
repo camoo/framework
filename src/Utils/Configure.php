@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace CAMOO\Utils;
 
-use Noodlehaus\Config;
-use Noodlehaus\Parser\Json;
+use Camoo\Config\Config;
+use Camoo\Config\Parser\Json;
+use ConfigInterop\ConfigInterface;
 
 class Configure
 {
@@ -33,7 +34,7 @@ class Configure
 
     public static function check(string $sKey): bool
     {
-        return static::$all?->offsetExists($sKey) ?? false;
+        return static::$all?->has($sKey) ?? false;
     }
 
     public static function get(): mixed
@@ -43,22 +44,16 @@ class Configure
 
     public static function write(string $sKey, mixed $xValue = []): void
     {
-        $hNewConf = [];
-        self::addConf($hNewConf, $sKey, $xValue);
-        $conf = Config::load(json_encode($hNewConf), new Json(), true);
-        if (null !== static::$all) {
-            static::$all->merge($conf);
-        } else {
-            static::$all = $conf;
+        if (null === static::$all) {
+            static::$all = new Config('{}', new Json(), true);
         }
+        static::$all->set($sKey, $xValue);
     }
 
-    private static function addConf(array &$hNewConf, string $sKey, mixed $xValue): void
+    public static function toInterop(?string $prefix = null): ConfigInterface
     {
-        $asKeys = explode('.', $sKey);
-        foreach ($asKeys as $key) {
-            $hNewConf = &$hNewConf[$key];
-        }
-        $hNewConf = $xValue;
+        $adapter = new ConfigureAdapter();
+
+        return $prefix !== null && $prefix !== '' ? $adapter->withPrefix($prefix) : $adapter;
     }
 }

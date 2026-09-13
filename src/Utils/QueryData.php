@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace CAMOO\Utils;
 
-use Noodlehaus\AbstractConfig;
+use Camoo\Config\AbstractConfig;
 
 /**
  * Class QueryData
