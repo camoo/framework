@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CAMOO\Test\TestCase\Model\Rest;
 
 use ArrayObject;
@@ -114,6 +116,7 @@ class AppRestTest extends TestCase
     {
         $remoteObj = new TestRemoteObject();
         $this->rest->attachRemote('remoteService', $remoteObj);
+        $this->assertFalse(property_exists($this->rest, 'remoteService'));
         $this->rest->newRequest(['key' => 'val1'], false);
 
         $res = $this->rest->send(['::remoteService', 'executeAction']);

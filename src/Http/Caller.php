@@ -94,12 +94,12 @@ final class Caller
                         throw new Exception(sprintf(
                             'Action %s does not exist in %s',
                             $this->action,
-                            $controller::class
+                            $controller::class,
                         ));
                     }
 
                     return call_user_func_array([$controller, $this->action], $this->xargs);
-                }
+                },
             );
         });
 

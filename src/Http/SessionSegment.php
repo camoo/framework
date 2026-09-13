@@ -43,7 +43,7 @@ final readonly class SessionSegment
             throw new Exception(sprintf(
                 'Invalid Type for %s ! The following Types are allowed %s',
                 '$value',
-                '<int|string|array|null>'
+                '<int|string|array|null>',
             ));
         }
         $hash = explode('.', $key);

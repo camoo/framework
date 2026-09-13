@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CAMOO\Test\TestCase\Utils;
 
 use CAMOO\Utils\QueryData;

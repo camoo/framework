@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CAMOO\Test\TestCase\Utils;
 
 use CAMOO\Utils\Security;
@@ -28,7 +30,7 @@ class SecurityTest extends TestCase
 
     public function testStripAllTags(): void
     {
-        $html = "<style>body{color:red;}</style><h1>Title</h1><p>Paragraph</p>";
+        $html = '<style>body{color:red;}</style><h1>Title</h1><p>Paragraph</p>';
         $stripped = Security::stripAllTags($html, true);
         $this->assertSame('TitleParagraph', $stripped);
     }

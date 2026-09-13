@@ -74,8 +74,8 @@ final class BackgroundProcess
                     '%s %s %s 2>&1 & echo $!',
                     $this->getCommand(),
                     ($bAppend) ? '>>' : '>',
-                    $sOutputFile
-                )
+                    $sOutputFile,
+                ),
             );
             $this->setPid($pid);
 

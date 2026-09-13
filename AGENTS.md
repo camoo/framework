@@ -30,6 +30,9 @@ composer test
 
 # Equivalent direct test command
 vendor/bin/phpunit
+
+# Format changed files after every edit
+make format FILES="src/ChangedClass.php tests/TestCase/Area/ChangedClassTest.php"
 ```
 
 When PHP/Composer are not installed locally, use the documented PHP 8.4
@@ -65,6 +68,11 @@ tool. At minimum, run the relevant PHPUnit tests and inspect the final diff.
 - Follow the local PHP style: typed properties and parameters, explicit return
   types, `declare(strict_types=1)` in production files, short array syntax, and
   PSR-4 class/file names. Keep comments focused on non-obvious behavior.
+- After every edit, including added or moved PHP files, run `make format` for
+  the changed files. Use `make format FILES="path/to/Changed.php
+  path/to/Added.php"`; run `make format` without `FILES` when the complete
+  configured tree should be formatted. Formatting is required before tests
+  and before handoff.
 - Prefer small, localized changes. Avoid unrelated formatting, renames, or
   framework-wide refactors in a bug fix.
 - Treat request data, cookies, sessions, templates, mail, and error rendering

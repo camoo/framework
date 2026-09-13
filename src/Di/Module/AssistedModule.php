@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CAMOO\Di\Module;
 
 use CAMOO\Di\Annotation\Assisted;
@@ -14,7 +16,7 @@ class AssistedModule extends AbstractModule
         $this->bindInterceptor(
             $this->matcher->any(),
             $this->matcher->annotatedWith(Assisted::class),
-            [AssistedInterceptor::class]
+            [AssistedInterceptor::class],
         );
     }
 }

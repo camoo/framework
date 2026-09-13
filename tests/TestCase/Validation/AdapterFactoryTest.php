@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CAMOO\Test\TestCase\Validation;
 
 use CAMOO\Exception\Exception;

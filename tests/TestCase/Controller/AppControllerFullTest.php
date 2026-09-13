@@ -1,19 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CAMOO\Test\TestCase\Controller;
 
-use Aura\Session\CsrfToken;
 use CAMOO\Controller\AppController;
 use CAMOO\Controller\Component\BaseComponent;
 use CAMOO\Controller\Component\ComponentCollection;
 use CAMOO\Controller\Component\SecurityComponent;
-use CAMOO\Controller\ErrorController;
 use CAMOO\Event\Event;
 use CAMOO\Exception\Exception;
 use CAMOO\Exception\Http\BadRequestException;
-use CAMOO\Exception\Http\ForbiddenException;
 use CAMOO\Http\ServerRequest;
-use CAMOO\Http\Session;
 use CAMOO\Utils\Configure;
 use CAMOO\Validation\Adapters\Cake\Validator;
 use GuzzleHttp\Psr7\Response;

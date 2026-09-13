@@ -1,12 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CAMOO\Test\TestCase\Http;
 
 use CAMOO\Controller\AppController;
 use CAMOO\Http\Caller;
-use FastRoute\Dispatcher;
-use FastRoute\RouteCollector;
-use function FastRoute\simpleDispatcher;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 

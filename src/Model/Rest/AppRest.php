@@ -39,6 +39,9 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
 
     private array $option = [];
 
+    /** @var array<string, object> */
+    private array $remoteObjects = [];
+
     public function __construct()
     {
         $this->getEventManager()->on($this);
@@ -47,7 +50,7 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
 
     public function __get(string $key): mixed
     {
-        return $this->offsetGet($key);
+        return $this->remoteObjects[$key] ?? $this->offsetGet($key);
     }
 
     abstract public function validationDefault(ValidationInterface $validator): ValidationInterface;
@@ -69,7 +72,7 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
 
     public function get(string $key): mixed
     {
-        return $this->offsetGet($key);
+        return $this->remoteObjects[$key] ?? $this->offsetGet($key);
     }
 
     /** @param string $value */
@@ -96,7 +99,7 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
 
         if (!empty($callable) && is_string($callable[0]) && str_starts_with($callable[0], '::')) {
             $remoteObject = str_replace('::', '', $callable[0]);
-            $callable[0] = $this->{$remoteObject};
+            $callable[0] = $this->get($remoteObject);
         }
         $this->output = call_user_func_array($callable, $args);
         $this->dispatchEvent('Rest.afterSend', ['data' => $this->output]);
@@ -115,7 +118,7 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
                 throw new Exception(sprintf(
                     'Validation method %s not found in %s',
                     $validationMethod,
-                    static::class
+                    static::class,
                 ));
             }
             $validator = $this->{$validationMethod}($this->getValidatorLocator()->get());
@@ -181,13 +184,12 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
 
     /**
      * Load a remote object into the current object
-     * @deprecated Use dependency injection instead of loading remote objects
      * @param string $name
      * @param object $object
      * @return void
      */
     protected function loadRemoteObject(string $name, object $object): void
     {
-        $this->{$name} = $object;
+        $this->remoteObjects[$name] = $object;
     }
 }

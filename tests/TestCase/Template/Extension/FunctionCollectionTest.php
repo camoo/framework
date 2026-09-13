@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CAMOO\Test\TestCase\Template\Extension;
 
 use CAMOO\Interfaces\TemplateFunctionInterface;
@@ -13,7 +15,7 @@ class DummyTemplateFunction implements TemplateFunctionInterface
 {
     public function getFunctions(): array
     {
-        return [new TwigFunction('dummy_func', fn() => 'ok')];
+        return [new TwigFunction('dummy_func', fn () => 'ok')];
     }
 }
 

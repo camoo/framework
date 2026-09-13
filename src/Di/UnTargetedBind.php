@@ -44,7 +44,7 @@ final class UnTargetedBind
         return $type instanceof ReflectionNamedType && !in_array(
             $type->getName(),
             Argument::UNBOUND_TYPE,
-            true
+            true,
         ) ? $type->getName() : '';
     }
 }

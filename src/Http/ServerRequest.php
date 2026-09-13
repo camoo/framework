@@ -55,7 +55,7 @@ class ServerRequest
         if (
             mb_substr($name, 0, 3) === 'get' && in_array(
                 mb_strtolower(mb_substr($name, 3)),
-                array_keys($this->queryDataMaps)
+                array_keys($this->queryDataMaps),
             )
         ) {
             $xData = $this->__queryData($this->oRequest->{$this->queryDataMaps[mb_strtolower(mb_substr($name, 3))]}());
@@ -65,7 +65,7 @@ class ServerRequest
         } elseif (in_array($name, array_keys($this->queryDataMaps))) {
             if (empty($xargs) || count($xargs) > 1 || !preg_match('/\S/', $xargs[0])) {
                 throw new Exception(
-                    sprintf('Method %s::%s does not exist', static::class, $name)
+                    sprintf('Method %s::%s does not exist', static::class, $name),
                 );
             }
             $xData = $this->__queryData($this->oRequest->{$this->queryDataMaps[$name]}(), false)->get($xargs[0]);
@@ -73,7 +73,7 @@ class ServerRequest
             return $this->satanise($xData);
         }
         throw new Exception(
-            sprintf('Method %s::%s does not exist', static::class, $name)
+            sprintf('Method %s::%s does not exist', static::class, $name),
         );
     }
 
@@ -244,7 +244,7 @@ class ServerRequest
 
             return array_map(
                 fn (mixed $data) => is_array($data) ? $this->satanise($data) : Security::satanizer($data),
-                $xData
+                $xData,
             );
         }
 

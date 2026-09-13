@@ -42,7 +42,7 @@ class Cookie extends BaseCookie
             $default['path'],
             $default['domain'],
             $default['secure'],
-            $default['httponly']
+            $default['httponly'],
         );
     }
 

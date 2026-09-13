@@ -120,7 +120,7 @@ final class FunctionCollection implements Countable, Iterator, ArrayAccess
         if (!($value instanceof TemplateFunctionInterface)) {
             throw new InvalidArgumentException(sprintf(
                 'Offset must be an instance of %s',
-                'TemplateFunctionInterface'
+                'TemplateFunctionInterface',
             ));
         }
 

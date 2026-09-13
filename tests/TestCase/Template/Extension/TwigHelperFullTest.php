@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CAMOO\Test\TestCase\Template\Extension;
 
 use CAMOO\Event\Event;
@@ -17,11 +19,8 @@ use CAMOO\Template\Extension\Functions;
 use CAMOO\Template\Extension\TwigHelper;
 use CAMOO\Utils\Configure;
 use GuzzleHttp\Psr7\ServerRequest as GuzzleRequest;
-use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Twig\TwigFilter;
-use Twig\TwigFunction;
 
 class SampleFilterHelper extends FilterHelper
 {
@@ -71,7 +70,7 @@ class TwigHelperFullTest extends TestCase
         $this->helper = new TwigHelper(
             $this->request,
             new FunctionCollection(),
-            new FilterCollection()
+            new FilterCollection(),
         );
     }
 
@@ -182,7 +181,7 @@ class TwigHelperFullTest extends TestCase
 
     public function testFilterHelperNonExistentExtensionThrowsException(): void
     {
-        $helper = new class($this->helper) extends FilterHelper {
+        $helper = new class ($this->helper) extends FilterHelper {
             public array $filters = ['NonExistentExtensionFilter'];
 
             public function getFilters(): array

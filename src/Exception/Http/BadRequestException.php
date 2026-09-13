@@ -38,7 +38,7 @@ final class BadRequestException extends BaseHttpException
         ?string $userTitle = null,
         ?string $userMessage = null,
         array $headers = [],
-        ?ExceptionInterface $previous = null
+        ?ExceptionInterface $previous = null,
     ) {
         $errorDescription ??= static::ERROR;
 

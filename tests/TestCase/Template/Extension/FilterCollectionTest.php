@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CAMOO\Test\TestCase\Template\Extension;
 
 use CAMOO\Interfaces\TemplateFilterInterface;
@@ -13,7 +15,7 @@ class DummyTemplateFilter implements TemplateFilterInterface
 {
     public function getFilters(): array
     {
-        return [new TwigFilter('dummy_filter', fn($v) => $v)];
+        return [new TwigFilter('dummy_filter', fn ($v) => $v)];
     }
 }
 

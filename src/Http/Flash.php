@@ -45,13 +45,13 @@ final class Flash
     {
         if (!in_array($name, self::$flashTypes, true)) {
             throw new Exception(
-                sprintf('Method %s::%s does not exist', self::class, $name)
+                sprintf('Method %s::%s does not exist', self::class, $name),
             );
         }
 
         if (empty($xargs) || count($xargs) > 1 || !preg_match('/\S/', $xargs[0])) {
             throw new Exception(
-                sprintf('Parameter is missing for %s::%s ', self::class, $name)
+                sprintf('Parameter is missing for %s::%s ', self::class, $name),
             );
         }
 

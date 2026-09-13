@@ -21,7 +21,7 @@ final class TwigHelper extends BaseExtension
     public function __construct(
         private readonly ServerRequest $request,
         private readonly FunctionCollection $functionCollection,
-        private readonly FilterCollection $filterCollection
+        private readonly FilterCollection $filterCollection,
     ) {
     }
 

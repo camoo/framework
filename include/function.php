@@ -1,6 +1,9 @@
 <?php
 
 use CAMOO\Di\CamooDi;
+use CAMOO\Di\Container;
+use Ray\Di\Injector;
+use Ray\Di\InjectorInterface;
 use Ray\Di\Name;
 
 if (!function_exists('getEnv')) {
@@ -25,8 +28,19 @@ if (!function_exists('array_key_first')) {
 }
 
 if (!function_exists('di')) {
-    function di(string $class, string $name = Name::ANY): mixed
+    function di(?string $class = null, string $name = Name::ANY): mixed
     {
-        return CamooDi::get($class, $name);
+        if (null !== $class) {
+            return CamooDi::get($class, $name);
+        }
+
+        return new Container(CamooDi::container());
+    }
+}
+
+if (!function_exists('camoo_di')) {
+    function camoo_di(?string $class = null, string $name = Name::ANY): mixed
+    {
+        return di($class, $name);
     }
 }

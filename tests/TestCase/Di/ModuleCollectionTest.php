@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CAMOO\Test\TestCase\Di;
 
 use CAMOO\Di\Module\ModuleCollection;
@@ -13,7 +15,7 @@ class ModuleCollectionTest extends TestCase
     {
         $collection = new ModuleCollection();
         $collection->add('SomeModule');
-        $collection->add(fn() => null);
+        $collection->add(fn () => null);
 
         $items = iterator_to_array($collection->getIterator());
         $this->assertCount(2, $items);

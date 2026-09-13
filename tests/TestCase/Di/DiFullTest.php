@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CAMOO\Test\TestCase\Di;
 
 use CAMOO\Controller\ErrorController;
@@ -7,6 +9,7 @@ use CAMOO\Di\Annotation\Assisted;
 use CAMOO\Di\Application as DiApplication;
 use CAMOO\Di\Cache\CacheAdapter;
 use CAMOO\Di\CamooDi;
+use CAMOO\Di\Container;
 use CAMOO\Di\Interceptor\AssistedInterceptor;
 use CAMOO\Di\Module\AssistedModule;
 use CAMOO\Di\Module\DefaultModule;
@@ -46,6 +49,7 @@ class Application
 }
 
 #[CoversClass(CamooDi::class)]
+#[CoversClass(Container::class)]
 #[CoversClass(CacheAdapter::class)]
 #[CoversClass(AssistedInterceptor::class)]
 #[CoversClass(AssistedModule::class)]
@@ -79,6 +83,40 @@ class DiFullTest extends TestCase
         $service = CamooDi::get(SampleService::class);
         $this->assertInstanceOf(SampleService::class, $service);
         $this->assertSame('sample_value', $service->getValue());
+    }
+
+    public function testCamooDiHelperFunctionGet(): void
+    {
+        CamooDi::create();
+        $container = di();
+        $this->assertInstanceOf(Container::class, $container);
+        $this->assertTrue($container->has(SampleService::class));
+
+        $service = di()->get(SampleService::class);
+        $this->assertInstanceOf(SampleService::class, $service);
+        $this->assertSame('sample_value', $service->getValue());
+
+        $camooService = camoo_di()->get(SampleService::class);
+        $this->assertInstanceOf(SampleService::class, $camooService);
+    }
+
+    public function testCamooDiHelperFunctionShorthand(): void
+    {
+        CamooDi::create();
+        $service = di(SampleService::class);
+        $this->assertInstanceOf(SampleService::class, $service);
+        $this->assertSame('sample_value', $service->getValue());
+
+        $camooService = camoo_di(SampleService::class);
+        $this->assertInstanceOf(SampleService::class, $camooService);
+    }
+
+    public function testContainerMagicCall(): void
+    {
+        CamooDi::create();
+        $container = di();
+        $service = $container->getInstance(SampleService::class);
+        $this->assertInstanceOf(SampleService::class, $service);
     }
 
     public function testCacheAdapterAllMethods(): void

@@ -69,7 +69,7 @@ final class SecurityComponent extends BaseComponent
         if (
             $this->isUnlockedAction() === false && in_array(
                 $this->request->getMethod(),
-                ['DELETE', 'POST', 'PUT', 'PATCH']
+                ['DELETE', 'POST', 'PUT', 'PATCH'],
             )
         ) {
             $csrfCreatedAt = (int)$oCsrfSegment->read('__csrf_created_at');

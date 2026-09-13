@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CAMOO\Test\TestCase\Controller;
 
 use CAMOO\Controller\AppController;
@@ -7,7 +9,6 @@ use CAMOO\Controller\Component\BaseComponent;
 use CAMOO\Controller\Component\ComponentCollection;
 use CAMOO\Controller\Component\SecurityComponent;
 use CAMOO\Controller\ErrorController;
-use CAMOO\Event\Event;
 use CAMOO\Http\ServerRequest;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest as GuzzleRequest;

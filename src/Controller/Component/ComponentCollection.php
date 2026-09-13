@@ -59,8 +59,11 @@ final class ComponentCollection implements Countable, IteratorAggregate, ArrayAc
 
         $oComponent = new $class($this->controller, $config);
 
-        /** @var ComponentInterface */
-        $this->controller->{$component} = $oComponent;
+        // Keep compatibility with controllers that declare component properties.
+        if (property_exists($this->controller, $component)) {
+            $this->controller->{$component} = $oComponent;
+        }
+
         $this->offsetSet($component, $oComponent);
     }
 

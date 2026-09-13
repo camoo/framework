@@ -105,7 +105,7 @@ abstract class Command implements CommandInterface
 
             return array_map(
                 fn (mixed $data) => is_array($data) ? $this->satanise($data) : Security::satanizer($data),
-                $xData
+                $xData,
             );
         }
 

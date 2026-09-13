@@ -1,19 +1,8 @@
 <?php
 
-namespace CAMOO\Test\TestCase\Console;
+declare(strict_types=1);
 
-use CAMOO\Command\Command;
-use CAMOO\Console\BackgroundProcess;
-use CAMOO\Console\CommandFinder;
-use CAMOO\Console\CommandWrapper;
-use CAMOO\Console\Input\InputArgument;
-use CAMOO\Console\Input\InputOption;
-use CAMOO\Console\Runner;
-use CAMOO\Exception\ConsoleException;
-use CAMOO\Utils\Configure;
-use InvalidArgumentException;
-use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
+namespace CAMOO\Test\TestCase\Console;
 
 namespace CAMOO\Test\TestCase\Console\Command;
 
@@ -64,7 +53,6 @@ use CAMOO\Console\Input\InputArgument;
 use CAMOO\Console\Input\InputOption;
 use CAMOO\Console\Runner;
 use CAMOO\Exception\ConsoleException;
-use CAMOO\Test\TestCase\Console\Command\TestDisabledCommand;
 use CAMOO\Test\TestCase\Console\Command\TestDummyCommand;
 use CAMOO\Utils\Configure;
 use InvalidArgumentException;

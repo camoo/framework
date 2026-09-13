@@ -115,7 +115,7 @@ class CamooDi
         $compiler->compileContainer();
 
         register_shutdown_function(
-            fn () => Cache::writes('camoo_di.instance', $containerInjector, 'camoo_di')
+            fn () => Cache::writes('camoo_di.instance', $containerInjector, 'camoo_di'),
         );
 
         return $compiler->getInstance($class, $name);

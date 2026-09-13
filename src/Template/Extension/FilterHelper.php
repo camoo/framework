@@ -28,6 +28,9 @@ abstract class FilterHelper implements TemplateFilterInterface, EventListenerInt
 
     protected ServerRequest $request;
 
+    /** @var array<string, object> */
+    private array $loadedFilters = [];
+
     public function __construct(private TwigHelper $baseHelper)
     {
         $this->getEventManager()->on($this);
@@ -50,12 +53,17 @@ abstract class FilterHelper implements TemplateFilterInterface, EventListenerInt
                     }
                 }
 
-                $this->{$filter} = new $class($baseHelper);
+                $this->loadedFilters[$filter] = new $class($baseHelper);
             }
         }
     }
 
     abstract public function getFilters(): array;
+
+    public function __get(string $name): mixed
+    {
+        return $this->loadedFilters[$name] ?? null;
+    }
 
     public function implementedEvents(): array
     {

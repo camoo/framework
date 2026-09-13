@@ -22,7 +22,7 @@ final class Form implements TemplateFunctionInterface
     public function __construct(
         private readonly ServerRequest $request,
         private readonly ?SessionSegment $csrfSessionSegment,
-        private readonly ?string $token = null
+        private readonly ?string $token = null,
     ) {
     }
 
@@ -68,7 +68,7 @@ final class Form implements TemplateFunctionInterface
                 '<textarea name="%s"%s>%s</textarea>',
                 $name,
                 rtrim($this->buildAttribute($options)),
-                htmlspecialchars($value, ENT_QUOTES, 'UTF-8')
+                htmlspecialchars($value, ENT_QUOTES, 'UTF-8'),
             );
         }
 
@@ -79,7 +79,7 @@ final class Form implements TemplateFunctionInterface
             return sprintf(
                 '<button %s>%s</button>',
                 rtrim($this->buildAttribute($options)),
-                htmlspecialchars($value, ENT_QUOTES, 'UTF-8')
+                htmlspecialchars($value, ENT_QUOTES, 'UTF-8'),
             );
         }
 

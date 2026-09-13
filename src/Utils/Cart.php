@@ -122,7 +122,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
             throw new InvalidArgumentException(sprintf(
                 'Value of "uid" should be of type %s or %s',
                 'Numeric',
-                'String'
+                'String',
             ));
         }
 
