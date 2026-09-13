@@ -109,6 +109,13 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
 
     public function newRequest(array $data, bool $validate = true, array $options = []): self
     {
+        // REST objects are reusable. Reset the previous request before
+        // validating a new one so invalid input cannot reuse stale data.
+        $this->data = [];
+        $this->errors = [];
+        $this->option = [];
+        $this->valid = false;
+
         $default = ['validation' => 'default'];
         $options += $default;
         if ($validate === true) {

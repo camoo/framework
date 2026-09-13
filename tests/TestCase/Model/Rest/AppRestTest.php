@@ -79,6 +79,19 @@ class AppRestTest extends TestCase
         $this->rest->send([$this->rest, 'myRemoteMethod']);
     }
 
+    public function testFailedRequestDoesNotReusePreviousValidPayload(): void
+    {
+        $this->rest->newRequest(['required_field' => 'first'], true, ['validation' => 'failing']);
+        $this->assertSame('first', $this->rest->get('required_field'));
+
+        $this->rest->newRequest([], true, ['validation' => 'failing']);
+        $this->assertNotEmpty($this->rest->getErrors());
+        $this->assertNull($this->rest->get('required_field'));
+
+        $this->expectException(Exception::class);
+        $this->rest->send([$this->rest, 'myRemoteMethod']);
+    }
+
     public function testSetAndUnsetAndIterator(): void
     {
         $this->rest->set('age', 10);

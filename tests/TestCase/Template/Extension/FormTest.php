@@ -57,4 +57,18 @@ class FormTest extends TestCase
         $pwd = $this->form->input('password');
         $this->assertStringContainsString('type="password"', $pwd);
     }
+
+    public function testInputEscapesAttributesAndPreservesZeroValues(): void
+    {
+        $input = $this->form->input('label', [
+            'value' => '" onfocus="alert(1)',
+            'data-label' => 'a&b',
+        ]);
+        self::assertStringNotContainsString('onfocus="alert(1)', $input);
+        self::assertStringContainsString('&quot; onfocus=&quot;alert(1)', $input);
+        self::assertStringContainsString('value="0"', $this->form->input('count', [
+            'type' => 'hidden',
+            'value' => '0',
+        ]));
+    }
 }

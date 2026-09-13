@@ -45,9 +45,16 @@ final class Form implements TemplateFunctionInterface
             unset($options['url']);
         }
         $options += $default;
-        $inputToken = $token !== null ? ' <input type="hidden" name="__csrf_Token" value="' . $token . '" />' : '';
+        $inputToken = $token !== null
+            ? ' <input type="hidden" name="__csrf_Token" value="' . $this->escape((string)$token) . '" />'
+            : '';
 
-        return sprintf('<form name="%s"%s>' . "\n" . '%s', $name, $this->buildAttribute($options), $inputToken);
+        return sprintf(
+            '<form name="%s"%s>' . "\n" . '%s',
+            $this->escape($name),
+            $this->buildAttribute($options),
+            $inputToken,
+        );
     }
 
     public function formEnd(): string
@@ -59,27 +66,28 @@ final class Form implements TemplateFunctionInterface
     {
         $default = ['id' => $name, 'type' => 'text', 'value' => ''];
         $options += $default;
-        if (array_key_exists('type', $options) && strtolower($options['type']) === 'textarea') {
-            $value = $options['value'];
+        $type = strtolower((string)$options['type']);
+        if ($type === 'textarea') {
+            $value = (string)$options['value'];
             unset($options['type']);
             unset($options['value']);
 
             return sprintf(
                 '<textarea name="%s"%s>%s</textarea>',
-                $name,
+                $this->escape($name),
                 rtrim($this->buildAttribute($options)),
-                htmlspecialchars($value, ENT_QUOTES, 'UTF-8'),
+                $this->escape($value),
             );
         }
 
-        if (array_key_exists('type', $options) && strtolower($options['type']) === 'submit') {
-            $value = $options['value'];
+        if ($type === 'submit') {
+            $value = (string)$options['value'];
             unset($options['value']);
 
             return sprintf(
                 '<button %s>%s</button>',
                 rtrim($this->buildAttribute($options)),
-                htmlspecialchars($value, ENT_QUOTES, 'UTF-8'),
+                $this->escape($value),
             );
         }
 
@@ -87,32 +95,38 @@ final class Form implements TemplateFunctionInterface
             unset($options['value']);
         }
 
-        if (array_key_exists('type', $options) && strtolower($options['type']) !== 'email' && $name === 'email') {
+        if ($type !== 'email' && $name === 'email') {
             $options['type'] = 'email';
         }
 
-        if (array_key_exists('type', $options) && strtolower($options['type']) !== 'password' && $name === 'password') {
+        if ($type !== 'password' && $name === 'password') {
             $options['type'] = 'password';
         }
 
-        if (array_key_exists('type', $options) && strtolower($options['type']) === 'hidden') {
-            $this->hiddenValue[$name] = md5(Security::satanizer((string)$options['value']));
+        if ($type === 'hidden') {
+            $this->hiddenValue[$name] = md5(Security::satanizer((string)($options['value'] ?? '')));
             $this->csrfSessionSegment?->write('__csrf_checksum', $this->hiddenValue);
         }
 
-        return sprintf('<input name="%s"%s />', $name, rtrim($this->buildAttribute($options)));
+        if (empty($options['value']) && $options['value'] !== '0') {
+            unset($options['value']);
+        }
+
+        return sprintf('<input name="%s"%s />', $this->escape($name), rtrim($this->buildAttribute($options)));
     }
 
     private function buildAttribute(array $options): string
     {
         $attributes = ' ';
         foreach ($options as $attr => $option) {
-            if (strtolower($attr) === 'value' && !empty($option)) {
-                $option = htmlspecialchars($option, ENT_QUOTES, 'UTF-8');
-            }
-            $attributes .= $attr . '="' . $option . '" ';
+            $attributes .= $attr . '="' . $this->escape((string)$option) . '" ';
         }
 
         return $attributes;
+    }
+
+    private function escape(string $value): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 }

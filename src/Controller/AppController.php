@@ -12,12 +12,12 @@ use CAMOO\Event\EventInterface;
 use CAMOO\Event\EventListenerInterface;
 use CAMOO\Exception\Exception;
 use Camoo\Http\Curl\Domain\Entity\Stream;
+use CAMOO\Http\Flash;
 use CAMOO\Http\ServerRequest;
 use Camoo\Inflector\Inflector;
 use CAMOO\Interfaces\ControllerInterface;
 use CAMOO\Model\Rest\RestLocatorTrait;
 use CAMOO\Template\Extension\FilterCollection;
-use CAMOO\Template\Extension\Filters\Flash;
 use CAMOO\Template\Extension\FunctionCollection;
 use CAMOO\Template\Extension\Functions\Form;
 use CAMOO\Template\Extension\Functions\Html;
@@ -39,7 +39,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
 
     public ?string $action = null;
 
-    public $Flash = null;
+    public ?Flash $Flash = null;
 
     public ?ServerRequest $request = null;
 
@@ -124,7 +124,10 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
 
         if ($this->oLayout === null) {
             $oTemplateLoader = new FilesystemLoader(APP . $this->sTemplateDir);
-            $this->oLayout = new Environment($oTemplateLoader, ['cache' => TMP . 'cache' . DS . 'tpl']);
+            $this->oLayout = new Environment($oTemplateLoader, [
+                'autoescape' => 'html',
+                'cache' => TMP . 'cache' . DS . 'tpl',
+            ]);
             $oFuncCollection = new FunctionCollection();
             $oFilterCollection = new FilterCollection();
             // check has Security Component
@@ -138,7 +141,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
                 unset($oSecComponent->csrf_Token);
             }
 
-            $flashFilter = new Flash($this->request);
+            $flashFilter = new \CAMOO\Template\Extension\Filters\Flash($this->request);
             $formHelper = new Form($this->request, $csrfSessionSegment, $csrf_Token);
             $htmlHelper = new Html($this->request);
             $extensions = new TwigHelper($this->request, $oFuncCollection, $oFilterCollection);
