@@ -255,14 +255,17 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
      *
      * @throw Exception
      */
-    public function redirect(string $destination, bool $permanent = false)
+    public function redirect(string $destination, bool $permanent = false): ResponseInterface
     {
         if (empty($destination)) {
             throw new Exception('destination cannot be empty');
         }
 
         if (!str_contains($destination, '://')) {
-            $this->dispatchEvent('AppController.beforeRedirect');
+            $event = $this->dispatchEvent('AppController.beforeRedirect');
+            if ($event->getResult() instanceof ResponseInterface) {
+                return $event->getResult();
+            }
 
             $components = $this->getComponentCollection();
             if (!empty($components)) {
@@ -290,9 +293,13 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
             $code = 302;
             $message = $code . ' Found';
         }
-        header('HTTP/' . getenv('SERVER_PROTOCOL') . ' ' . $message, true, $code);
-        header('Status: ' . $message, true, $code);
-        header('Location: ' . $destination);
+        if ($this->response === null) {
+            throw new LogicException('A response must be set before redirecting.');
+        }
+
+        return $this->response
+            ->withStatus($code, $message)
+            ->withHeader('Location', $destination);
     }
 
     public function loadComponent(string $component, array $config = []): void
@@ -325,26 +332,26 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         $this->loadedRests[$restModel] = $this->getRestLocator()->get(Inflector::classify($restModel));
     }
 
-    protected function jsonResponse(array $data): void
+    protected function jsonResponse(array $data): ResponseInterface
     {
-        $this->setResponseBody(json_encode($data, JSON_THROW_ON_ERROR), 'application/json');
+        return $this->setResponseBody(json_encode($data, JSON_THROW_ON_ERROR), 'application/json');
     }
 
     /**
      * @deprecated Use jsonResponse() instead.
      */
-    protected function _jsonResponse(array $data): void
+    protected function _jsonResponse(array $data): ResponseInterface
     {
-        $this->jsonResponse($data);
+        return $this->jsonResponse($data);
     }
 
-    private function setResponseBody(string $body, string $contentType): void
+    private function setResponseBody(string $body, string $contentType): ResponseInterface
     {
         if ($this->response === null) {
             throw new LogicException('A response must be set before writing a response body.');
         }
 
-        $this->response = $this->response
+        return $this->response = $this->response
             ->withHeader('Content-Type', $contentType)
             ->withBody(new Stream($body));
     }
