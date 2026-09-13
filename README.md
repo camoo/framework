@@ -33,3 +33,15 @@ docker build -t camoo-framework-php84 .
 # Run test suite
 docker run --rm -v "$(pwd)":/app -w /app camoo-framework-php84 vendor/bin/phpunit
 ```
+
+## Development tinker
+
+Applications can add an interactive development REPL with PsySH:
+
+```bash
+composer require --dev psy/psysh
+php bin/camoo tinker
+```
+
+The `tinker` command is optional and is not installed as a production
+dependency. It starts PsySH after the application's normal CLI bootstrap.

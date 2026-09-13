@@ -46,6 +46,7 @@ class TestDisabledCommand extends Command
 namespace CAMOO\Test\TestCase\Console;
 
 use CAMOO\Command\Command;
+use CAMOO\Command\TinkerCommand;
 use CAMOO\Console\BackgroundProcess;
 use CAMOO\Console\CommandFinder;
 use CAMOO\Console\CommandWrapper;
@@ -186,5 +187,15 @@ class ConsoleTest extends TestCase
         $runner = new Runner(['script.php', 'test_disabled']);
         $this->expectException(ConsoleException::class);
         $runner->run();
+    }
+
+    public function testTinkerRequiresPsysh(): void
+    {
+        if (class_exists(\Psy\Shell::class)) {
+            self::markTestSkipped('PsySH is installed in this environment.');
+        }
+
+        $this->expectException(ConsoleException::class);
+        (new TinkerCommand())->execute();
     }
 }

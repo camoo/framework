@@ -6,8 +6,8 @@ namespace CAMOO\TestCase;
 
 use CAMOO\Controller\AppController;
 use CAMOO\Exception\Exception;
-use Camoo\Http\Curl\Infrastructure\Response;
 use CAMOO\Http\ServerRequest;
+use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest as GuzzleServerRequest;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;

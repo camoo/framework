@@ -69,7 +69,8 @@
     }
   },
   "suggest": {
-    "phpunit/phpunit": "Allows automated tests to be run without system-wide install."
+    "phpunit/phpunit": "Allows automated tests to be run without system-wide install.",
+    "psy/psysh": "Provides the optional development tinker REPL command."
   },
   "scripts": {
     "test": "phpunit --colors=always",
