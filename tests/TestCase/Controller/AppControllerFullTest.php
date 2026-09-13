@@ -142,6 +142,22 @@ class AppControllerFullTest extends TestCase
         $secCtrl->Security->wakeUp($event);
     }
 
+    public function testSecurityComponentDoesNotAllowUnlockedUnsafeActions(): void
+    {
+        $_SERVER['HTTP_HOST'] = 'localhost';
+        $_POST = [];
+        $secCtrl = new TestSecurityController();
+        $secCtrl->controller = 'Pages';
+        $secCtrl->action = 'publicAction';
+        $secCtrl->request = new ServerRequest(new GuzzleRequest('POST', 'http://localhost/test', [], null, '1.1', [
+            'HTTP_HOST' => 'localhost',
+        ]));
+        $secCtrl->loadComponent('Security', ['unlockedActions' => ['publicAction']]);
+
+        $this->expectException(BadRequestException::class);
+        $secCtrl->Security->wakeUp(new Event('AppController.wakeUp', $secCtrl));
+    }
+
     public function testShowValidateErrors(): void
     {
         $validator = new Validator();
@@ -199,12 +215,13 @@ class AppControllerFullTest extends TestCase
 
     public function testRedirect(): void
     {
-        putenv('HTTP_HOST=localhost');
         putenv('SERVER_PROTOCOL=1.1');
 
-        @$this->controller->redirect('/new-page');
-        @$this->controller->redirect('http://example.com/external', true);
-        $this->assertTrue(true);
+        $response = $this->controller->redirect('/new-page');
+        $this->assertSame('/new-page', $response->getHeaderLine('Location'));
+
+        $this->expectException(Exception::class);
+        $this->controller->redirect('http://example.com/external', true);
     }
 
     public function testRedirectEmptyDestinationThrowsException(): void

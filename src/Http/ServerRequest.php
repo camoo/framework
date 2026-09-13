@@ -6,7 +6,6 @@ namespace CAMOO\Http;
 
 use Aura\Session\Segment;
 use CAMOO\Exception\Exception;
-use CAMOO\Exception\Http\ForbiddenException;
 use CAMOO\Exception\Http\MethodNotAllowedException;
 use CAMOO\Utils\QueryData;
 use CAMOO\Utils\Security;
@@ -26,6 +25,8 @@ class ServerRequest
     public array $query = [];
 
     public array $data = [];
+
+    private array $rawData = [];
 
     public ?Cookie $cookie;
 
@@ -114,6 +115,11 @@ class ServerRequest
         return $this->getRequestData('data', $key);
     }
 
+    public function getRawData(string $key): mixed
+    {
+        return $this->rawData[$key] ?? null;
+    }
+
     public function getQuery(?string $key = null): mixed
     {
         return $this->getRequestData('query', $key);
@@ -142,11 +148,6 @@ class ServerRequest
         if (strtolower($request_method) === 'ajax') {
             $checkAjax = null !== $this->getEnv('HTTP_X_REQUESTED_WITH') &&
                 $this->getEnv('HTTP_X_REQUESTED_WITH') === 'XMLHttpRequest';
-            // CHECK TO ENSURE REFERRER URL IS ON THIS DOMAIN
-            if ($checkAjax === true && !str_contains($this->getEnv('HTTP_REFERER'), $this->getEnv('HTTP_HOST'))) {
-                throw new ForbiddenException('Ajax:: Bad Referrer !');
-            }
-
             return $checkAjax;
         }
 
@@ -219,7 +220,9 @@ class ServerRequest
 
         if (!empty($this->oRequest)) {
             $this->query = $this->satanise($this->__queryData($this->oRequest->getQueryParams()));
-            $this->data = $this->satanise($this->__queryData($this->oRequest->getParsedBody()));
+            $this->rawData = is_array($this->oRequest->getParsedBody())
+                ? $this->oRequest->getParsedBody() : [];
+            $this->data = $this->satanise($this->__queryData($this->rawData));
         }
 
         $this->cookie = $this->__getCookie();

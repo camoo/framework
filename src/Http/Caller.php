@@ -10,7 +10,6 @@ use CAMOO\Event\EventDispatcherTrait;
 use CAMOO\Exception\Exception;
 use Camoo\Http\Curl\Domain\Entity\Uri;
 use Camoo\Http\Curl\Infrastructure\Response;
-use Camoo\Inflector\Inflector;
 use FastRoute\Dispatcher\GroupCountBased;
 use FastRoute\RouteCollector;
 
@@ -141,32 +140,7 @@ final class Caller
 
         switch ($routeInfo[0]) {
             case \FastRoute\Dispatcher::NOT_FOUND:
-                $action = null;
-                $asUri = explode('/', ltrim($uri, '/'));
-                if (count($asUri) >= 2) {
-                    [$controller, $action] = explode('/', ltrim($uri, '/'), 2);
-                    array_shift($asUri);
-                    array_shift($asUri);
-                    if (!empty($action)) {
-                        $this->xargs = $asUri;
-                    }
-                } else {
-                    $controller = $asUri[0];
-                }
-
-                if (!empty($action)) {
-                    if (str_contains($action, '-')) {
-                        $action = Inflector::camelize($action);
-                    }
-                    $this->action = trim($action, '/');
-                }
-
-                if ($controller) {
-                    $this->controllerName = ucfirst($controller);
-                    $this->controller = '\\App\\Controller\\' . $this->controllerName . 'Controller';
-                }
-
-                return $this->response = $this->dispatchRequest();
+                return $this->response = new Response(statusCode: 404);
             case \FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
                 return $this->response = new Response(statusCode: 405);
             case \FastRoute\Dispatcher::FOUND:

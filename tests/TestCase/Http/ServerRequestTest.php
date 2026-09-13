@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace CAMOO\Test\TestCase\Http;
 
 use CAMOO\Exception\Exception;
-use CAMOO\Exception\Http\ForbiddenException;
 use CAMOO\Exception\Http\MethodNotAllowedException;
 use CAMOO\Http\Cookie;
 use CAMOO\Http\Flash;
@@ -46,6 +45,7 @@ class ServerRequestTest extends TestCase
     public function testGetDataAndQuery(): void
     {
         $this->assertSame('camoo', $this->request->getData('username'));
+        $this->assertSame('token123', $this->request->getRawData('__csrf_Token'));
         $this->assertSame('1', $this->request->getQuery('page'));
         $this->assertSame('camoo', $this->request->data('username'));
         $this->assertSame('1', $this->request->query('page'));
@@ -79,7 +79,7 @@ class ServerRequestTest extends TestCase
         $this->assertTrue($req->is('ajax'));
     }
 
-    public function testAjaxMethodBadReferrerThrowsForbidden(): void
+    public function testAjaxMethodDoesNotAuthorizeByReferrer(): void
     {
         $guzzle = new GuzzleRequest('GET', '/test', [], null, '1.1', [
             'HTTP_HOST' => 'example.com',
@@ -88,8 +88,7 @@ class ServerRequestTest extends TestCase
         ]);
         $req = new ServerRequest($guzzle);
 
-        $this->expectException(ForbiddenException::class);
-        $req->is('ajax');
+        $this->assertTrue($req->is('ajax'));
     }
 
     public function testAllowMethod(): void

@@ -74,7 +74,7 @@ final class BackgroundProcess
                     '%s %s %s 2>&1 & echo $!',
                     $this->getCommand(),
                     ($bAppend) ? '>>' : '>',
-                    $sOutputFile,
+                    escapeshellarg($sOutputFile),
                 ),
             );
             $this->setPid($pid);
@@ -88,6 +88,10 @@ final class BackgroundProcess
     {
         if (null === $this->command) {
             return null;
+        }
+
+        if (preg_match('/[;&|`$<>\r\n]/', $this->command) === 1) {
+            throw new ConsoleException('Unsafe shell command');
         }
 
         return escapeshellcmd($this->command);

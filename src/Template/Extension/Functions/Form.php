@@ -91,7 +91,7 @@ final class Form implements TemplateFunctionInterface
             );
         }
 
-        if (empty($options['value'])) {
+        if (array_key_exists('value', $options) && $options['value'] === '') {
             unset($options['value']);
         }
 
@@ -104,11 +104,11 @@ final class Form implements TemplateFunctionInterface
         }
 
         if ($type === 'hidden') {
-            $this->hiddenValue[$name] = md5(Security::satanizer((string)($options['value'] ?? '')));
+            $this->hiddenValue[$name] = hash('sha256', Security::satanizer((string)($options['value'] ?? '')));
             $this->csrfSessionSegment?->write('__csrf_checksum', $this->hiddenValue);
         }
 
-        if (empty($options['value']) && $options['value'] !== '0') {
+        if (array_key_exists('value', $options) && $options['value'] === '') {
             unset($options['value']);
         }
 

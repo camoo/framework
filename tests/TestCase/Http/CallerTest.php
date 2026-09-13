@@ -68,6 +68,6 @@ PHP;
     {
         putenv('REQUEST_URI=/unknown/action-name');
         $caller = new Caller($this->configDir);
-        $this->assertSame('actionName', $caller->action);
+        $this->assertSame(404, $caller->getResponse()->getStatusCode());
     }
 }

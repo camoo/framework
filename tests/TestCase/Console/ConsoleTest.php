@@ -95,6 +95,12 @@ class ConsoleTest extends TestCase
         $bg->run();
     }
 
+    public function testBackgroundProcessRejectsShellSyntax(): void
+    {
+        $this->expectException(ConsoleException::class);
+        new BackgroundProcess('echo safe; touch /tmp/not-allowed')->run();
+    }
+
     public function testInputArgumentAndOption(): void
     {
         $arg = new InputArgument('name', InputArgument::REQUIRED, 'User name');

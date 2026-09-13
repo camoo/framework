@@ -261,7 +261,15 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
             throw new Exception('destination cannot be empty');
         }
 
-        if (!str_contains($destination, '://')) {
+        if (parse_url($destination, PHP_URL_SCHEME) !== null || str_starts_with($destination, '//')) {
+            throw new Exception('External redirects are not allowed');
+        }
+
+        if (!str_starts_with($destination, '/')) {
+            $destination = '/' . $destination;
+        }
+
+        if (str_starts_with($destination, '/')) {
             $event = $this->dispatchEvent('AppController.beforeRedirect');
             if ($event->getResult() instanceof ResponseInterface) {
                 return $event->getResult();
@@ -279,12 +287,8 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
                 }
             }
 
-            if (empty(getenv('HTTPS')) || getenv('HTTPS') == 'off') {
-                $protocol = 'http';
-            } else {
-                $protocol = 'https';
-            }
-            $destination = $protocol . '://' . getenv('HTTP_HOST') . $destination;
+            // Keep the Location relative so an untrusted Host header cannot
+            // poison redirects or generate phishing URLs.
         }
         if ($permanent) {
             $code = 301;
