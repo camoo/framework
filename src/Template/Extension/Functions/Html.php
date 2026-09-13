@@ -7,6 +7,7 @@ namespace CAMOO\Template\Extension\Functions;
 use CAMOO\Exception\Exception;
 use CAMOO\Http\ServerRequest;
 use CAMOO\Interfaces\TemplateFunctionInterface;
+use InvalidArgumentException;
 use Twig\TwigFunction;
 
 /**
@@ -40,6 +41,7 @@ final class Html implements TemplateFunctionInterface
         if (strtolower($extension) !== 'js') {
             $js = $js . '.js';
         }
+        $this->assertSafeAsset($js, 'js');
         $this->script[] = sprintf('<script src="/js/%s"></script>' . "\n", $js);
     }
 
@@ -50,6 +52,7 @@ final class Html implements TemplateFunctionInterface
         if (strtolower($extension) !== 'css') {
             $css = $css . '.css';
         }
+        $this->assertSafeAsset($css, 'css');
 
         $this->css[] = sprintf('<link rel="stylesheet" href="/css/%s">' . "\n", $css);
     }
@@ -63,5 +66,16 @@ final class Html implements TemplateFunctionInterface
         $asItems = $this->{$item};
 
         return implode('', $asItems);
+    }
+
+    private function assertSafeAsset(string $asset, string $extension): void
+    {
+        $pattern = sprintf(
+            '/\\A(?:[A-Za-z0-9_-]+\\/)*[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)*\\.%s\\z/i',
+            preg_quote($extension, '/'),
+        );
+        if (!preg_match($pattern, $asset)) {
+            throw new InvalidArgumentException(sprintf('Invalid %s asset name.', $extension));
+        }
     }
 }

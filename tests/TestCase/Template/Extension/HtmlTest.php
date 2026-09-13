@@ -7,6 +7,7 @@ namespace CAMOO\Test\TestCase\Template\Extension;
 use CAMOO\Exception\Exception;
 use CAMOO\Http\ServerRequest;
 use CAMOO\Template\Extension\Functions\Html;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
@@ -55,5 +56,19 @@ class HtmlTest extends TestCase
     {
         $this->expectException(Exception::class);
         $this->html->fetch('invalid');
+    }
+
+    public function testRejectsUnsafeJavascriptAssetName(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->html->addJs('x"></script><script>alert(1)</script><script src="x');
+    }
+
+    public function testRejectsUnsafeCssAssetName(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->html->addCss('../x.css');
     }
 }

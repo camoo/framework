@@ -20,25 +20,21 @@ use CAMOO\Utils\Security;
  */
 final class SecurityComponent extends BaseComponent
 {
-    /** @var SessionSegment $csrfSessionSegment */
-    public $csrfSessionSegment = null;
+    public ?SessionSegment $csrfSessionSegment = null;
 
     /** @var string|null $csrf_Token */
-    public $csrf_Token = null;
+    public ?string $csrf_Token = null;
 
-    /** @var array $_configKeys */
-    private $_configKeys = [
-        'unlockedActions',
+    protected array $_defaultConfig = [
+        'unlockedActions' => [],
     ];
 
-    /** @var string $_csrfSegment */
-    private static $_csrfSegment = \Aura\Session\CsrfToken::class;
+    private static string $_csrfSegment = \Aura\Session\CsrfToken::class;
 
     /** @var ServerRequest $request */
-    private $request;
+    private ServerRequest $request;
 
-    /** @var array $__sessionRaw */
-    private $__sessionRaw = [Session::class, 'create'];
+    private array $__sessionRaw = [Session::class, 'create'];
 
     public function __construct(?ControllerInterface $controller = null, array $config = [])
     {
@@ -63,10 +59,15 @@ final class SecurityComponent extends BaseComponent
         $oSession = $this->__getSessionRaw();
         $oCsrfSegment = $this->_getCsrfSegment($oSession);
 
+        $action = $this->getController()?->action;
+        $unlockedActions = (array)($this->getConfig('unlockedActions') ?? []);
+        $isUnlocked = !empty($action) && in_array($action, $unlockedActions, true);
+
         ################## CSRF protection
         // @See https://github.com/auraphp/Aura.Session
         if (
-            in_array($this->request->getMethod(), ['DELETE', 'POST', 'PUT', 'PATCH'])
+            !$isUnlocked &&
+            in_array($this->request->getMethod(), ['DELETE', 'POST', 'PUT', 'PATCH'], true)
         ) {
             $csrfCreatedAt = (int)$oCsrfSegment->read('__csrf_created_at');
             $csrfTimeout = Configure::read('Security.csrf_lifetime') ?? 1800;
@@ -94,14 +95,19 @@ final class SecurityComponent extends BaseComponent
             }
         }
 
+        $oCsrfToken = $oSession->getCsrfToken();
         if (
             Configure::read('Security.csrf_single_once') === true &&
             $oCsrfSegment->check('__csrf_created_at')
         ) {
-            $oSession->getCsrfToken()->regenerateValue();
+            $oCsrfToken->regenerateValue();
         }
 
-        $this->csrf_Token = $oSession->getCsrfToken()->getValue();
+        if ($oCsrfToken->getValue() === null) {
+            $oCsrfToken->regenerateValue();
+        }
+
+        $this->csrf_Token = $oCsrfToken->getValue();
         $oCsrfSegment->write('__csrf_created_at', time());
         $oCsrfSegment->delete('__csrf_checksum');
         $this->csrfSessionSegment = $oCsrfSegment;

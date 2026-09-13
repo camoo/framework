@@ -24,7 +24,16 @@ final class Session
         if (null === $this->oSession) {
             $cookies = self::$cookie ?? $_COOKIE;
             $this->oSession = new SessionFactory()->newInstance($cookies);
-            $hCookieParam = Configure::read('Session.cookie') ?? [];
+            $hCookieParam = Configure::read('Session.cookie');
+            if (!is_array($hCookieParam)) {
+                $hCookieParam = [];
+            }
+            $hCookieParam += [
+                'secure' => isset($_SERVER['HTTPS'])
+                    && strtolower((string)$_SERVER['HTTPS']) !== ''
+                    && strtolower((string)$_SERVER['HTTPS']) !== 'off',
+                'httponly' => true,
+            ];
             $sessionName = Configure::read('Session.name') ?? 'CAMOOSESS';
             $this->oSession->setName($sessionName);
             $this->oSession->setCookieParams($hCookieParam);

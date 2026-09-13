@@ -9,6 +9,7 @@ use CAMOO\Http\Session;
 use CAMOO\Http\SessionSegment;
 use CAMOO\Interfaces\TemplateFunctionInterface;
 use CAMOO\Utils\Security;
+use InvalidArgumentException;
 use Twig\TwigFunction;
 
 /**
@@ -33,7 +34,11 @@ final class Form implements TemplateFunctionInterface
         $this->csrfSessionSegment = $csrfSessionSegment ?? new SessionSegment(
             $session->segment(\Aura\Session\CsrfToken::class),
         );
-        $this->token = $token ?? $session->getCsrfToken()->getValue();
+        $csrfToken = $session->getCsrfToken();
+        if ($csrfToken->getValue() === null) {
+            $csrfToken->regenerateValue();
+        }
+        $this->token = $token ?? $csrfToken->getValue() ?? '';
     }
 
     public function getFunctions(): array
@@ -127,10 +132,29 @@ final class Form implements TemplateFunctionInterface
     {
         $attributes = ' ';
         foreach ($options as $attr => $option) {
+            $this->assertSafeAttribute((string)$attr, (string)$option);
             $attributes .= $attr . '="' . $this->escape((string)$option) . '" ';
         }
 
         return $attributes;
+    }
+
+    private function assertSafeAttribute(string $attribute, string $value): void
+    {
+        if (!preg_match('/^[A-Za-z_:][A-Za-z0-9:._-]*$/D', $attribute)) {
+            throw new InvalidArgumentException(sprintf('Invalid HTML attribute name: %s', $attribute));
+        }
+
+        if (str_starts_with(strtolower($attribute), 'on')) {
+            throw new InvalidArgumentException(sprintf('Event handler attributes are not allowed: %s', $attribute));
+        }
+
+        if (in_array(strtolower($attribute), ['action', 'formaction'], true)) {
+            $scheme = parse_url($value, PHP_URL_SCHEME);
+            if ($scheme !== null && !in_array(strtolower($scheme), ['http', 'https'], true)) {
+                throw new InvalidArgumentException(sprintf('Unsafe URL scheme in attribute: %s', $attribute));
+            }
+        }
     }
 
     private function escape(string $value): string

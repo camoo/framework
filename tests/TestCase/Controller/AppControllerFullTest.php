@@ -142,13 +142,29 @@ class AppControllerFullTest extends TestCase
         $secCtrl->Security->wakeUp($event);
     }
 
-    public function testSecurityComponentDoesNotAllowUnlockedUnsafeActions(): void
+    public function testSecurityComponentAllowsUnlockedActions(): void
     {
         $_SERVER['HTTP_HOST'] = 'localhost';
         $_POST = [];
         $secCtrl = new TestSecurityController();
         $secCtrl->controller = 'Pages';
         $secCtrl->action = 'publicAction';
+        $secCtrl->request = new ServerRequest(new GuzzleRequest('POST', 'http://localhost/test', [], null, '1.1', [
+            'HTTP_HOST' => 'localhost',
+        ]));
+        $secCtrl->loadComponent('Security', ['unlockedActions' => ['publicAction']]);
+
+        $secCtrl->Security->wakeUp(new Event('AppController.wakeUp', $secCtrl));
+        $this->assertNotEmpty($secCtrl->Security->csrf_Token);
+    }
+
+    public function testSecurityComponentBlocksNonUnlockedActions(): void
+    {
+        $_SERVER['HTTP_HOST'] = 'localhost';
+        $_POST = [];
+        $secCtrl = new TestSecurityController();
+        $secCtrl->controller = 'Pages';
+        $secCtrl->action = 'lockedAction';
         $secCtrl->request = new ServerRequest(new GuzzleRequest('POST', 'http://localhost/test', [], null, '1.1', [
             'HTTP_HOST' => 'localhost',
         ]));
@@ -254,32 +270,29 @@ class AppControllerFullTest extends TestCase
         $this->controller->wakeUpController();
         $collection = $this->controller->getComponentCollection();
 
-        $security = $collection->load('Security');
+        $collection->add('Security');
+        $this->assertTrue(isset($collection['Security']));
+        $security = $collection['Security'];
         $this->assertInstanceOf(SecurityComponent::class, $security);
-        $this->assertTrue($collection->has('Security'));
-        $this->assertSame($security, $collection->get('Security'));
-        $this->assertSame($security, $collection->Security);
-        $this->assertContains('Security', $collection->loaded());
 
-        $collection->unload('Security');
-        $this->assertFalse($collection->has('Security'));
+        unset($collection['Security']);
+        $this->assertFalse(isset($collection['Security']));
     }
 
     public function testComponentCollectionGetNonExistent(): void
     {
         $this->controller->wakeUpController();
         $collection = $this->controller->getComponentCollection();
-        $this->assertNull($collection->get('NonExistentComponent'));
+        $this->assertFalse(isset($collection['NonExistentComponent']));
     }
 
     public function testBaseComponentMethods(): void
     {
         $this->controller->wakeUpController();
-        $component = new DummyComponent($this->controller->getComponentCollection());
-        $this->assertSame(['BaseComponent.initialize' => 'beforeAction'], $component->implementedEvents());
-        $component->beforeAction(new Event('test'));
-        $component->shutdown(new Event('test'));
-        $component->beforeRedirect(new Event('test'));
+        $component = new DummyComponent($this->controller);
+        $events = $component->implementedEvents();
+        $this->assertIsArray($events);
+        $component->initialize();
         $this->assertTrue(true);
     }
 

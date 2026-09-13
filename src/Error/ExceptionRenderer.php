@@ -51,8 +51,7 @@ final class ExceptionRenderer
         }
         $controller->set('code', $code);
         $controller->set('message', $message);
-        $headerResponse = '%d %s';
-        header('HTTP/1.1 ' . sprintf($headerResponse, $code, $message));
+        http_response_code((int)$code);
 
         return call_user_func_array([$controller, 'overview'], []);
     }

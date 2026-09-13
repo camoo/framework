@@ -6,6 +6,7 @@ namespace CAMOO\Test\TestCase\Template\Extension;
 
 use CAMOO\Http\ServerRequest;
 use CAMOO\Template\Extension\Functions\Form;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
@@ -77,5 +78,19 @@ class FormTest extends TestCase
             'type' => 'hidden',
             'value' => '0',
         ]));
+    }
+
+    public function testRejectsEventHandlerAttributes(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->form->input('label', ['onfocus' => 'alert(1)']);
+    }
+
+    public function testRejectsUnsafeFormActionScheme(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->form->formStart('my_form', ['url' => 'javascript:alert(1)']);
     }
 }
