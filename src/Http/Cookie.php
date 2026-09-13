@@ -48,9 +48,7 @@ class Cookie extends BaseCookie
 
     public static function create(): ?self
     {
-        if (null === self::$createInstance) {
-            self::$createInstance = new self();
-        }
+        self::$createInstance ??= new self();
 
         return self::$createInstance;
     }

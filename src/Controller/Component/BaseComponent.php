@@ -60,7 +60,7 @@ class BaseComponent implements ComponentInterface, EventListenerInterface
     {
     }
 
-    public function implementedEvents()
+    public function implementedEvents(): array
     {
         $eventMap = [
             'AppController.initialize' => 'beforeAction',

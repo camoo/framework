@@ -13,11 +13,11 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 final class CommandFinder
 {
-    private string $commandDirectory;
+    private readonly string $commandDirectory;
 
     private array $commands = [];
 
-    private SymfonyStyle $out;
+    private readonly SymfonyStyle $out;
 
     public function __construct()
     {

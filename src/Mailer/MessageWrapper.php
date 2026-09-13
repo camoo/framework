@@ -6,6 +6,7 @@ namespace CAMOO\Mailer;
 
 use CAMOO\Exception\MailerException;
 use Nette\Mail\Message as BaseMessage;
+use Nette\Mail\MimePart;
 
 /**
  * Class MessageWrapper

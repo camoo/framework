@@ -20,31 +20,22 @@ use Throwable;
  */
 final class ExceptionRenderer
 {
-    public const MSG_NOT_FOUND = 'Page Not Found';
+    public const string MSG_NOT_FOUND = 'Page Not Found';
 
-    public const MSG_INTERNAL_ERR = 'An Internal Error Has Occurred';
-
-    /**
-     * The exception being handled.
-     */
-    public Error|Throwable $error;
+    public const string MSG_INTERNAL_ERR = 'An Internal Error Has Occurred';
 
     /**
      * Controller instance.
      */
     public ErrorController|ControllerInterface $controller;
 
-    private ServerRequest $request;
-
     /**
      * Creates the controller to perform rendering on the error response.
      *
-     * @param Error $exception Exception.
+     * @param Error $error Exception.
      */
-    public function __construct(Throwable $exception, ServerRequest $request)
+    public function __construct(public Error|Throwable $error, private readonly ServerRequest $request)
     {
-        $this->request = $request;
-        $this->error = $exception;
         $this->controller = $this->_getController();
     }
 
@@ -90,7 +81,8 @@ final class ExceptionRenderer
         $message = $exception->getMessage();
         $code = $exception->getCode();
 
-        if (!Configure::read('debug') &&
+        if (
+            !Configure::read('debug') &&
             !($exception instanceof HttpExceptionInterface)
         ) {
             if ($code < 500) {

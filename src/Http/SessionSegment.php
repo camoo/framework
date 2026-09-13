@@ -13,7 +13,7 @@ use CAMOO\Utils\QueryData;
  *
  * @author CamooSarl
  */
-final class SessionSegment
+final readonly class SessionSegment
 {
     public function __construct(private ?Segment $segment)
     {
@@ -34,7 +34,7 @@ final class SessionSegment
 
         $dataFiltered = array_filter($valueArray, fn (mixed $val) => null !== $val);
 
-        return  (new QueryData($dataFiltered))->get(implode('.', $hash));
+        return  new QueryData($dataFiltered)->get(implode('.', $hash));
     }
 
     public function write(string $key, mixed $value): void

@@ -59,11 +59,11 @@ class Mailer
         'X-Mailer' => 'CAMOO Framework',
     ];
 
-    private MessageWrapper $mail;
+    private readonly MessageWrapper $mail;
 
     private ?string $domain = null;
 
-    public function __construct(private string $transport = 'default')
+    public function __construct(private readonly string $transport = 'default')
     {
         if (Configure::check('SmtpTransport.' . $transport) === false) {
             throw new MailerException(sprintf('Smtp Transport %s can not be found', $transport));

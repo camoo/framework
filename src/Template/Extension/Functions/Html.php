@@ -20,16 +20,16 @@ final class Html implements TemplateFunctionInterface
 
     private array $script = [];
 
-    public function __construct(private ServerRequest $request)
+    public function __construct(private readonly ServerRequest $request)
     {
     }
 
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('html_script', [$this, 'addJs']),
-            new TwigFunction('html_css', [$this, 'addCss']),
-            new TwigFunction('html_fetch', [$this, 'addCss'], ['is_safe' => ['html']]),
+            new TwigFunction('html_script', $this->addJs(...)),
+            new TwigFunction('html_css', $this->addCss(...)),
+            new TwigFunction('html_fetch', $this->addCss(...), ['is_safe' => ['html']]),
         ];
     }
 

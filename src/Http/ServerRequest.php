@@ -15,7 +15,7 @@ use GuzzleHttp\Psr7\ServerRequest as BaseServerRequest;
 class ServerRequest
 {
     /** @var array */
-    private const REQUEST_METHODS = [
+    private const array REQUEST_METHODS = [
         'POST',
         'GET',
         'PUT',
@@ -34,8 +34,6 @@ class ServerRequest
 
     public ?Flash $Flash = null;
 
-    private ?BaseServerRequest $oRequest;
-
     private Segment $session;
 
     private array $__session = [Session::class, 'create'];
@@ -47,26 +45,27 @@ class ServerRequest
         'data' => 'getParsedBody',
     ];
 
-    public function __construct(?BaseServerRequest $oRequest = null)
+    public function __construct(private readonly ?BaseServerRequest $oRequest = null)
     {
-        $this->oRequest = $oRequest;
         $this->invoker();
     }
 
     public function __call(string $name, array $xargs): mixed
     {
-        if (mb_substr($name, 0, 3) === 'get' && in_array(
-            mb_strtolower(mb_substr($name, 3)),
-            array_keys($this->queryDataMaps)
-        )) {
+        if (
+            mb_substr($name, 0, 3) === 'get' && in_array(
+                mb_strtolower(mb_substr($name, 3)),
+                array_keys($this->queryDataMaps)
+            )
+        ) {
             $xData = $this->__queryData($this->oRequest->{$this->queryDataMaps[mb_strtolower(mb_substr($name, 3))]}());
             $xData = $this->satanise($xData);
 
-            return empty($xargs) ? $xData : (new QueryData($xData))->get($xargs[0]);
+            return empty($xargs) ? $xData : new QueryData($xData)->get($xargs[0]);
         } elseif (in_array($name, array_keys($this->queryDataMaps))) {
             if (empty($xargs) || count($xargs) > 1 || !preg_match('/\S/', $xargs[0])) {
                 throw new Exception(
-                    sprintf('Method %s::%s does not exist', get_class($this), $name)
+                    sprintf('Method %s::%s does not exist', static::class, $name)
                 );
             }
             $xData = $this->__queryData($this->oRequest->{$this->queryDataMaps[$name]}(), false)->get($xargs[0]);
@@ -74,7 +73,7 @@ class ServerRequest
             return $this->satanise($xData);
         }
         throw new Exception(
-            sprintf('Method %s::%s does not exist', get_class($this), $name)
+            sprintf('Method %s::%s does not exist', static::class, $name)
         );
     }
 
@@ -95,19 +94,19 @@ class ServerRequest
 
     private function __queryData(mixed $xData, bool $bAll = true): QueryData|array|null
     {
-        $oxData = new QueryData($xData);
+        $oxData = new QueryData(is_array($xData) ? $xData : []);
 
         return $bAll === true ? $oxData->all() : $oxData;
     }
 
     public function getCookieParams(): array
     {
-        return $this->oRequest->getCookieParams();
+        return $this->oRequest?->getCookieParams() ?? [];
     }
 
     public function getAttribute(string $key): mixed
     {
-        return $this->oRequest->getAttribute($key);
+        return $this->oRequest?->getAttribute($key);
     }
 
     public function getData(?string $key = null): mixed
@@ -170,14 +169,14 @@ class ServerRequest
             throw new Exception('Allowed method is not defined !');
         }
 
-        if (!in_array(strtolower($this->oRequest->getMethod()), array_map('strtolower', $asMethod))) {
+        if (!in_array(strtolower($this->oRequest->getMethod()), array_map(strtolower(...), $asMethod))) {
             throw new MethodNotAllowedException();
         }
     }
 
     public function getMethod(): string
     {
-        return $this->oRequest->getMethod();
+        return $this->oRequest?->getMethod() ?? 'GET';
     }
 
     public function getReferer(): ?string
@@ -188,6 +187,9 @@ class ServerRequest
     /** @return mixed|null */
     public function getEnv(string $param): mixed
     {
+        if ($this->oRequest === null) {
+            return $_SERVER[$param] ?? null;
+        }
         $serverParams = $this->oRequest->getServerParams();
 
         return array_key_exists($param, $serverParams) ? $serverParams[$param] : null;
@@ -195,7 +197,7 @@ class ServerRequest
 
     public function getRequestTarget(): string
     {
-        return $this->oRequest->getRequestTarget();
+        return $this->oRequest?->getRequestTarget() ?? '/';
     }
 
     private function getRequestData(string $type, ?string $key = null): mixed

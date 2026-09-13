@@ -153,7 +153,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
      *
      * @param int|string|array|object|mixed|null $value
      */
-    public function set(mixed $varName, mixed $value): void
+    public function set(mixed $varName, mixed $value = null): void
     {
         if (empty($varName)) {
             throw new Exception('varName cannot be empty');
@@ -224,7 +224,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
             throw new Exception('destination cannot be empty');
         }
 
-        if (mb_strpos($destination, '://') === false) {
+        if (!str_contains($destination, '://')) {
             $this->dispatchEvent('AppController.beforeRedirect');
 
             $components = $this->getComponentCollection();
@@ -261,6 +261,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
     public function loadComponent(string $component, array $config = []): void
     {
         $component = Inflector::classify($component);
+        $this->componentCollection ??= new ComponentCollection($this);
         $this->componentCollection->add($component, $config);
     }
 
@@ -284,7 +285,7 @@ abstract class AppController implements ControllerInterface, EventListenerInterf
         if (Configure::check('Database') === false) {
             return;
         }
-        $this->{$sModel} = (new TableLocator())->get(Inflector::classify($sModel));
+        $this->{$sModel} = new TableLocator()->get(Inflector::classify($sModel));
     }
 
     protected function loadRest(string $restModel): void

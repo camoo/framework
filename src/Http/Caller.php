@@ -14,7 +14,9 @@ use Camoo\Inflector\Inflector;
 use CAMOO\Interfaces\ControllerInterface;
 use FastRoute\Dispatcher\GroupCountBased;
 use FastRoute\RouteCollector;
+
 use function FastRoute\simpleDispatcher;
+
 use GuzzleHttp\Psr7;
 use Middlewares\FastRoute;
 use Middlewares\RequestHandler;
@@ -38,13 +40,10 @@ final class Caller
 
     protected array $hRequest = [];
 
-    protected string $sConfigDir;
-
     private string $controllerName = 'Pages';
 
-    public function __construct(string $configDir)
+    public function __construct(protected string $sConfigDir)
     {
-        $this->sConfigDir = $configDir;
         $this->initialize();
     }
 
@@ -95,7 +94,7 @@ final class Caller
                         throw new Exception(sprintf(
                             'Action %s does not exist in %s',
                             $this->action,
-                            get_class($controller)
+                            $controller::class
                         ));
                     }
 
@@ -117,7 +116,7 @@ final class Caller
         $dispatcher = require_once $this->sConfigDir . '/route.php';
         /** @var GroupCountBased $routeDispatcher */
         $routeDispatcher = $dispatcher[0];
-        $this->uri = $uri = (new Uri(getenv('REQUEST_URI')))->getPath();
+        $this->uri = $uri = new Uri(getenv('REQUEST_URI'))->getPath();
 
         $routeInfo = $routeDispatcher->dispatch(getenv('REQUEST_METHOD'), $uri);
 

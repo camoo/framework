@@ -10,7 +10,7 @@ final class BackgroundProcess
 {
     private int $pid = 0;
 
-    public function __construct(private ?string $command = null)
+    public function __construct(private readonly ?string $command = null)
     {
     }
 

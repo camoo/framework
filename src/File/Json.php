@@ -7,7 +7,7 @@ namespace CAMOO\File;
 use CAMOO\Exception\Exception;
 use stdClass;
 
-class Json
+readonly class Json
 {
     public function __construct(private ?string $file = null, private ?string $json = null)
     {
@@ -21,8 +21,10 @@ class Json
             throw new Exception('Cannot decode on NULL');
         }
 
-        if (($xData = json_decode($json, $bAsHash)) !== null
-                && (json_last_error() === JSON_ERROR_NONE)) {
+        if (
+            ($xData = json_decode($json, $bAsHash)) !== null
+                && (json_last_error() === JSON_ERROR_NONE)
+        ) {
             return $xData;
         }
 

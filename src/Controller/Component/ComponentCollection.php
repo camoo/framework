@@ -142,7 +142,7 @@ final class ComponentCollection implements Countable, IteratorAggregate, ArrayAc
      *
      * @param mixed|null $offset
      */
-    public function offsetSet($offset = null, $value)
+    public function offsetSet($offset = null, $value = null)
     {
         if (!($value instanceof ComponentInterface)) {
             throw new InvalidArgumentException(sprintf('Offset must be an instance of %s', 'ComponentInterface'));

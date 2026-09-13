@@ -33,7 +33,7 @@ final class SecurityComponent extends BaseComponent
     ];
 
     /** @var string $_csrfSegment */
-    private static $_csrfSegment = 'Aura\Session\CsrfToken';
+    private static $_csrfSegment = \Aura\Session\CsrfToken::class;
 
     /** @var ServerRequest $request */
     private $request;
@@ -66,15 +66,17 @@ final class SecurityComponent extends BaseComponent
 
         ################## CSRF protection
         // @See https://github.com/auraphp/Aura.Session
-        if ($this->isUnlockedAction() === false && in_array(
-            $this->request->getMethod(),
-            ['DELETE', 'POST', 'PUT', 'PATCH']
-        )) {
+        if (
+            $this->isUnlockedAction() === false && in_array(
+                $this->request->getMethod(),
+                ['DELETE', 'POST', 'PUT', 'PATCH']
+            )
+        ) {
             $csrfCreatedAt = (int)$oCsrfSegment->read('__csrf_created_at');
             $csrfTimeout = Configure::read('Security.csrf_lifetime') ?? 1800;
 
             // CHECK TO ENSURE REFERRER URL IS ON THIS DOMAIN
-            if (strpos($this->request->getEnv('HTTP_REFERER'), $this->request->getEnv('HTTP_HOST')) === false) {
+            if (!str_contains($this->request->getEnv('HTTP_REFERER'), $this->request->getEnv('HTTP_HOST'))) {
                 throw new ForbiddenException('Bad Referrer !');
             }
 
@@ -97,8 +99,10 @@ final class SecurityComponent extends BaseComponent
             }
         }
 
-        if (Configure::read('Security.csrf_single_once') === true &&
-            $oCsrfSegment->check('__csrf_created_at')) {
+        if (
+            Configure::read('Security.csrf_single_once') === true &&
+            $oCsrfSegment->check('__csrf_created_at')
+        ) {
             $oSession->getCsrfToken()->regenerateValue();
         }
 
@@ -110,7 +114,7 @@ final class SecurityComponent extends BaseComponent
     }
 
     /** @return array */
-    public function implementedEvents()
+    public function implementedEvents(): array
     {
         return [
             'AppController.wakeUp' => 'wakeUp',

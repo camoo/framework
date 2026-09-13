@@ -9,11 +9,8 @@ use Ray\Di\AbstractModule;
 
 class DefaultModule extends AbstractModule
 {
-    protected ModuleCollection $configuration;
-
-    public function __construct(ModuleCollection $configuration)
+    public function __construct(protected ModuleCollection $configuration)
     {
-        $this->configuration = $configuration;
         parent::__construct();
     }
 

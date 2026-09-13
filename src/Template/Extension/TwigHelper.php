@@ -19,9 +19,9 @@ use Twig\Extension\AbstractExtension as BaseExtension;
 final class TwigHelper extends BaseExtension
 {
     public function __construct(
-        private ServerRequest $request,
-        private FunctionCollection $functionCollection,
-        private FilterCollection $filterCollection
+        private readonly ServerRequest $request,
+        private readonly FunctionCollection $functionCollection,
+        private readonly FilterCollection $filterCollection
     ) {
     }
 

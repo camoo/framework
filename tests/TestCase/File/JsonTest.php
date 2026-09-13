@@ -2,63 +2,51 @@
 
 namespace CAMOO\Test\TestCase\File;
 
+use CAMOO\Exception\Exception;
 use CAMOO\File\Json;
-use PHPUnit\Framework\Error\Error;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Class JsonTest
- *
- * @author CamooSarl
- *
- * @covers \CAMOO\File\Json
- */
+#[CoversClass(Json::class)]
 class JsonTest extends TestCase
 {
-    private $oJson;
-
-    public function setUp(): void
+    public function testDecodeValidJson(): void
     {
-        $this->oJson = new Json();
-        file_put_contents('/tmp/test_success.json', '{"test": "OK"}');
-        file_put_contents('/tmp/test_failure.json', '"test": "OK"');
+        $json = new Json(null, '{"key":"value"}');
+        $result = $json->decode(bAsHash: true);
+        $this->assertSame(['key' => 'value'], $result);
     }
 
-    public function tearDown(): void
+    public function testDecodeNullThrowsException(): void
     {
-        unlink('/tmp/test_success.json');
-        unlink('/tmp/test_failure.json');
-        unset($this->oJson);
+        $json = new Json();
+        $this->expectException(Exception::class);
+        $json->decode();
     }
 
-    /**
-     * @covers \CAMOO\File\Json::read
-     *
-     * @testWith        ["/tmp/test_success.json"]
-     */
-    public function testReadSuccess($sFile)
+    public function testDecodeInvalidJsonThrowsException(): void
     {
-        $this->assertIsArray($this->oJson->read($sFile));
+        $json = new Json(null, '{invalid_json}');
+        $this->expectException(Exception::class);
+        $json->decode();
     }
 
-    /**
-     * @covers \CAMOO\File\Json::read
-     *
-     * @testWith        ["/tmp/test_error.json"]
-     */
-    public function testReadError($sFile)
+    public function testReadValidJsonFile(): void
     {
-        $this->expectException(Error::class);
-        $this->oJson->read($sFile);
+        $file = TMP . 'test_' . uniqid() . '.json';
+        file_put_contents($file, json_encode(['foo' => 'bar']));
+
+        $json = new Json($file);
+        $result = $json->read();
+        $this->assertSame(['foo' => 'bar'], $result);
+
+        @unlink($file);
     }
 
-    /**
-     * @covers \CAMOO\File\Json::read
-     *
-     * @testWith        ["/tmp/test_failure.json"]
-     */
-    public function testReadFailure($sFile)
+    public function testReadNonExistentFileThrowsException(): void
     {
-        $this->assertNull($this->oJson->read($sFile));
+        $json = new Json(TMP . 'non_existent_file_xyz.json');
+        $this->expectException(Exception::class);
+        $json->read();
     }
 }

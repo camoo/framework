@@ -8,7 +8,9 @@ use Camoo\Cache\Cache;
 use CAMOO\Di\Module\DefaultModule;
 use CAMOO\Di\Module\ModuleCollection;
 use CAMOO\Utils\Configure;
+
 use const DIRECTORY_SEPARATOR;
+
 use Ray\Compiler\DiCompiler;
 use Ray\Di\Injector;
 use Ray\Di\InjectorInterface;
@@ -35,7 +37,7 @@ class CamooDi
      */
     public static function create(array|callable|null $modules = null): Injector
     {
-        $modules = $modules ?? [];
+        $modules ??= [];
         if (is_callable($modules)) {
             $modules = (array)$modules();
         }
@@ -91,7 +93,7 @@ class CamooDi
         $application = new Application();
         $application->modules($collection);
         $modules = new DefaultModule($collection);
-        self::$modules = self::$modules ?? $modules;
+        self::$modules ??= $modules;
 
         $unTargetedBind = new UnTargetedBind();
         $reflectionClass = new ReflectionClass($class);

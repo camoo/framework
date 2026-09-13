@@ -18,14 +18,14 @@ final class UnauthorizedException extends BaseHttpException
      *
      * @const int
      */
-    public const HTTP_CODE = 401;
+    public const int HTTP_CODE = 401;
 
     /**
      * Error code storage;
      *
      * @const string
      */
-    public const ERROR = 'Unauthorized';
+    public const string ERROR = 'Unauthorized';
 
     /**
      * UnauthorizedException constructor.
@@ -40,7 +40,7 @@ final class UnauthorizedException extends BaseHttpException
         array $headers = [],
         ?ExceptionInterface $previous = null
     ) {
-        $errorDescription = $errorDescription ?? static::ERROR;
+        $errorDescription ??= static::ERROR;
 
         parent::__construct($errorDescription, static::HTTP_CODE, $errorData, $userTitle, $userMessage, $headers, $previous);
     }

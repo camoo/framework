@@ -18,14 +18,14 @@ final class MethodNotAllowedException extends BaseHttpException
      *
      * @const int
      */
-    public const HTTP_CODE = 405;
+    public const int HTTP_CODE = 405;
 
     /**
      * Error code storage;
      *
      * @const string
      */
-    public const ERROR = 'Method Not Allowed';
+    public const string ERROR = 'Method Not Allowed';
 
     /**
      * MethodNotAllowedException constructor.
@@ -40,7 +40,7 @@ final class MethodNotAllowedException extends BaseHttpException
         array $headers = [],
         ?ExceptionInterface $previous = null
     ) {
-        $errorDescription = $errorDescription ?? static::ERROR;
+        $errorDescription ??= static::ERROR;
 
         parent::__construct($errorDescription, static::HTTP_CODE, $errorData, $userTitle, $userMessage, $headers, $previous);
     }

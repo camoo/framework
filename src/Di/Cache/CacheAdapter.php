@@ -13,17 +13,13 @@ use Doctrine\Common\Cache\CacheProvider;
  */
 class CacheAdapter extends CacheProvider
 {
-    /** The Cache config name to use. */
-    protected string $config;
-
     /**
      * Constructor.
      *
-     * @param string $configName The Cache config name to use.
+     * @param string $config The Cache config name to use.
      */
-    public function __construct(string $configName)
+    public function __construct(protected string $config)
     {
-        $this->config = $configName;
     }
 
     /** {@inheritDoc} */
