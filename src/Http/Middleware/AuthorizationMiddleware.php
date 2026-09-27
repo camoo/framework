@@ -21,7 +21,7 @@ final readonly class AuthorizationMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if (!(bool)($this->authorize)($request)) {
+        if (!($this->authorize)($request)) {
             return $this->forbiddenResponse;
         }
 
