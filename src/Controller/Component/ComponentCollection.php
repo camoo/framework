@@ -6,7 +6,6 @@ namespace CAMOO\Controller\Component;
 
 use ArrayAccess;
 use ArrayIterator;
-use ArrayObject;
 use CAMOO\Interfaces\ComponentInterface;
 use CAMOO\Interfaces\ControllerInterface;
 use CAMOO\Utils\Configure;
@@ -39,7 +38,7 @@ final class ComponentCollection implements Countable, IteratorAggregate, ArrayAc
 
     public function getIterator(): Traversable
     {
-        return new ArrayIterator(new ArrayObject($this->values));
+        return new ArrayIterator($this->values);
     }
 
     public function add(string $component, array $config = [])

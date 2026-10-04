@@ -143,7 +143,6 @@ class ConsoleTest extends TestCase
         $cmd->initialize('test_dummy', []);
 
         $refMethod = new \ReflectionMethod($cmd, 'satanise');
-        $refMethod->setAccessible(true);
 
         $this->expectException(InvalidArgumentException::class);
         $refMethod->invoke($cmd, new \stdClass());
@@ -153,7 +152,6 @@ class ConsoleTest extends TestCase
     {
         $cmd = new TestDummyCommand();
         $refMethod = new \ReflectionMethod($cmd, 'satanise');
-        $refMethod->setAccessible(true);
 
         $this->assertSame(123, $refMethod->invoke($cmd, 123));
         $this->assertSame([], $refMethod->invoke($cmd, []));

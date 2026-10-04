@@ -65,7 +65,6 @@ class ErrorHandlingTest extends TestCase
         @$renderer->render();
 
         $refMethod = new \ReflectionMethod($renderer, '_getMessage');
-        $refMethod->setAccessible(true);
         $msg = $refMethod->invoke($renderer);
         $this->assertSame(ExceptionRenderer::MSG_INTERNAL_ERR, $msg);
     }
@@ -78,7 +77,6 @@ class ErrorHandlingTest extends TestCase
 
         $renderer = new ExceptionRenderer($exception, $request);
         $refMethod = new \ReflectionMethod($renderer, '_getMessage');
-        $refMethod->setAccessible(true);
         $msg = $refMethod->invoke($renderer);
         $this->assertSame(ExceptionRenderer::MSG_NOT_FOUND, $msg);
     }

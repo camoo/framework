@@ -117,7 +117,19 @@ class Mailer
         if ($this->domain !== null) {
             $mailOption['clientHost'] = $this->domain;
         }
-        $smtpMailer = new SmtpMailer($mailOption);
+        $encryption = $mailOption['encryption'] ?? $mailOption['secure'] ?? null;
+        $streamOptions = $mailOption['streamOptions'] ?? $mailOption['context'] ?? null;
+        $smtpMailer = new SmtpMailer(
+            host: (string)($mailOption['host'] ?? 'localhost'),
+            username: (string)($mailOption['username'] ?? ''),
+            password: (string)($mailOption['password'] ?? ''),
+            port: isset($mailOption['port']) ? (int)$mailOption['port'] : null,
+            encryption: $encryption !== null && $encryption !== '' ? (string)$encryption : null,
+            persistent: (bool)($mailOption['persistent'] ?? false),
+            timeout: isset($mailOption['timeout']) ? (int)$mailOption['timeout'] : 20,
+            clientHost: isset($mailOption['clientHost']) ? (string)$mailOption['clientHost'] : null,
+            streamOptions: is_array($streamOptions) ? $streamOptions : null,
+        );
         try {
             $from = $this->mail->getFrom();
             if ($from === null) {

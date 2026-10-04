@@ -62,7 +62,7 @@ abstract class AppRest implements RestInterface, EventListenerInterface, EventDi
 
     public function getIterator(): Traversable
     {
-        return new ArrayIterator(new ArrayObject($this->data));
+        return new ArrayIterator($this->data);
     }
 
     public function has(string $key): bool

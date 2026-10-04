@@ -22,6 +22,10 @@ class SessionAndFlashTest extends TestCase
 {
     public function setUp(): void
     {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+
         Configure::write('Session.name', 'TESTSESS');
         Configure::write('Session.cookie', [
             'expire' => 3600,
@@ -30,6 +34,13 @@ class SessionAndFlashTest extends TestCase
             'secure' => false,
             'httponly' => true,
         ]);
+    }
+
+    public function tearDown(): void
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
     }
 
     public function testSessionAndSegment(): void

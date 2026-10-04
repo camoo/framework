@@ -6,7 +6,6 @@ namespace CAMOO\Utils;
 
 use ArrayAccess;
 use ArrayIterator;
-use ArrayObject;
 use Camoo\Cache\Cache;
 use CAMOO\Http\ServerRequest;
 use Countable;
@@ -155,7 +154,7 @@ class Cart implements IteratorAggregate, ArrayAccess, Countable
 
     public function getIterator(): Traversable
     {
-        return new ArrayIterator(new ArrayObject($this->data));
+        return new ArrayIterator($this->data);
     }
 
     public function has(string $key): bool

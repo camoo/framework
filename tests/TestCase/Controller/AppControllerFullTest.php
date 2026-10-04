@@ -182,7 +182,6 @@ class AppControllerFullTest extends TestCase
 
         $this->controller->wakeUpController();
         $refMethod = new \ReflectionMethod($this->controller, 'showValidateErrors');
-        $refMethod->setAccessible(true);
         $refMethod->invoke($this->controller, $validator);
 
         $this->assertNotNull($this->controller->request->Flash);
@@ -194,7 +193,6 @@ class AppControllerFullTest extends TestCase
         $this->controller->set(['key1' => 'val1', 'key2' => 'val2']);
 
         $refProp = new \ReflectionProperty($this->controller, 'tplData');
-        $refProp->setAccessible(true);
         $data = $refProp->getValue($this->controller);
 
         $this->assertSame('My Page Title', $data['title']);
@@ -220,7 +218,6 @@ class AppControllerFullTest extends TestCase
     public function testJsonResponse(): void
     {
         $refMethod = new \ReflectionMethod($this->controller, 'jsonResponse');
-        $refMethod->setAccessible(true);
 
         $refMethod->invoke($this->controller, ['result' => 'success']);
 
@@ -249,7 +246,6 @@ class AppControllerFullTest extends TestCase
     public function testGetReferer(): void
     {
         $refMethod = new \ReflectionMethod($this->controller, 'getReferer');
-        $refMethod->setAccessible(true);
         $this->assertNull($refMethod->invoke($this->controller));
     }
 

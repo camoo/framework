@@ -24,6 +24,10 @@ final class Session
         if (null === $this->oSession) {
             $cookies = self::$cookie ?? $_COOKIE;
             $this->oSession = new SessionFactory()->newInstance($cookies);
+            if ($this->oSession->isStarted()) {
+                return;
+            }
+
             $hCookieParam = Configure::read('Session.cookie');
             if (!is_array($hCookieParam)) {
                 $hCookieParam = [];
@@ -112,6 +116,10 @@ final class Session
 
     public function regenerateId(): bool
     {
+        if (!$this->oSession->isStarted()) {
+            $this->oSession->start();
+        }
+
         return $this->oSession->regenerateId();
     }
 
@@ -133,7 +141,9 @@ final class Session
 
     public function setName(string $name): void
     {
-        $this->oSession->setName($name);
+        if (!$this->oSession->isStarted()) {
+            $this->oSession->setName($name);
+        }
     }
 
     /**
@@ -145,6 +155,10 @@ final class Session
      */
     public function setSavePath(string $path): string|false
     {
+        if ($this->oSession->isStarted()) {
+            return $this->oSession->getSavePath();
+        }
+
         return $this->oSession->setSavePath($path);
     }
 
